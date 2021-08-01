@@ -1,0 +1,9 @@
+# MacOS
+.DS_Store
+
+#Xcode
+*xcuserdata
+
+#Pod
+Pods/
+Podfile.lock
