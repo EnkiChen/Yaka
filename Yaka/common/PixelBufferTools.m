@@ -99,7 +99,7 @@
     }
     
     CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-    CVPixelBufferLockBaseAddress(outputPixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferLockBaseAddress(outputPixelBuffer, kNilOptions);
     
     if (CVPixelBufferIsPlanar(pixelBuffer)) {
         int planeCount = (int)CVPixelBufferGetPlaneCount(pixelBuffer);
@@ -124,7 +124,7 @@
     }
     
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
-    CVPixelBufferUnlockBaseAddress(outputPixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferUnlockBaseAddress(outputPixelBuffer, kNilOptions);
     return outputPixelBuffer;
 }
 
@@ -144,8 +144,8 @@
     CFTypeRef colorAttachments = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, NULL);
     CVBufferSetAttachment(outputPixelBuffer, kCVImageBufferYCbCrMatrixKey, colorAttachments, kCVAttachmentMode_ShouldNotPropagate);
     
-    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    CVPixelBufferLockBaseAddress(outputPixelBuffer, 0);
+    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferLockBaseAddress(outputPixelBuffer, kNilOptions);
     
     if (format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange || format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
         vImage_Buffer srcImageBuffer;
@@ -192,8 +192,8 @@
         vImageRotate90_ARGB8888(&srcImageBuffer, &dstImageBuffer, rotationConstant, backgroundColor, kvImageBackgroundColorFill);
     }
 
-    CVPixelBufferUnlockBaseAddress(outputPixelBuffer, 0);
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    CVPixelBufferUnlockBaseAddress(outputPixelBuffer, kNilOptions);
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     return outputPixelBuffer;
 }
 
@@ -210,8 +210,8 @@
     OSType pixelFormat = CVPixelBufferGetPixelFormatType(srcPixelBuffer);
     CVPixelBufferRef ouputPixelBuffer = [self createPixelBufferWithSize:size pixelFormat:pixelFormat];
     
-    CVPixelBufferLockBaseAddress(srcPixelBuffer, 0);
-    CVPixelBufferLockBaseAddress(ouputPixelBuffer, 0);
+    CVPixelBufferLockBaseAddress(srcPixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferLockBaseAddress(ouputPixelBuffer, kNilOptions);
     
     if (pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange || pixelFormat == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange) {
         int planeCount = (int)CVPixelBufferGetPlaneCount(srcPixelBuffer);
@@ -252,8 +252,8 @@
         vImageScale_ARGB8888(&srcBuffer, &destBuffer, NULL, kvImageNoFlags);
     }
     
-    CVPixelBufferUnlockBaseAddress(srcPixelBuffer, 0);
-    CVPixelBufferUnlockBaseAddress(ouputPixelBuffer, 0);
+    CVPixelBufferUnlockBaseAddress(srcPixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferUnlockBaseAddress(ouputPixelBuffer, kNilOptions);
     
     return ouputPixelBuffer;
 }

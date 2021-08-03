@@ -13,10 +13,6 @@
 
 static const int kDefaultFps = 24;
 
-//I420: YYYYYYYY UU VV    =>  YUV420P
-//YV12: YYYYYYYY VV UU    =>  YUV420P
-//NV12: YYYYYYYY UVUV     =>  YUV420SP
-//NV21: YYYYYYYY VUVU     =>  YUV420SP
 
 size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
     size_t read_size = 0;
@@ -31,7 +27,6 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
 @interface FileCapture ()
 
 @property(nonatomic, strong) MutableI420Buffer *frameBuffer;
-@property(nonatomic, assign) uint8_t* cacheBuffer;
 @property(nonatomic, copy) NSString *filePath;
 @property(nonatomic, assign) int width;
 @property(nonatomic, assign) int height;
@@ -65,7 +60,6 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
         self.format = format;
         self.isLoop = YES;
         self.fps = kDefaultFps;
-        self.cacheBuffer = NULL;
     }
     return self;
 }
@@ -163,14 +157,15 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
     if (self.fd == NULL) {
         return NO;
     }
-    self.frameSize = self.width * self.height * 3 / 2;
+    if (self.format == kPixelFormatType_420_P010) {
+        self.frameSize = self.width * self.height * 3;
+    } else {
+        self.frameSize = self.width * self.height * 3 / 2;
+    }
     fseek(self.fd, 0, SEEK_END);
     self.totalByte = ftell(self.fd);
     fseek(self.fd, 0, SEEK_SET);
     self.frameBuffer = [[MutableI420Buffer alloc] initWithWidth:(int)self.width height:(int)self.height];
-    if (self.format != kPixelFormatType_I420) {
-        self.cacheBuffer = (uint8_t*)malloc(self.frameSize);
-    }
     return YES;
 }
 
@@ -199,10 +194,6 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
         fclose(self.fd);
         self.fd = NULL;
     }
-    if (self.cacheBuffer != NULL) {
-        free(self.cacheBuffer);
-        self.cacheBuffer = NULL;
-    }
 }
 
 - (VideoFrame*)outputFrame {
@@ -222,27 +213,142 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
 }
 
 - (VideoFrame*)readFrame:(BOOL) isLoop {
-    uint8_t* buffer = self.frameBuffer.mutableDataY;
-    if (self.format != kPixelFormatType_I420) {
-        buffer = self.cacheBuffer;
+    if (self.format == kPixelFormatType_420_I420) {
+        return [self readI420Frame:isLoop];
+    } else if (self.format == kPixelFormatType_420_NV12) {
+        return [self readNV12Frame:isLoop];
+    } else if (self.format == kPixelFormatType_420_P010) {
+        return [self readP010Frame:isLoop];
     }
-    size_t read_size = (int)read_data(buffer, self.frameSize, self.fd);
+    return nil;
+}
+
+- (VideoFrame*)readI420Frame:(BOOL) isLoop {
+    size_t read_size = (int)read_data(self.frameBuffer.mutableDataY, self.frameSize, self.fd);
     if (read_size != self.frameSize) {
         if (isLoop) {
             fseek(self.fd, 0, SEEK_SET);
-            read_size = read_data(buffer, self.frameSize, self.fd);
+            read_size = read_data(self.frameBuffer.mutableDataY, self.frameSize, self.fd);
         } else {
             return nil;
         }
     }
-    if (self.format == kPixelFormatType_NV12) {
-        libyuv::NV12ToI420(buffer, self.width, buffer + self.width * self.height, self.width,
-                           self.frameBuffer.mutableDataY, self.frameBuffer.strideY,
-                           self.frameBuffer.mutableDataU, self.frameBuffer.strideU,
-                           self.frameBuffer.mutableDataV, self.frameBuffer.strideV,
-                           self.frameBuffer.width, self.frameBuffer.height);
-    }
     return [[VideoFrame alloc] initWithBuffer:self.frameBuffer rotation:VideoRotation_0];
+}
+
+- (VideoFrame*)readNV12Frame:(BOOL) isLoop {
+    
+    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
+                                                                   pixelFormat:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    BOOL isContinue = NO;
+    BOOL isOk = NO;
+    do {
+        isOk = YES;
+        isContinue = NO;
+        unsigned char *src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+        int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+        int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+        int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+        for (int i = 0; i < srcHeight; i++) {
+            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
+            if (read_size != srcWidth) {
+                if (isLoop) {
+                    fseek(self.fd, 0, SEEK_SET);
+                    isContinue = YES;
+                }
+                isOk = NO;
+                break;
+            }
+        }
+
+        src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+        srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+        srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1) * 2;
+        srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+        for (int i = 0; i < srcHeight; i++) {
+            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
+            if (read_size != srcWidth) {
+                if (isLoop) {
+                    fseek(self.fd, 0, SEEK_SET);
+                    isContinue = YES;
+                }
+                isOk = NO;
+                break;
+            }
+        }
+    } while (isContinue);
+
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    
+    if ( !isOk ) {
+        CVPixelBufferRelease(pixelBuffer);
+        return nil;
+    }
+
+    VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
+    
+    CVPixelBufferRelease(pixelBuffer);
+    return videoFrame;
+}
+
+- (VideoFrame*)readP010Frame:(BOOL) isLoop  {
+    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
+                                                                   pixelFormat:kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    BOOL isContinue = NO;
+    BOOL isOk = NO;
+    do {
+        isOk = YES;
+        isContinue = NO;
+        unsigned char *src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+        int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+        int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0) * 2;
+        int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+        for (int i = 0; i < srcHeight; i++) {
+            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
+            if (read_size != srcWidth) {
+                if (isLoop) {
+                    fseek(self.fd, 0, SEEK_SET);
+                    isContinue = YES;
+                }
+                isOk = NO;
+                break;
+            }
+        }
+        
+        src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+        srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+        srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1) * 4;
+        srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+        for (int i = 0; i < srcHeight; i++) {
+            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
+            if (read_size != srcWidth) {
+                if (isLoop) {
+                    fseek(self.fd, 0, SEEK_SET);
+                    isContinue = YES;
+                }
+                isOk = NO;
+                break;
+            }
+        }
+    } while (isContinue);
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    
+    if ( !isOk ) {
+        CVPixelBufferRelease(pixelBuffer);
+        return nil;
+    }
+
+    CVBufferSetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_2020, kCVAttachmentMode_ShouldPropagate);
+    CVBufferSetAttachment(pixelBuffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_2020, kCVAttachmentMode_ShouldPropagate);
+    CVBufferSetAttachment(pixelBuffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2100_HLG, kCVAttachmentMode_ShouldPropagate);
+    
+    VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
+    CVPixelBufferRelease(pixelBuffer);
+
+    return videoFrame;
 }
 
 @end

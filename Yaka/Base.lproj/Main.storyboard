@@ -517,8 +517,9 @@
                                             <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             <objectValues>
-                                                <string>I420</string>
-                                                <string>NV12</string>
+                                                <string>420_I420</string>
+                                                <string>420_NV12</string>
+                                                <string>420_P010</string>
                                             </objectValues>
                                         </comboBoxCell>
                                         <connections>
@@ -745,7 +746,7 @@
                                 </textFieldCell>
                             </textField>
                             <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="7cV-0O-zJa">
-                                <rect key="frame" x="144" y="13" width="62" height="32"/>
+                                <rect key="frame" x="145" y="13" width="61" height="32"/>
                                 <buttonCell key="cell" type="push" title="确认" bezelStyle="rounded" imagePosition="overlaps" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="FiN-WG-M6p">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                     <font key="font" metaFont="system"/>
@@ -769,8 +770,9 @@
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <objectValues>
-                                        <string>I420</string>
-                                        <string>NV12</string>
+                                        <string>420_I420</string>
+                                        <string>420_NV12</string>
+                                        <string>420_P010</string>
                                     </objectValues>
                                 </comboBoxCell>
                             </comboBox>

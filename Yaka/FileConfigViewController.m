@@ -38,12 +38,16 @@
         }
     }
     [self.sizeComboBox selectItemAtIndex:0];
-    if ([self containsType:filePath types:@[@"i420", @"420p"]]) {
+    if ([self containsType:filePath types:@[@"i420", @"y420"]]) {
         [self.formatComboBox selectItemAtIndex:0];
         return;
     }
-    if ([self containsType:filePath types:@[@"nv12", @"420sp"]]) {
+    if ([self containsType:filePath types:@[@"nv12", @"420f", @"420v"]]) {
         [self.formatComboBox selectItemAtIndex:1];
+        return;
+    }
+    if ([self containsType:filePath types:@[@"p010", @"x420"]]) {
+        [self.formatComboBox selectItemAtIndex:2];
         return;
     }
 }
