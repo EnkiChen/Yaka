@@ -73,7 +73,7 @@
 - (IBAction)closeAction:(id)sender {
     if ( self.delegate != nil ) {
         [self.delegate fileConfigViewController:self
-                                       filePath:self.filePath
+                                       filePath:self.textFilePath.stringValue
                                           width:self.textWidth.intValue
                                          height:self.textHeight.intValue
                                     formatIndex:(int)self.formatComboBox.indexOfSelectedItem];

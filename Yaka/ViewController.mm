@@ -9,6 +9,7 @@
 #include <iostream>
 #import "ViewController.h"
 #import "FileConfigViewController.h"
+#import "DragOperationView.h"
 #import "VideoFrame.h"
 #import "CameraCapture.h"
 #import "DesktopCapture.h"
@@ -24,7 +25,7 @@
 #import "EncodeTestItem.h"
 #include "YuvHelper.h"
 
-
+static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
 
 @interface ViewController() <VideoSourceSink, H264SourceSink, H264DecoderDelegate, H264EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
 
@@ -95,32 +96,10 @@
     openPanel.canChooseDirectories = NO;
     openPanel.canCreateDirectories = NO;
     openPanel.canChooseFiles = YES;
-    openPanel.allowedFileTypes = @[@"yuv", @"h264", @"264"];
+    openPanel.allowedFileTypes = kAllowedFileTypes;
     [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
         if ( result == NSModalResponseOK ) {
-            if ( [openPanel.URL.path hasSuffix:@"yuv"] ) {
-                [self showFileConfigPanle:openPanel.URL.path];
-            } else {
-                [self performClose:nil];
-                
-                self.h264FileSoucre = [[H264SourceFileImp alloc] initWithPath:openPanel.URL.path];
-                self.h264Source = self.h264FileSoucre;
-                self.fileSourceCapture = self.h264FileSoucre;
-                
-                self.h264FileSoucre.delegate = self;
-                self.h264FileSoucre.fileSourceDelegate = self;
-                [self.h264FileSoucre start];
-                
-                self.view.window.title = [openPanel.URL.path componentsSeparatedByString:@"/"].lastObject;
-
-                self.palyCtrlView.progressSlider.minValue = 1;
-                self.palyCtrlView.progressSlider.maxValue = self.h264FileSoucre.totalFrames;
-                self.palyCtrlView.formatComboBox.enabled = NO;
-                [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.h264FileSoucre.totalFrames]];
-                [self.palyCtrlView.progressSlider setIntValue:1];
-                self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
-                self.palyCtrlView.playState = PlayControlState_Stop;
-            }
+            [self openFileWithPath:openPanel.URL];
         }
     }];
 }
@@ -293,6 +272,10 @@
 }
 
 - (void)fileConfigViewController:(FileConfigViewController*) fileConfigCtrl filePath:(NSString*) filePath width:(int) widht height:(int) height formatIndex:(int) formatIndex {
+    if ( ![filePath hasSuffix:@".yuv"] ) {
+        [self showMessage:@"提示" message:@"请选择正确的文件格式！" window:self.fileConfigWindowCtrl.window];
+        return;
+    }
     if ( filePath.length == 0 || widht == 0 || height == 0 ) {
         [self showMessage:@"提示" message:@"参数信息错误！" window:self.fileConfigWindowCtrl.window];
         return;
@@ -300,9 +283,21 @@
 
     [self performClose:nil];
 
-    self.view.window.title = [filePath componentsSeparatedByString:@"/"].lastObject;
-    
-    PixelFormatType format = formatIndex == 0 ? kPixelFormatType_I420 : kPixelFormatType_NV12;
+    PixelFormatType format = kPixelFormatType_420_I420;
+    switch (formatIndex) {
+        case 0:
+            format = kPixelFormatType_420_I420;
+            break;
+        case 1:
+            format = kPixelFormatType_420_NV12;
+            break;
+        case 2:
+            format = kPixelFormatType_420_P010;
+            break;
+        default:
+            format = kPixelFormatType_420_I420;
+            break;
+    }
     self.fileCapture = [[FileCapture alloc] initWithPath:filePath width:widht height:height pixelFormatType:format];
     self.fileSourceCapture = self.fileCapture;
     self.capture = self.fileCapture;
@@ -436,8 +431,56 @@
     }
 }
 
+
+#pragma mark -
+#pragma mark DragOperationViewDelegate
+- (NSDragOperation)dragOperationView:(DragOperationView*) view draggingEntered:(NSArray<NSURL *>*) fileUrls {
+    if (fileUrls.count == 1) {
+        for (NSString *fileType in kAllowedFileTypes) {
+            if ([fileUrls.lastObject.path hasSuffix:fileType] ) {
+                return NSDragOperationCopy;
+            }
+        }
+    }
+    return NSDragOperationNone;
+}
+
+- (void)dragOperationView:(DragOperationView*) view prepareForDragOperation:(NSArray<NSURL *>*) fileUrls {
+    if (fileUrls.count == 1) {
+        [self openFileWithPath:fileUrls.lastObject];
+    }
+}
+
+
 #pragma mark -
 #pragma mark Private Method
+
+- (void)openFileWithPath:(NSURL*) filePath {
+    
+    self.view.window.title = [filePath.path componentsSeparatedByString:@"/"].lastObject;
+    
+    if ( [filePath.path hasSuffix:@"yuv"] ) {
+        [self showFileConfigPanle:filePath.path];
+    } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"] ) {
+        [self performClose:nil];
+        
+        self.h264FileSoucre = [[H264SourceFileImp alloc] initWithPath:filePath.path];
+        self.h264Source = self.h264FileSoucre;
+        self.fileSourceCapture = self.h264FileSoucre;
+        
+        self.h264FileSoucre.delegate = self;
+        self.h264FileSoucre.fileSourceDelegate = self;
+        [self.h264FileSoucre start];
+
+        self.palyCtrlView.progressSlider.minValue = 1;
+        self.palyCtrlView.progressSlider.maxValue = self.h264FileSoucre.totalFrames;
+        self.palyCtrlView.formatComboBox.enabled = NO;
+        [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.h264FileSoucre.totalFrames]];
+        [self.palyCtrlView.progressSlider setIntValue:1];
+        self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
+        self.palyCtrlView.playState = PlayControlState_Stop;
+    }
+}
 
 - (void)showFileConfigPanle:(NSString*) filePath {
     NSStoryboard *storyBoard = [NSStoryboard storyboardWithName:@"Main" bundle:nil];

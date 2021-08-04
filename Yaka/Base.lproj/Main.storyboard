@@ -349,7 +349,7 @@
         <scene sceneID="hIz-AP-VOD">
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="ViewController" sceneMemberID="viewController">
-                    <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl">
+                    <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl" customClass="DragOperationView">
                         <rect key="frame" x="0.0" y="0.0" width="782" height="540"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
@@ -601,6 +601,9 @@
                             <constraint firstAttribute="bottom" secondItem="HPT-da-RwN" secondAttribute="bottom" id="dRJ-v5-gb6"/>
                             <constraint firstAttribute="trailing" secondItem="9os-Vc-Xyu" secondAttribute="trailing" id="e62-7z-Eet"/>
                         </constraints>
+                        <connections>
+                            <outlet property="delegate" destination="XfG-lQ-9wD" id="7ud-H7-LXE"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="glVideoView" destination="zid-F9-oKw" id="EKR-13-TX8"/>
@@ -656,7 +659,6 @@
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="200" id="Tf7-LN-S3n"/>
                                 </constraints>
                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" focusRingType="none" drawsBackground="YES" id="3uY-Bz-OJG">
-                                    <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="0vQ-2Y-Szg"/>
                                     <font key="font" metaFont="system"/>
                                     <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

@@ -16,6 +16,7 @@
 		895A32012227D98400B952A8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31FE2227D98400B952A8 /* main.m */; };
 		895B25042357894C0031B819 /* EncodeTestItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895B25032357894C0031B819 /* EncodeTestItem.mm */; };
 		895B2509235844920031B819 /* YuvHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 895B2507235844920031B819 /* YuvHelper.cpp */; };
+		898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 898825D426B96E9E00B90B26 /* DragOperationView.m */; };
 		8990537D26A995EC00358B8C /* CameraCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537326A995EC00358B8C /* CameraCapture.m */; };
 		8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537726A995EC00358B8C /* DesktopCapture.m */; };
 		8990537F26A995EC00358B8C /* FileCapture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990537926A995EC00358B8C /* FileCapture.mm */; };
@@ -66,6 +67,8 @@
 		895B25032357894C0031B819 /* EncodeTestItem.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EncodeTestItem.mm; sourceTree = "<group>"; };
 		895B25062358445D0031B819 /* YuvHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YuvHelper.h; sourceTree = "<group>"; };
 		895B2507235844920031B819 /* YuvHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YuvHelper.cpp; sourceTree = "<group>"; };
+		898825D326B96E9E00B90B26 /* DragOperationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragOperationView.h; sourceTree = "<group>"; };
+		898825D426B96E9E00B90B26 /* DragOperationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DragOperationView.m; sourceTree = "<group>"; };
 		8990537326A995EC00358B8C /* CameraCapture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraCapture.m; sourceTree = "<group>"; };
 		8990537426A995EC00358B8C /* CameraCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraCapture.h; sourceTree = "<group>"; };
 		8990537626A995EC00358B8C /* DesktopCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DesktopCapture.h; sourceTree = "<group>"; };
@@ -541,6 +544,8 @@
 			children = (
 				89B2C13526A3D3E600D340CC /* PalyCtrlView.h */,
 				89B2C13626A3D3E600D340CC /* PalyCtrlView.m */,
+				898825D326B96E9E00B90B26 /* DragOperationView.h */,
+				898825D426B96E9E00B90B26 /* DragOperationView.m */,
 			);
 			name = View;
 			path = Yaka/View;
@@ -616,6 +621,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				89AEF3FF269E80E800DA9FAD /* I420TextureCache.mm in Sources */,
+				898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */,
 				89AEF3FB269E80E800DA9FAD /* MTLI420Renderer.mm in Sources */,
 				89B2C13726A3D3E600D340CC /* PalyCtrlView.m in Sources */,
 				8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */,
