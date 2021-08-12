@@ -11,7 +11,7 @@
 
 #import "VideoFrame.h"
 
-@protocol H264EncoderInterface;
+@protocol EncoderInterface;
 
 @interface EncoderParams : NSObject
 
@@ -24,16 +24,16 @@
 
 @end
 
-@protocol H264EncoderDelegate <NSObject>
+@protocol EncoderDelegate <NSObject>
 
-- (void)encoder:(id<H264EncoderInterface>) encoder onEncoded:(Nal *) nal;
+- (void)encoder:(id<EncoderInterface>) encoder onEncoded:(Nal *) nal;
 
 @end
 
 
-@protocol H264EncoderInterface <NSObject>
+@protocol EncoderInterface <NSObject>
 
-@property(nonatomic, weak) id<H264EncoderDelegate> delegate;
+@property(nonatomic, weak) id<EncoderDelegate> delegate;
 
 - (void)initEncoder;
 

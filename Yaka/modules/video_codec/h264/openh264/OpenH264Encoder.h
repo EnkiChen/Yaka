@@ -1,5 +1,5 @@
 //
-//  OpenH264VideoEncoder.h
+//  OpenH264Encoder.h
 //  Yaka
 //
 //  Created by Enki on 2019/10/9.
@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "H264EncoderInterface.h"
+#import "EncoderInterface.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface OpenH264VideoEncoder : NSObject <H264EncoderInterface>
+@interface OpenH264Encoder : NSObject <EncoderInterface>
 
 @end
 

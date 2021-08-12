@@ -6,7 +6,7 @@
 //  Copyright © 2019 Enki. All rights reserved.
 //
 
-#import "H264EncoderInterface.h"
+#import "EncoderInterface.h"
 
 @implementation EncoderParams
 

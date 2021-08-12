@@ -6,7 +6,7 @@
 //  Copyright © 2019 Enki. All rights reserved.
 //
 
-#import "H264SourceFileImp.h"
+#import "NalUnitSourceFileImp.h"
 
 namespace  {
 
@@ -82,7 +82,7 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
 
 @end
 
-@interface H264SourceFileImp ()
+@interface NalUnitSourceFileImp ()
 
 @property(nonatomic, copy) NSString *filePath;
 @property(nonatomic, assign) NSUInteger width;
@@ -96,7 +96,7 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
 
 @end
 
-@implementation H264SourceFileImp
+@implementation NalUnitSourceFileImp
 
 @synthesize delegate;
 

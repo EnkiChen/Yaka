@@ -1,12 +1,12 @@
 //
-//  X264VideoEncoder.m
+//  X264Encoder.m
 //  Yaka
 //
 //  Created by Enki on 2019/10/9.
 //  Copyright © 2019 Enki. All rights reserved.
 //
 
-#import "X264VideoEncoder.h"
+#import "X264Encoder.h"
 #include <chrono>
 #import "x264.h"
 #import "H264Common.h"
@@ -24,7 +24,7 @@ static const char *kTune = "grain+zerolatency";
 
 static const uint8_t start_code[4] = { 0, 0, 0, 1 };
 
-@interface X264VideoEncoder ()
+@interface X264Encoder ()
 
 @property(nonatomic, assign) x264_t* encoder;
 
@@ -39,7 +39,7 @@ static const uint8_t start_code[4] = { 0, 0, 0, 1 };
 @end
 
 
-@implementation X264VideoEncoder
+@implementation X264Encoder
 
 @synthesize delegate;
 

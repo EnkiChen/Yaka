@@ -16,38 +16,43 @@
 #import "FileCapture.h"
 #import "YuvFileDumper.h"
 #import "H264FileDumper.h"
-#import "H264SourceFileImp.h"
-#import "Openh264VideoDecoder.h"
-#import "VideoToolboxVideoDecoder.h"
-#import "X264VideoEncoder.h"
-#import "OpenH264VideoEncoder.h"
+#import "NalUnitSourceFileImp.h"
+#import "Openh264Decoder.h"
+#import "VT264Encoder.h"
+#import "VT264Decoder.h"
+#import "VT265Encoder.h"
+#import "VT265Decoder.h"
+#import "X264Encoder.h"
+#import "OpenH264Encoder.h"
 #import "H264Common.h"
 #import "EncodeTestItem.h"
 #include "YuvHelper.h"
 
-static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
+static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 
-@interface ViewController() <VideoSourceSink, H264SourceSink, H264DecoderDelegate, H264EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
+@interface ViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
 
 @property(nonatomic, weak) id<VideoRenderer> videoRenderer;
 
-@property(nonatomic, strong) id<H264DecoderInterface> h264Decoder;
-@property(nonatomic, strong) Openh264VideoDecoder *openh264Decoder;
-@property(nonatomic, strong) VideoToolboxVideoDecoder *videoToolboxDecoder;
+@property(nonatomic, strong) id<DecoderInterface> decoder;
+@property(nonatomic, strong) Openh264Decoder *openh264Decoder;
+@property(nonatomic, strong) VT264Decoder *vt264Decoder;
+@property(nonatomic, strong) VT265Decoder *vt265Decoder;
 
-@property(nonatomic, strong) id<H264EncoderInterface> h264Encoder;
-@property(nonatomic, strong) OpenH264VideoEncoder *openh264Encoder;
-@property(nonatomic, strong) X264VideoEncoder *x264Encoder;
+@property(nonatomic, strong) id<EncoderInterface> encoder;
+@property(nonatomic, strong) OpenH264Encoder *openh264Encoder;
+@property(nonatomic, strong) X264Encoder *x264Encoder;
+@property(nonatomic, strong) VT264Encoder *vt264Encoder;
+@property(nonatomic, strong) VT265Encoder *vt265Encoder;
 
 @property(nonatomic, strong) id<VideoSourceInterface> capture;
 @property(nonatomic, strong) id<FileSourceInterface> fileSourceCapture;
 @property(nonatomic, strong) CameraCapture *cameraCapture;
 @property(nonatomic, strong) DesktopCapture *desktopCapture;
-@property(nonatomic, strong) FileCapture *fileCapture;
-@property(nonatomic, assign) NSUInteger captureType;
 
-@property(nonatomic, strong) id<H264SourceInterface> h264Source;
-@property(nonatomic, strong) H264SourceFileImp *h264FileSoucre;
+@property(nonatomic, copy) NSString *filePath;
+@property(nonatomic, strong) FileCapture *fileCapture;
+@property(nonatomic, strong) NalUnitSourceFileImp *naluFileSoucre;
 
 @property(nonatomic, strong) YuvFileDumper *yuvFileDumper;
 @property(nonatomic, strong) H264FileDumper *h264FileDumper;
@@ -110,9 +115,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
         self.capture = nil;
     }
     
-    if ( self.h264FileSoucre != nil ) {
-        [self.h264FileSoucre stop];
-        self.h264FileSoucre = nil;
+    if ( self.naluFileSoucre != nil ) {
+        [self.naluFileSoucre stop];
+        self.naluFileSoucre = nil;
     }
     
     if ( self.fileCapture != nil ) {
@@ -120,7 +125,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
         self.fileCapture = nil;
     }
     
-    self.h264Source = nil;
     self.fileSourceCapture = nil;
     
     self.palyCtrlView.progressSlider.minValue = 1;
@@ -252,10 +256,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
     NSComboBox *combobox = (NSComboBox*)sender;
     switch (combobox.indexOfSelectedItem) {
         case 0:
-            self.h264Decoder = self.openh264Decoder;
+            self.decoder = self.openh264Decoder;
             break;
         case 1:
-            self.h264Decoder = self.videoToolboxDecoder;
+            self.decoder = self.vt264Decoder;
             break;
         default:
             break;
@@ -323,7 +327,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
 #pragma mark h264 capture Action
 
 - (void)h264Source:(id<H264SourceInterface>) source onEncodedImage:(Nal *)nal {
-    [self.h264Decoder decode:nal];
+    if ([self.filePath hasSuffix:@"h264"] || [self.filePath hasSuffix:@"264"]) {
+        [self.vt264Decoder decode:nal];
+    } else if ([self.filePath hasSuffix:@"h265"] || [self.filePath hasSuffix:@"265"]) {
+        [self.vt265Decoder decode:nal];
+    }
 }
 
 
@@ -338,7 +346,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
 #pragma mark -
 #pragma mark h264 Encode Action
 
-- (void)encoder:(id<H264EncoderInterface>) encoder onEncoded:(Nal *) nal {
+- (void)encoder:(id<EncoderInterface>) encoder onEncoded:(Nal *) nal {
     if ( self.h264FileDumper != nil ) {
         [self.h264FileDumper dumpToFile:nal];
     }
@@ -346,7 +354,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
 
 #pragma mark -
 #pragma mark h264 decode Action
-- (void)decoder:(id<H264DecoderInterface>) decoder onDecoded:(VideoFrame *)frame {
+- (void)decoder:(id<DecoderInterface>) decoder onDecoded:(VideoFrame *)frame {
     [self renderFrame:frame];
 }
 
@@ -457,25 +465,25 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
 
 - (void)openFileWithPath:(NSURL*) filePath {
     
+    self.filePath = [filePath.path lowercaseString];
     self.view.window.title = [filePath.path componentsSeparatedByString:@"/"].lastObject;
     
     if ( [filePath.path hasSuffix:@"yuv"] ) {
         [self showFileConfigPanle:filePath.path];
-    } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"] ) {
+    } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"] || [filePath.path hasSuffix:@"h265"] || [filePath.path hasSuffix:@"265"] ) {
         [self performClose:nil];
         
-        self.h264FileSoucre = [[H264SourceFileImp alloc] initWithPath:filePath.path];
-        self.h264Source = self.h264FileSoucre;
-        self.fileSourceCapture = self.h264FileSoucre;
+        self.naluFileSoucre = [[NalUnitSourceFileImp alloc] initWithPath:filePath.path];
+        self.fileSourceCapture = self.naluFileSoucre;
         
-        self.h264FileSoucre.delegate = self;
-        self.h264FileSoucre.fileSourceDelegate = self;
-        [self.h264FileSoucre start];
+        self.naluFileSoucre.delegate = self;
+        self.naluFileSoucre.fileSourceDelegate = self;
+        [self.naluFileSoucre start];
 
         self.palyCtrlView.progressSlider.minValue = 1;
-        self.palyCtrlView.progressSlider.maxValue = self.h264FileSoucre.totalFrames;
+        self.palyCtrlView.progressSlider.maxValue = self.naluFileSoucre.totalFrames;
         self.palyCtrlView.formatComboBox.enabled = NO;
-        [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.h264FileSoucre.totalFrames]];
+        [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.naluFileSoucre.totalFrames]];
         [self.palyCtrlView.progressSlider setIntValue:1];
         self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
         self.palyCtrlView.playState = PlayControlState_Stop;
@@ -509,10 +517,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
 }
 
 - (void)setupUI {
-    self.captureType = 0;
     self.videoRenderer = self.sampleRenderView;
-    self.h264Decoder = self.openh264Decoder;
-    self.h264Encoder = self.openh264Encoder;
+    self.decoder = self.openh264Decoder;
+    self.encoder = self.openh264Encoder;
     self.palyCtrlView.delegate = self;
     [self updateRecordMenu];
 }
@@ -588,40 +595,67 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264"];
     return _desktopCapture;
 }
 
-- (Openh264VideoDecoder*)openh264Decoder {
+- (Openh264Decoder*)openh264Decoder {
     if ( _openh264Decoder == nil ) {
-        _openh264Decoder = [[Openh264VideoDecoder alloc] init];
+        _openh264Decoder = [[Openh264Decoder alloc] init];
         _openh264Decoder.delegate = self;
         [_openh264Decoder initDecoder];
     }
     return _openh264Decoder;
 }
 
-- (VideoToolboxVideoDecoder*)videoToolboxDecoder {
-    if ( _videoToolboxDecoder == nil ) {
-        _videoToolboxDecoder = [[VideoToolboxVideoDecoder alloc] init];
-        _videoToolboxDecoder.delegate = self;
-        [_videoToolboxDecoder initDecoder];
+- (VT264Decoder*)vt264Decoder {
+    if ( _vt264Decoder == nil ) {
+        _vt264Decoder = [[VT264Decoder alloc] init];
+        _vt264Decoder.delegate = self;
+        [_vt264Decoder initDecoder];
     }
-    return _videoToolboxDecoder;
+    return _vt264Decoder;
 }
 
--(OpenH264VideoEncoder*)openh264Encoder {
+- (VT264Encoder*)vt264Encoder {
+    if (_vt264Encoder == nil) {
+        _vt264Encoder = [[VT264Encoder alloc] init];
+        _vt264Encoder.delegate = self;
+        [_vt264Encoder initEncoder];
+    }
+    return _vt264Encoder;
+}
+
+-(OpenH264Encoder*)openh264Encoder {
     if ( _openh264Encoder == nil ) {
-        _openh264Encoder = [[OpenH264VideoEncoder alloc] init];
+        _openh264Encoder = [[OpenH264Encoder alloc] init];
         _openh264Encoder.delegate = self;
         [_openh264Encoder initEncoder];
     }
     return _openh264Encoder;
 }
 
-- (X264VideoEncoder*)x264Encoder {
+- (X264Encoder*)x264Encoder {
     if ( _x264Encoder == nil ) {
-        _x264Encoder = [[X264VideoEncoder alloc] init];
+        _x264Encoder = [[X264Encoder alloc] init];
         _x264Encoder.delegate = self;
         [_x264Encoder initEncoder];
     }
     return _x264Encoder;
+}
+
+- (VT265Decoder*)vt265Decoder {
+    if (_vt265Decoder == nil) {
+        _vt265Decoder = [[VT265Decoder alloc] init];
+        _vt265Decoder.delegate = self;
+        [_vt265Decoder initDecoder];
+    }
+    return _vt265Decoder;
+}
+
+- (VT265Encoder*)vt265Encoder {
+    if (_vt265Encoder == nil) {
+        _vt265Encoder = [[VT265Encoder alloc] init];
+        _vt265Encoder.delegate = self;
+        [_vt265Encoder initEncoder];
+    }
+    return _vt265Encoder;
 }
 
 @end

@@ -183,7 +183,7 @@
                                                     <menuItem title="Metal" id="j7U-5i-lXm">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="系统控件" id="7WR-6e-oJ0">
+                                                    <menuItem title="系统控件" state="on" id="7WR-6e-oJ0">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
                                                 </items>
@@ -199,7 +199,7 @@
                                                     <menuItem title="openh264" id="zbR-nh-S7f">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="VideoToolBox" id="ooC-C8-WLu">
+                                                    <menuItem title="VideoToolBox" state="on" id="ooC-C8-WLu">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
                                                     <menuItem title="ffmpeg" id="XYd-F1-pxc">
@@ -215,7 +215,7 @@
                                                     <menuItem title="openh264" id="mtH-g4-GC7">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
-                                                    <menuItem title="VideoToolBox" id="0g4-gC-Jxm">
+                                                    <menuItem title="VideoToolBox" state="on" id="0g4-gC-Jxm">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                     </menuItem>
                                                     <menuItem title="ffmpeg" id="iXt-go-Amx">
@@ -322,7 +322,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="0.0"/>
+            <point key="canvasLocation" x="-734" y="-93"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -343,7 +343,7 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="250"/>
+            <point key="canvasLocation" x="65" y="468"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="hIz-AP-VOD">
@@ -614,7 +614,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="874"/>
+            <point key="canvasLocation" x="65" y="1047"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="ccc-MT-FGW">

@@ -11,18 +11,18 @@
 
 #import "VideoFrame.h"
 
-@protocol H264DecoderInterface;
+@protocol DecoderInterface;
 
-@protocol H264DecoderDelegate <NSObject>
+@protocol DecoderDelegate <NSObject>
 
-- (void)decoder:(id<H264DecoderInterface>) decoder onDecoded:(VideoFrame *) frame;
+- (void)decoder:(id<DecoderInterface>) decoder onDecoded:(VideoFrame *) frame;
 
 @end
 
 
-@protocol H264DecoderInterface <NSObject>
+@protocol DecoderInterface <NSObject>
 
-@property(nonatomic, weak) id<H264DecoderDelegate> delegate;
+@property(nonatomic, weak) id<DecoderDelegate> delegate;
 
 - (void)initDecoder;
 

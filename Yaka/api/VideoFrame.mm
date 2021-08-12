@@ -263,6 +263,14 @@
 
 @implementation NalBuffer
 
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.data = [[NSMutableData alloc] init];
+    }
+    return self;
+}
+
 - (instancetype)initWithBytes:(const void*) buffer length:(int) length {
     self = [super init];
     if ( self ) {

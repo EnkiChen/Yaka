@@ -14,8 +14,8 @@
 
 @property(nonatomic, copy) NSString *name;
 
-@property(nonatomic, strong) id<H264EncoderInterface> h264Encoder;
-@property(nonatomic, strong) id<H264DecoderInterface> h264Decoder;
+@property(nonatomic, strong) id<EncoderInterface> h264Encoder;
+@property(nonatomic, strong) id<DecoderInterface> h264Decoder;
 
 @property(nonatomic, strong) YuvFileDumper *yuvFileDumper;
 
@@ -32,7 +32,7 @@
 
 @implementation EncodeTestItem
 
-- (instancetype)initEncoder:(id<H264EncoderInterface>) encoder params:(EncoderParams *) params name:(NSString *) name {
+- (instancetype)initEncoder:(id<EncoderInterface>) encoder params:(EncoderParams *) params name:(NSString *) name {
     self = [super init];
     if ( self ) {
         self.name = name;
@@ -42,7 +42,7 @@
         [self.h264Encoder initEncoder];
         [self.h264Encoder reconfig:params];
         
-        self.h264Decoder = [[Openh264VideoDecoder alloc] init];
+        self.h264Decoder = [[Openh264Decoder alloc] init];
         self.h264Decoder.delegate = self;
         [self.h264Decoder initDecoder];
         
@@ -65,7 +65,7 @@
           self.nalCount, self.dumpCount, self.totalEncodeTime / 1000);
 }
 
-- (void)encoder:(id<H264EncoderInterface>) encoder onEncoded:(Nal *) nal {
+- (void)encoder:(id<EncoderInterface>) encoder onEncoded:(Nal *) nal {
     if ( nal.type == H264::kIdr ) {
         self.idrBits += nal.buffer.length * 8;
         self.idrCount++;
@@ -89,7 +89,7 @@
     [self.h264Decoder decode:nal];
 }
 
-- (void)decoder:(id<H264DecoderInterface>) decoder onDecoded:(VideoFrame *)frame {
+- (void)decoder:(id<DecoderInterface>) decoder onDecoded:(VideoFrame *)frame {
     self.dumpCount++;
     NSLog(@"dump frame %d", self.dumpCount);
     [self.yuvFileDumper dumpToFile:frame];

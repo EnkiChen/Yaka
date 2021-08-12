@@ -7,15 +7,15 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "H264EncoderInterface.h"
-#import "VideoToolboxVideoDecoder.h"
-#import "Openh264VideoDecoder.h"
+#import "EncoderInterface.h"
+#import "VT264Decoder.h"
+#import "Openh264Decoder.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface EncodeTestItem : NSObject <H264EncoderDelegate, H264DecoderDelegate>
+@interface EncodeTestItem : NSObject <EncoderDelegate, DecoderDelegate>
 
-- (instancetype)initEncoder:(id<H264EncoderInterface>) encoder params:(EncoderParams *) params name:(NSString *) name;
+- (instancetype)initEncoder:(id<EncoderInterface>) encoder params:(EncoderParams *) params name:(NSString *) name;
 
 - (void)encode:(VideoFrame*) frame;
 

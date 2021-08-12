@@ -53,7 +53,17 @@ inline bool isNalu(unsigned char *buffer)
 {
     return buffer[0] == 0x00 && buffer[1] == 0x00 && buffer[2] == 0x00 && buffer[3] == 0x01;
 }
-    
+
+inline int findNalu(unsigned char *buffer, int length)
+{
+    for ( int i = 0; i < length - 4; i++ ) {
+        if ( isNalu(buffer + i) ) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 }
 
 #endif /* H264Common_h */

@@ -1,20 +1,21 @@
 //
-//  Openh264VideoDecoder.m
+//  Openh264Decoder.m
 //  Yaka
 //
 //  Created by Enki on 2019/8/30.
 //  Copyright © 2019 Enki. All rights reserved.
 //
 
-#import "Openh264VideoDecoder.h"
+#import "Openh264Decoder.h"
 #include <stdio.h>
 #include <iostream>
+#import "H264Common.h"
 #import "codec_api.h"
 #import "codec_app_def.h"
 #import "codec_def.h"
 #import "codec_ver.h"
 
-@interface Openh264VideoDecoder ()
+@interface Openh264Decoder ()
 
 @property(nonatomic, strong) dispatch_queue_t decoder_queue;
 @property(nonatomic, assign) ISVCDecoder* decoder;
@@ -22,7 +23,7 @@
 @end
 
 
-@implementation Openh264VideoDecoder
+@implementation Openh264Decoder
 
 @synthesize delegate;
 
@@ -65,7 +66,23 @@
 
 - (void)decode:(Nal*) nal {
     dispatch_async(self.decoder_queue, ^{
-        [self decodeFrame:nal.buffer.bytes length:nal.buffer.length];
+        uint8_t *bytes = nal.buffer.bytes;
+        int length = (int)nal.buffer.length;
+        while (length > H264::kNaluLongStartSequenceSize) {
+            int startIndex = H264::findNalu(bytes, length);
+            if (startIndex == -1) {
+                break;
+            }
+            int nextIndex = H264::findNalu(bytes + startIndex + H264::kNaluLongStartSequenceSize, length - startIndex - H264::kNaluLongStartSequenceSize);
+            if ( nextIndex == -1 ) {
+                [self decodeFrame:bytes + startIndex length:length - startIndex];
+                break;
+            } else {
+                [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize];
+                bytes += startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
+                length -= startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
+            }
+        }
     });
 }
 

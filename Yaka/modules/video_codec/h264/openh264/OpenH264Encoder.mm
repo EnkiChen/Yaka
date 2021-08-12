@@ -1,12 +1,12 @@
 //
-//  OpenH264VideoEncoder.m
+//  OpenH264Encoder.m
 //  Yaka
 //
 //  Created by Enki on 2019/10/9.
 //  Copyright © 2019 Enki. All rights reserved.
 //
 
-#import "OpenH264VideoEncoder.h"
+#import "OpenH264Encoder.h"
 #include <chrono>
 #import "codec_api.h"
 #import "codec_app_def.h"
@@ -21,7 +21,7 @@ static const int kMaxBitrateBps = 3 * 1000 * 1000;
 static const int kMaxFramerate = 15;
 static const int kGopSize = 300;
 
-@interface OpenH264VideoEncoder ()
+@interface OpenH264Encoder ()
 
 @property(nonatomic, assign) ISVCEncoder* encoder;
 
@@ -34,7 +34,7 @@ static const int kGopSize = 300;
 
 @end
 
-@implementation OpenH264VideoEncoder
+@implementation OpenH264Encoder
 
 @synthesize delegate;
 

@@ -1,19 +1,19 @@
 //
-//  VideoToolboxVideoDecoder.m
+//  VT264Decoder.m
 //  Yaka
 //
 //  Created by Enki on 2019/8/31.
 //  Copyright © 2019 Enki. All rights reserved.
 //
 
-#import "VideoToolboxVideoDecoder.h"
+#import "VT264Decoder.h"
 #import <VideoToolbox/VideoToolbox.h>
 #import "H264Common.h"
 
 namespace {
     
 struct DecodeCallbackParams {
-    VideoToolboxVideoDecoder *decoder;
+    VT264Decoder *decoder;
     void *image_buffer;
 };
 
@@ -27,7 +27,7 @@ CFDictionaryRef CreateCFTypeDictionary(CFTypeRef* keys,
 
 }
 
-@interface VideoToolboxVideoDecoder()
+@interface VT264Decoder()
 
 @property(nonatomic, strong) dispatch_queue_t decoder_queue;
 
@@ -54,11 +54,11 @@ void decompressionOutputCallback(void *decoder,
                                  CMTime duration) {
     
     DecodeCallbackParams *decodeParams = (DecodeCallbackParams*)params;
-    VideoToolboxVideoDecoder *vtb_decoder = decodeParams->decoder;
+    VT264Decoder *vtb_decoder = decodeParams->decoder;
     [vtb_decoder onDecompression:status imageBufferRef:imageBuffer timestamp:timestamp duration:duration];
 }
 
-@implementation VideoToolboxVideoDecoder
+@implementation VT264Decoder
 
 @synthesize delegate;
 
@@ -88,9 +88,24 @@ void decompressionOutputCallback(void *decoder,
         NSLog(@"not initialized decoder！");
         return;
     }
-    dispatch_async(self.decoder_queue, ^{
-        [self decodeFrame:nal.buffer.bytes length:nal.buffer.length];
-    });
+    
+    uint8_t *bytes = nal.buffer.bytes;
+    int length = (int)nal.buffer.length;
+    while (length > H264::kNaluLongStartSequenceSize) {
+        int startIndex = H264::findNalu(bytes, length);
+        if (startIndex == -1) {
+            break;
+        }
+        int nextIndex = H264::findNalu(bytes + startIndex + H264::kNaluLongStartSequenceSize, length - startIndex - H264::kNaluLongStartSequenceSize);
+        if ( nextIndex == -1 ) {
+            [self decodeFrame:bytes + startIndex length:length - startIndex];
+            break;
+        } else {
+            [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize];
+            bytes += startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
+            length -= startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
+        }
+    }
 }
 
 - (void)decodeFrame:(uint8_t*) buffer length:(NSUInteger) length {
@@ -176,7 +191,7 @@ void decompressionOutputCallback(void *decoder,
     }
     VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:imageBuffer rotation:VideoRotation_0];
     [videoFrame.buffer toI420];
-    __weak VideoToolboxVideoDecoder *weak_self = self;
+    __weak VT264Decoder *weak_self = self;
     dispatch_async(self.decoder_queue, ^{
         if (weak_self.delegate) {
             [weak_self.delegate decoder:weak_self onDecoded:videoFrame];

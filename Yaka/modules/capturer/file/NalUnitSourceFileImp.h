@@ -1,5 +1,5 @@
 //
-//  VideoToolboxVideoDecoder.h
+//  H264SourceFileImp.h
 //  Yaka
 //
 //  Created by Enki on 2019/8/31.
@@ -7,11 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "H264DecoderInterface.h"
+#import "VideoSourceInterface.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface VideoToolboxVideoDecoder : NSObject <H264DecoderInterface>
+@interface NalUnitSourceFileImp : NSObject <H264FileSourceInterface>
+
+- (instancetype)initWithPath:(NSString*) filePath;
 
 @end
 

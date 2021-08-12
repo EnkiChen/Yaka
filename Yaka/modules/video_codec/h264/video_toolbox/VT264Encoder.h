@@ -1,5 +1,5 @@
 //
-//  VideoToolboxVideoEncoder.h
+//  VT264Encoder.h
 //  Yaka
 //
 //  Created by Enki on 2019/10/10.
@@ -7,11 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "H264EncoderInterface.h"
+#import "EncoderInterface.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface VideoToolboxVideoEncoder : NSObject <H264EncoderInterface>
+@interface VT264Encoder : NSObject <EncoderInterface>
 
 @end
 

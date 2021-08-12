@@ -55,7 +55,7 @@
     
     id<I420Buffer> buffer = [frame.buffer toI420];
     
-    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
     
     uint8_t* y_src = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0);
     size_t y_stride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
@@ -81,7 +81,7 @@
         memcpy(v_src + v_stride * i, buffer.dataV + buffer.strideV * i, v_width);
     }
     
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
     
     [self dispatchPixelBuffer:pixelBuffer];
     CFRelease(pixelBuffer);
