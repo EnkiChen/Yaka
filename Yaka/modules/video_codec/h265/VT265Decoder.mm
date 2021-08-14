@@ -136,8 +136,13 @@ struct DecodeCallbackParams {
 
 - (void)decode:(uint8_t*) buffer length:(NSUInteger) length {
     
-    if ( self.decoderSession == nil && self.vps != nil && self.sps != nil && self.pps != nil ) {
-        [self setupDecoder:self.vps sps:self.sps pps:self.pps];
+    if ( self.decoderSession == nil ) {
+        if (self.vps != nil && self.sps != nil && self.pps != nil) {
+            [self setupDecoder:self.vps sps:self.sps pps:self.pps];
+        } else {
+            NSLog(@"not vps sps pps.");
+            return;
+        }
     }
     
     CMBlockBufferRef blockBuffer = nil;
@@ -176,6 +181,7 @@ struct DecodeCallbackParams {
         NSLog(@"decode frame fail with error code : %d", status);
     }
 
+    CFRelease(blockBuffer);
     CFRelease(sampleBuffer);
 }
 
@@ -184,16 +190,16 @@ struct DecodeCallbackParams {
         return YES;
     }
 
-    const uint8_t * const parameterSetPointers[3] = {(const uint8_t *)vps.bytes, (const uint8_t *)sps.bytes, (const uint8_t *)pps.bytes};
-    const size_t parameterSetSizes[3] = {vps.length, sps.length, pps.length };
+    const uint8_t * const param_set_ptrs[3] = {(const uint8_t *)vps.bytes, (const uint8_t *)sps.bytes, (const uint8_t *)pps.bytes};
+    const size_t param_set_sizes[3] = {vps.length, sps.length, pps.length };
     CMFormatDescriptionRef formatDescription = NULL;
     OSStatus status = CMVideoFormatDescriptionCreateFromHEVCParameterSets(kCFAllocatorDefault,
-                                                                           3,
-                                                                           parameterSetPointers,
-                                                                           parameterSetSizes,
-                                                                           4,
-                                                                           NULL,
-                                                                           &formatDescription);
+                                                                          3,
+                                                                          param_set_ptrs,
+                                                                          param_set_sizes,
+                                                                          4,
+                                                                          NULL,
+                                                                          &formatDescription);
     if (status != noErr) {
         NSLog(@"create format description error, status:%d!!", status);
         return NO;
@@ -279,19 +285,22 @@ struct DecodeCallbackParams {
         NSLog(@"createSession error:%d",status);
     }
     
+    VTSessionSetProperty(_decoderSession, kVTDecompressionPropertyKey_RealTime, kCFBooleanTrue);
+    
     return status == noErr;
 }
 
 - (void)destroySession {
     if (_decoderSession) {
-#if TARGET_OS_IPHONE
-        if ([UIDevice isIOS11OrLater]) {
-            VTDecompressionSessionWaitForAsynchronousFrames(_decoderSession);
-        }
-#endif
+        VTDecompressionSessionWaitForAsynchronousFrames(_decoderSession);
         VTDecompressionSessionInvalidate(_decoderSession);
         CFRelease(_decoderSession);
         _decoderSession = nil;
+    }
+
+    if (_formatDescription != NULL) {
+        CFRelease(_formatDescription);
+        _formatDescription = NULL;
     }
 }
 

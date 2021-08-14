@@ -27,6 +27,7 @@
 #import "H264Common.h"
 #import "EncodeTestItem.h"
 #include "YuvHelper.h"
+#import "RateStatistics.h"
 
 static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 
@@ -44,6 +45,8 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 @property(nonatomic, strong) X264Encoder *x264Encoder;
 @property(nonatomic, strong) VT264Encoder *vt264Encoder;
 @property(nonatomic, strong) VT265Encoder *vt265Encoder;
+@property(nonatomic, strong) RateStatistics *encodeBitrate;
+@property(nonatomic, strong) RateStatistics *encodeFps;
 
 @property(nonatomic, strong) id<VideoSourceInterface> capture;
 @property(nonatomic, strong) id<FileSourceInterface> fileSourceCapture;
@@ -62,6 +65,8 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 @property(nonatomic, strong) NSWindowController *fileConfigWindowCtrl;
 
 @property(nonatomic, assign) BOOL isLoop;
+
+@property(nonatomic, assign) uint64_t lastPrintLog;
 
 @end
 
@@ -339,7 +344,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 #pragma mark VideoSourceInterface Action
 
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-    [self renderFrame:frame];
+//    [self renderFrame:frame];
+    [self.vt264Encoder encode:frame];
+    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+    [self.encodeFps update:1 now:now_ms];
 }
 
 
@@ -350,6 +358,14 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
     if ( self.h264FileDumper != nil ) {
         [self.h264FileDumper dumpToFile:nal];
     }
+    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+    [self.encodeBitrate update:nal.buffer.length * 8 now:now_ms];
+    
+    if (now_ms - self.lastPrintLog >= 1000) {
+        NSLog(@"encode %llufps output %llukbps", [self.encodeFps rate:now_ms], [self.encodeBitrate rate:now_ms] / 1000);
+        self.lastPrintLog = now_ms;
+    }
+    [self.openh264Decoder decode:nal];
 }
 
 #pragma mark -
@@ -656,6 +672,20 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
         [_vt265Encoder initEncoder];
     }
     return _vt265Encoder;
+}
+
+- (RateStatistics*)encodeBitrate {
+    if (_encodeBitrate == nil) {
+        _encodeBitrate = [[RateStatistics alloc] initWithWindowSize:1000];
+    }
+    return _encodeBitrate;
+}
+
+- (RateStatistics*)encodeFps {
+    if (_encodeFps == nil) {
+        _encodeFps = [[RateStatistics alloc] initWithWindowSize:1000];
+    }
+    return _encodeFps;
 }
 
 @end

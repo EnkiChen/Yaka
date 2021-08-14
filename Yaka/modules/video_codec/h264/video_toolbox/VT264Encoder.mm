@@ -141,7 +141,7 @@ const size_t kNaluLongStartSequenceSize = 4;
     int frameRate = 30;
     int keyFrameIntervalDuration = 3;
     int keyFrameInterval = keyFrameIntervalDuration * frameRate;
-    int averageBitRate = 1.2 * 1000 * 1000;
+    int averageBitRate = 3 * 1000 * 1000;
 
     status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_High_AutoLevel);
     status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);

@@ -156,7 +156,10 @@ const size_t kNaluLongStartSequenceSize = 4;
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration, keyFrameIntervalDuration);
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_ExpectedFrameRate, frameRate);
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_AverageBitRate, averageBitRate);
-    
+
+    if (@available(macOS 11.0, *)) {
+        status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_HDRMetadataInsertionMode, kVTHDRMetadataInsertionMode_Auto);
+    }
     
     CVAttachmentMode attachmentMode = kCVAttachmentMode_ShouldNotPropagate;
     CFTypeRef matrix = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, &attachmentMode);
