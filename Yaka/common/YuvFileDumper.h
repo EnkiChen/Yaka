@@ -13,9 +13,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface YuvFileDumper : NSObject
 
-- (instancetype)initWithPath:(NSString*) filePath;
+@property(nonatomic, assign) NSUInteger startIndex;
+@property(nonatomic, assign) NSInteger total;
 
-- (void)dumpToFile:(VideoFrame *) frame;
+- (instancetype)initWithPath:(NSString*)filePath;
+
+- (void)dumpToFile:(VideoFrame *)frame;
 
 - (void)stop;
 
