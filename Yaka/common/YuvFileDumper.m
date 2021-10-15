@@ -87,7 +87,6 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
     if ([frame.buffer isKindOfClass:CVPixelBuffer.class]) {
         CVPixelBuffer *pixelBuffer = (CVPixelBuffer*)frame.buffer;
         [self writeToFile:pixelBuffer.pixelBuffer fd:self.fd_yuv];
-        return;
     } else {
         id<I420Buffer> buffer = [frame.buffer toI420];
         uint8_t* data[3] = {(uint8_t*)buffer.dataY, (uint8_t*)buffer.dataU, (uint8_t*)buffer.dataV};
