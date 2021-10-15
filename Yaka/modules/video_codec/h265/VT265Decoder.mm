@@ -124,6 +124,7 @@ struct DecodeCallbackParams {
         case NAL_IDR_W_RADL:
         case NAL_TRAIL_R:
         case NAL_TSA_N:
+        case NAL_TSA_R:
             [self decode:buffer length:length];
             break;
         case NAL_SEI_PREFIX:
@@ -256,6 +257,10 @@ struct DecodeCallbackParams {
         } else {
             videoFormat = kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange;
         }
+    }
+    
+    if (CFStringCompare(transfer, kCVImageBufferTransferFunction_ITU_R_2100_HLG, 0) == kCFCompareEqualTo) {
+        
     }
     
     if ( bits == 8 || bits == 10 ) {
