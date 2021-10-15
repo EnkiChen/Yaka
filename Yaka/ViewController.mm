@@ -93,13 +93,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark User UI Action
-
-- (IBAction)magicAction:(id)sender {
-
-}
-
+#pragma mark - User UI Action
 - (IBAction)openDocument:(id)sender {
     NSOpenPanel *openPanel = [[NSOpenPanel alloc] init];
     openPanel.allowsMultipleSelection = NO;
@@ -110,6 +104,23 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
     [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
         if ( result == NSModalResponseOK ) {
             [self openFileWithPath:openPanel.URL];
+        }
+    }];
+}
+
+- (IBAction)saveDocumentAs:(id)sender {
+    NSSavePanel *panel = [NSSavePanel savePanel];
+    [panel setCanSelectHiddenExtension:NO];
+    [panel setNameFieldStringValue:@"Video_720x1280x30_I420.yuv"];
+    [panel beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSModalResponse result) {
+        if (result == NSModalResponseOK) {
+            NSString *chooseFile = [[panel URL] path];
+            if ([chooseFile hasSuffix:@".yuv"]) {
+                self.yuvFileDumper = [[YuvFileDumper alloc] initWithPath:chooseFile];
+            } else if ( [chooseFile hasSuffix:@".h264"] ) {
+                self.h264FileDumper = [[H264FileDumper alloc] initWithPath:chooseFile];
+            }
+            NSLog(@"choose file:%@", chooseFile);
         }
     }];
 }
@@ -210,31 +221,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
     }
 }
 
-- (IBAction)dumpAction:(id)sender {
-    NSButton *btn = sender;
-    if ( self.isDump ) {
-        [self.yuvFileDumper stop];
-        self.yuvFileDumper = nil;
-        [self.h264FileDumper stop];
-        self.h264FileDumper = nil;
-        [btn setTitle:@"开始存储"];
-        self.isDump = NO;
-        return;
-    }
-    
-    NSString *dumpPath = @"";
-    if ( [dumpPath hasSuffix:@".yuv"] ) {
-        self.yuvFileDumper = [[YuvFileDumper alloc] initWithPath:dumpPath];
-    } else if ( [dumpPath hasSuffix:@".h264"] ) {
-        self.h264FileDumper = [[H264FileDumper alloc] initWithPath:dumpPath];
-    }
-    
-    if ( self.yuvFileDumper != nil || self.h264FileDumper != nil ) {
-        [btn setTitle:@"停止存储"];
-        self.isDump = YES;
-    }
-}
-
 - (IBAction)onRendererComboboxChanged:(id)sender {
     NSComboBox *combobox = (NSComboBox*)sender;
     id<VideoRenderer> renderView = self.videoRenderer;
@@ -272,9 +258,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark FileConfigDelegae
-
+#pragma mark - FileConfigDelegae
 - (void)fileConfigViewController:(FileConfigViewController*) fileConfigCtrl openDocument:(NSString*) path {
     [self.fileConfigWindowCtrl close];
     [self openDocument:nil];
@@ -328,9 +312,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark h264 capture Action
-
+#pragma mark - h264 capture Action
 - (void)h264Source:(id<H264SourceInterface>) source onEncodedImage:(Nal *)nal {
     if ([self.filePath hasSuffix:@"h264"] || [self.filePath hasSuffix:@"264"]) {
         [self.vt264Decoder decode:nal];
@@ -340,20 +322,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark VideoSourceInterface Action
-
+#pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-//    [self renderFrame:frame];
-    [self.vt264Encoder encode:frame];
-    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
-    [self.encodeFps update:1 now:now_ms];
+    [self renderFrame:frame];
 }
 
 
-#pragma mark -
-#pragma mark h264 Encode Action
-
+#pragma mark - h264 Encode Action
 - (void)encoder:(id<EncoderInterface>) encoder onEncoded:(Nal *) nal {
     if ( self.h264FileDumper != nil ) {
         [self.h264FileDumper dumpToFile:nal];
@@ -365,18 +340,16 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
         NSLog(@"encode %llufps output %llukbps", [self.encodeFps rate:now_ms], [self.encodeBitrate rate:now_ms] / 1000);
         self.lastPrintLog = now_ms;
     }
-    [self.openh264Decoder decode:nal];
+    [self.vt264Decoder decode:nal];
 }
 
-#pragma mark -
-#pragma mark h264 decode Action
+#pragma mark - h264 decode Action
 - (void)decoder:(id<DecoderInterface>) decoder onDecoded:(VideoFrame *)frame {
     [self renderFrame:frame];
 }
 
 
-#pragma mark -
-#pragma mark FileSourceInterface Action
+#pragma mark - FileSourceInterface Action
 - (void)fileSource:(id<FileSourceInterface>) fileSource progressUpdated:(NSUInteger) index {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.palyCtrlView.progressSlider setIntValue:(int)index + 1];
@@ -391,9 +364,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark PalyCtrlView Action
-
+#pragma mark - PalyCtrlView Action
 - (void)palyCtrlView:(PalyCtrlView*) palyCtrlView formatUpdated:(NSInteger) indexOfSelectedItem {
     
 }
@@ -456,8 +427,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark DragOperationViewDelegate
+#pragma mark - DragOperationViewDelegate
 - (NSDragOperation)dragOperationView:(DragOperationView*) view draggingEntered:(NSArray<NSURL *>*) fileUrls {
     if (fileUrls.count == 1) {
         for (NSString *fileType in kAllowedFileTypes) {
@@ -476,9 +446,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark Private Method
-
+#pragma mark - Private Method
 - (void)openFileWithPath:(NSURL*) filePath {
     
     self.filePath = [filePath.path lowercaseString];
@@ -575,9 +543,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 
-#pragma mark -
-#pragma mark get&set
-
+#pragma mark - getter&setter
 - (BOOL)isLoop {
     NSMenuItem *loopMenuItem = [[[NSApp menu] itemAtIndex:4].submenu itemAtIndex:7];
     if (loopMenuItem) {
