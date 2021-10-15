@@ -17,6 +17,7 @@
 		895B25042357894C0031B819 /* EncodeTestItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895B25032357894C0031B819 /* EncodeTestItem.mm */; };
 		895B2509235844920031B819 /* YuvHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 895B2507235844920031B819 /* YuvHelper.cpp */; };
 		898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 898825D426B96E9E00B90B26 /* DragOperationView.m */; };
+		89891A1B27199FE700C22745 /* libvmaf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89891A1A27199FE600C22745 /* libvmaf.a */; };
 		8990537D26A995EC00358B8C /* CameraCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537326A995EC00358B8C /* CameraCapture.m */; };
 		8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537726A995EC00358B8C /* DesktopCapture.m */; };
 		8990537F26A995EC00358B8C /* FileCapture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990537926A995EC00358B8C /* FileCapture.mm */; };
@@ -72,6 +73,13 @@
 		895B2507235844920031B819 /* YuvHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YuvHelper.cpp; sourceTree = "<group>"; };
 		898825D326B96E9E00B90B26 /* DragOperationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragOperationView.h; sourceTree = "<group>"; };
 		898825D426B96E9E00B90B26 /* DragOperationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DragOperationView.m; sourceTree = "<group>"; };
+		89891A1327199FE600C22745 /* picture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = picture.h; sourceTree = "<group>"; };
+		89891A1427199FE600C22745 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
+		89891A1527199FE600C22745 /* compute_vmaf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = compute_vmaf.h; sourceTree = "<group>"; };
+		89891A1627199FE600C22745 /* feature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = feature.h; sourceTree = "<group>"; };
+		89891A1727199FE600C22745 /* libvmaf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libvmaf.h; sourceTree = "<group>"; };
+		89891A1827199FE600C22745 /* model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = model.h; sourceTree = "<group>"; };
+		89891A1A27199FE600C22745 /* libvmaf.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libvmaf.a; sourceTree = "<group>"; };
 		8990537326A995EC00358B8C /* CameraCapture.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CameraCapture.m; sourceTree = "<group>"; };
 		8990537426A995EC00358B8C /* CameraCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CameraCapture.h; sourceTree = "<group>"; };
 		8990537626A995EC00358B8C /* DesktopCapture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DesktopCapture.h; sourceTree = "<group>"; };
@@ -177,6 +185,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8936CE1F231D04DE009217FE /* VideoToolbox.framework in Frameworks */,
+				89891A1B27199FE700C22745 /* libvmaf.a in Frameworks */,
 				89AEF3B6269E80DA00DA9FAD /* libopenh264.a in Frameworks */,
 				89A03C0F26B6C7270071891E /* libyuv.a in Frameworks */,
 				89AEF3B4269E80DA00DA9FAD /* libx264.a in Frameworks */,
@@ -261,6 +270,36 @@
 				8990538A26AECCA100358B8C /* SystemTools.mm */,
 			);
 			path = common;
+			sourceTree = "<group>";
+		};
+		89891A1127199FE600C22745 /* vmaf */ = {
+			isa = PBXGroup;
+			children = (
+				89891A1227199FE600C22745 /* include */,
+				89891A1927199FE600C22745 /* lib */,
+			);
+			path = vmaf;
+			sourceTree = "<group>";
+		};
+		89891A1227199FE600C22745 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				89891A1327199FE600C22745 /* picture.h */,
+				89891A1427199FE600C22745 /* version.h */,
+				89891A1527199FE600C22745 /* compute_vmaf.h */,
+				89891A1627199FE600C22745 /* feature.h */,
+				89891A1727199FE600C22745 /* libvmaf.h */,
+				89891A1827199FE600C22745 /* model.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		89891A1927199FE600C22745 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				89891A1A27199FE600C22745 /* libvmaf.a */,
+			);
+			path = lib;
 			sourceTree = "<group>";
 		};
 		8990537226A995EC00358B8C /* camera */ = {
@@ -422,6 +461,7 @@
 		89AEF38B269E80DA00DA9FAD /* third_party */ = {
 			isa = PBXGroup;
 			children = (
+				89891A1127199FE600C22745 /* vmaf */,
 				89A03BF426B6C7270071891E /* libyuv */,
 				89AEF38C269E80DA00DA9FAD /* x264 */,
 				89AEF3AC269E80DA00DA9FAD /* openh264 */,
@@ -837,6 +877,7 @@
 					"$(PROJECT_DIR)/Yaka/third_party/x264/lib",
 					"$(PROJECT_DIR)/Yaka/third_party/libyuv/lib",
 					"$(PROJECT_DIR)/Yaka/third_party/openh264/lib",
+					"$(PROJECT_DIR)/Yaka/third_party/vmaf/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 1.0.0;
@@ -864,6 +905,7 @@
 					"$(PROJECT_DIR)/Yaka/third_party/x264/lib",
 					"$(PROJECT_DIR)/Yaka/third_party/libyuv/lib",
 					"$(PROJECT_DIR)/Yaka/third_party/openh264/lib",
+					"$(PROJECT_DIR)/Yaka/third_party/vmaf/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 1.0.0;
