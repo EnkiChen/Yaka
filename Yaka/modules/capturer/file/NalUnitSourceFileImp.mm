@@ -113,7 +113,7 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
     if ( self ) {
         self.filePath = filePath;
         self.cancel = YES;
-        self.isLoop = YES;
+        self.isLoop = NO;
         self.fps = kDefaultFps;
     }
     return self;
