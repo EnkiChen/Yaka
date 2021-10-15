@@ -12,7 +12,7 @@
 
 @implementation PixelBufferTools
 
-- (void)writeToFile:(CVImageBufferRef) pixelBuffer {
+- (void)writeToFile:(CVImageBufferRef)pixelBuffer {
     FILE *fd = 0;
     const OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
     CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
@@ -38,7 +38,7 @@
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 }
 
-+ (CVPixelBufferRef)createPixelBufferWithSize:(CGSize) size pixelFormat:(OSType) format {
++ (CVPixelBufferRef)createPixelBufferWithSize:(CGSize)size pixelFormat:(OSType)format {
     CVPixelBufferRef resultPixelBuffer;
     CFDictionaryRef options = NULL;
     const void *keys[] = {
@@ -63,7 +63,54 @@
     return resultPixelBuffer;
 }
 
-+ (CVPixelBufferRef)copyPixelBuffer:(CVPixelBufferRef) pixelBuffer {
++ (CVPixelBufferRef)createPixelBufferWithSize:(CGSize)size from:(CVPixelBufferRef)src {
+    CVPixelBufferRef result;
+    CFDictionaryRef options = NULL;
+    const void *keys[] = {
+        kCVPixelBufferOpenGLCompatibilityKey,
+        kCVPixelBufferIOSurfacePropertiesKey,
+        kCVPixelBufferCGImageCompatibilityKey,
+        kCVPixelBufferCGBitmapContextCompatibilityKey,
+        kCVPixelBufferBytesPerRowAlignmentKey,
+    };
+    const void *values[] = {
+        (__bridge const void *)([NSNumber numberWithBool:YES]),
+        (__bridge const void *)([NSDictionary dictionary]),
+        (__bridge const void *)([NSNumber numberWithBool:YES]),
+        (__bridge const void *)([NSNumber numberWithBool:YES]),
+        (__bridge const void *)([NSNumber numberWithInt:32]),
+    };
+    
+    OSType format = CVPixelBufferGetPixelFormatType(src);
+    options = CFDictionaryCreate(NULL, keys, values, 5, NULL, NULL);
+    CVPixelBufferCreate(kCFAllocatorDefault, size.width, size.height, format, options, &result);
+    CFRelease(options);
+    
+    CVAttachmentMode attachmentMode = kCVAttachmentMode_ShouldPropagate;
+    CGColorSpaceRef colorSpace = (CGColorSpaceRef)CVBufferGetAttachment(src, kCVImageBufferCGColorSpaceKey, &attachmentMode);
+    if (colorSpace != nil) {
+        CVBufferSetAttachment(result, kCVImageBufferCGColorSpaceKey, colorSpace, attachmentMode);
+    }
+
+    CFTypeRef matrix = CVBufferGetAttachment(src, kCVImageBufferYCbCrMatrixKey, &attachmentMode);
+    if (matrix != nil) {
+        CVBufferSetAttachment(result, kCVImageBufferYCbCrMatrixKey, matrix, attachmentMode);
+    }
+
+    CFTypeRef colorPrimaries = CVBufferGetAttachment(src, kCVImageBufferColorPrimariesKey, &attachmentMode);
+    if (colorPrimaries != nil) {
+        CVBufferSetAttachment(result, kCVImageBufferColorPrimariesKey, colorPrimaries, attachmentMode);
+    }
+
+    CFTypeRef transferFunction = CVBufferGetAttachment(src, kCVImageBufferTransferFunctionKey, &attachmentMode);
+    if (transferFunction != nil) {
+        CVBufferSetAttachment(result, kCVImageBufferTransferFunctionKey, transferFunction, attachmentMode);
+    }
+    
+    return result;
+}
+
++ (CVPixelBufferRef)copyPixelBuffer:(CVPixelBufferRef)pixelBuffer {
     const size_t width = CVPixelBufferGetWidth(pixelBuffer);
     const size_t height = CVPixelBufferGetHeight(pixelBuffer);
     const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
@@ -128,7 +175,7 @@
     return outputPixelBuffer;
 }
 
-+ (CVPixelBufferRef)createAndRotatePixelBuffer:(CVPixelBufferRef) pixelBuffer rotationConstant:(uint8_t) rotationConstant
++ (CVPixelBufferRef)createAndRotatePixelBuffer:(CVPixelBufferRef)pixelBuffer rotationConstant:(uint8_t)rotationConstant
 {
     const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
     int srcYWidth = (int)CVPixelBufferGetWidth(pixelBuffer);
@@ -197,7 +244,7 @@
     return outputPixelBuffer;
 }
 
-+ (CGImagePropertyOrientation)getOrientation:(CMSampleBufferRef) sampleBuffer
++ (CGImagePropertyOrientation)getOrientation:(CMSampleBufferRef)sampleBuffer
 {
     CFStringRef sampleBufferVideoOrientation = CFSTR("RPSampleBufferVideoOrientation");
     CFNumberRef numberRef = (CFNumberRef)CMGetAttachment(sampleBuffer, sampleBufferVideoOrientation, nil);
@@ -205,7 +252,7 @@
     return orientation;
 }
 
-+ (CVPixelBufferRef)createAndscalePixelBuffer:(CVPixelBufferRef)srcPixelBuffer ScaleSize:(CGSize) size
++ (CVPixelBufferRef)createAndscalePixelBuffer:(CVPixelBufferRef)srcPixelBuffer scaleSize:(CGSize)size
 {
     OSType pixelFormat = CVPixelBufferGetPixelFormatType(srcPixelBuffer);
     CVPixelBufferRef ouputPixelBuffer = [self createPixelBufferWithSize:size pixelFormat:pixelFormat];
@@ -258,6 +305,108 @@
     return ouputPixelBuffer;
 }
 
++ (CVPixelBufferRef)scaleCropPixelBuffer:(CVPixelBufferRef)src cropSize:(CGSize)size {
+    int src_width = (int)CVPixelBufferGetWidth(src);
+    int src_height = (int)CVPixelBufferGetHeight(src);
+    OSType format = CVPixelBufferGetPixelFormatType(src);
+    if (format != kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange || size.width > src_width || size.height > src_height ) {
+        return src;
+    }
+
+    int offset_x = 0;
+    int offset_y = 0;
+    
+    int dst_width = size.width;
+    int dst_height = size.height;
+    
+    float hs = 1.0 * src_width / size.width;
+    float vs = 1.0 * src_height / size.height;
+
+    if ( vs > hs ) {
+        dst_width = src_width;
+        dst_height = src_width / (1.0 * size.width / size.height);
+    } else {
+        dst_width = src_height * (1.0 * size.width / size.height);
+        dst_height = src_height;
+    }
+
+    offset_x = (src_width - dst_width) / 2;
+    offset_y = (src_height - dst_height) / 2;
+    
+    CVPixelBufferRef dst = [self createPixelBufferWithSize:CGSizeMake(dst_width, dst_height) from:src];
+    
+    CVPixelBufferLockBaseAddress(dst, kNilOptions);
+    CVPixelBufferLockBaseAddress(src, kNilOptions);
+    
+    const uint16_t* src_y = (const uint16_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 0));
+    const uint16_t* src_uv = (const uint16_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 1));
+    const int src_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 0)) / 2;
+    const int src_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 1)) / 2;
+
+    const int uv_offset_x = offset_x;
+    const int uv_offset_y = offset_y / 2;
+    const uint16_t* y_plane = src_y + src_stride_y * offset_y + offset_x;
+    const uint16_t* uv_plane = src_uv + src_stride_uv * uv_offset_y + uv_offset_x;
+    
+    uint16_t* dst_y = (uint16_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 0));
+    uint16_t* dst_uv = (uint16_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 1));
+    const int dst_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 0)) / 2;
+    const int dst_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 1)) / 2;
+    
+    size.width = (int)CVPixelBufferGetWidth(dst);
+    size.height = (int)CVPixelBufferGetHeight(dst);
+
+    int srcHeight = (int)CVPixelBufferGetHeightOfPlane(src, 0);
+    int dstHeight = (int)CVPixelBufferGetHeightOfPlane(dst, 0);
+    for (int i = 0; i < dstHeight && i < srcHeight; i++) {
+        memcpy(dst_y + i * dst_stride_y, y_plane + i * src_stride_y, size.width * 2);
+    }
+
+    srcHeight = (int)CVPixelBufferGetHeightOfPlane(src, 1);
+    dstHeight = (int)CVPixelBufferGetHeightOfPlane(dst, 1);
+    for (int i = 0; i < dstHeight && i < srcHeight; i++) {
+        memcpy(dst_uv + i * dst_stride_uv, uv_plane + i * src_stride_uv, size.width * 4);
+    }
+    
+    CVPixelBufferUnlockBaseAddress(src, kNilOptions);
+    CVPixelBufferUnlockBaseAddress(dst, kNilOptions);
+    
+    return dst;
+}
+
++ (CMSampleBufferRef)createSampleBufferWithPixelBuffer:(CVPixelBufferRef)pixelBuffer
+{
+    CMSampleBufferRef result = NULL;
+    CMVideoFormatDescriptionRef formatDescription = NULL;
+    CMVideoFormatDescriptionCreateForImageBuffer(NULL, pixelBuffer, &formatDescription);
+    
+    CMSampleTimingInfo timing = {kCMTimeInvalid, kCMTimeInvalid, kCMTimeInvalid};
+    CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault,
+                                             pixelBuffer,
+                                             formatDescription,
+                                             &timing,
+                                             &result);
+    CFRelease(formatDescription);
+    return result;
+}
+
++ (CMSampleBufferRef)createSampleBufferWithPixelBuffer:(CVPixelBufferRef)pixelBuffer from:(CMSampleBufferRef)sampleBuffer
+{
+    CMSampleBufferRef result = NULL;
+    CMVideoFormatDescriptionRef formatDescription = NULL;
+    CMVideoFormatDescriptionCreateForImageBuffer(NULL, pixelBuffer, &formatDescription);
+    
+    CMSampleTimingInfo timing;
+    CMSampleBufferGetSampleTimingInfo(sampleBuffer, 0, &timing);
+    CMSampleBufferCreateReadyWithImageBuffer(kCFAllocatorDefault,
+                                             pixelBuffer,
+                                             formatDescription,
+                                             &timing,
+                                             &result);
+    CFRelease(formatDescription);
+    return result;
+}
+
 + (CVPixelBufferRef)convertTo32BGRA:(CVPixelBufferRef)pixelBuffer
 {
     OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
@@ -293,5 +442,85 @@
     }
     return ouputPixelBuffer;
 }
+
+//void cropAndScaleFrom(CVPixelBufferRef dst,
+//                      CVPixelBufferRef src,
+//                      int offset_x,
+//                      int offset_y,
+//                      int crop_width,
+//                      int crop_height) {
+//
+//    CVPixelBufferLockBaseAddress(dst, kNilOptions);
+//    CVPixelBufferLockBaseAddress(src, kNilOptions);
+//    OSType format = CVPixelBufferGetPixelFormatType(src);
+//    if (format == kCVPixelFormatType_420YpCbCr8Planar) {
+//        const int uv_offset_x = offset_x / 2;
+//        const int uv_offset_y = offset_y / 2;
+//        offset_x = uv_offset_x * 2;
+//        offset_y = uv_offset_y * 2;
+//
+//        const int src_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 0));
+//        const int src_stride_u = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 1));
+//        const int src_stride_v = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 2));
+//
+//        const uint8_t* srcY = (const uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 0));
+//        const uint8_t* srcU = (const uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 1));
+//        const uint8_t* srcV = (const uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 2));
+//
+//        const uint8_t* y_plane = srcY + src_stride_y * offset_y + offset_x;
+//        const uint8_t* u_plane = srcU + src_stride_u * uv_offset_y + uv_offset_x;
+//        const uint8_t* v_plane = srcV + src_stride_v * uv_offset_y + uv_offset_x;
+//
+//        const int dst_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 0));
+//        const int dst_stride_u = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 1));
+//        const int dst_stride_v = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 2));
+//
+//        uint8_t* dstY = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 0));
+//        uint8_t* dstU = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 1));
+//        uint8_t* dstV = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 2));
+//
+//        int width = (int)CVPixelBufferGetWidth(dst);
+//        int height = (int)CVPixelBufferGetHeight(dst);
+//
+//        libyuv::I420Scale(y_plane, src_stride_y, u_plane, src_stride_u, v_plane, src_stride_v,
+//                          crop_width, crop_height,
+//                          dstY, dst_stride_y, dstU, dst_stride_u, dstV, dst_stride_v,
+//                          width, height,
+//                          libyuv::kFilterBox);
+//    }
+//    else if (format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange) {
+//        const int uv_offset_x = offset_x / 2;
+//        const int uv_offset_y = offset_y / 2;
+//        offset_x = uv_offset_x * 2;
+//        offset_y = uv_offset_y * 2;
+//
+//        const int src_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 0));
+//        const int src_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(src, 1));
+//
+//        const uint8_t* srcY = (const uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 0));
+//        const uint8_t* srcUV = (const uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(src, 1));
+//
+//        const uint8_t* y_plane = srcY + src_stride_y * offset_y + offset_x;
+//        const uint8_t* uv_plane = srcUV + src_stride_uv * uv_offset_y * 2 + uv_offset_x * 2;
+//
+//        const int dst_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 0));
+//        const int dst_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(dst, 1));
+//
+//        uint8_t* dstY = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 0));
+//        uint8_t* dstUV = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dst, 1));
+//
+//        int width = (int)CVPixelBufferGetWidth(dst);
+//        int height = (int)CVPixelBufferGetHeight(dst);
+//
+//        libyuv::NV12Scale(y_plane, src_stride_y, uv_plane, src_stride_uv,
+//                          crop_width, crop_height,
+//                          dstY, dst_stride_y, dstUV, dst_stride_uv,
+//                          width, height,
+//                          libyuv::kFilterBox);
+//    }
+//
+//    CVPixelBufferUnlockBaseAddress(src, kNilOptions);
+//    CVPixelBufferUnlockBaseAddress(dst, kNilOptions);
+//}
 
 @end

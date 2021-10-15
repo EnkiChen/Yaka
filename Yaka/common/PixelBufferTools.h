@@ -15,13 +15,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (CGImagePropertyOrientation)getOrientation:(CMSampleBufferRef) sampleBuffer;
 
-+ (CVPixelBufferRef)createPixelBufferWithSize:(CGSize) size pixelFormat:(OSType) format;
++ (CMSampleBufferRef)createSampleBufferWithPixelBuffer:(CVPixelBufferRef)pixelBuffer;
 
-+ (CVPixelBufferRef)copyPixelBuffer:(CVPixelBufferRef) pixelBuffer;
++ (CMSampleBufferRef)createSampleBufferWithPixelBuffer:(CVPixelBufferRef)pixelBuffer from:(CMSampleBufferRef)sampleBuffer;
 
-+ (CVPixelBufferRef)createAndRotatePixelBuffer:(CVPixelBufferRef) pixelBuffer rotationConstant:(uint8_t) rotationConstant;
++ (CVPixelBufferRef)createPixelBufferWithSize:(CGSize)size pixelFormat:(OSType)format;
 
-+ (CVPixelBufferRef)createAndscalePixelBuffer:(CVPixelBufferRef)srcPixelBuffer ScaleSize:(CGSize) size;
++ (CVPixelBufferRef)createPixelBufferWithSize:(CGSize)size from:(CVPixelBufferRef)src;
+
++ (CVPixelBufferRef)copyPixelBuffer:(CVPixelBufferRef)pixelBuffer;
+
++ (CVPixelBufferRef)createAndRotatePixelBuffer:(CVPixelBufferRef)pixelBuffer rotationConstant:(uint8_t)rotationConstant;
+
++ (CVPixelBufferRef)createAndscalePixelBuffer:(CVPixelBufferRef)srcPixelBuffer scaleSize:(CGSize)size;
+
++ (CVPixelBufferRef)scaleCropPixelBuffer:(CVPixelBufferRef)src cropSize:(CGSize)size;
 
 + (CVPixelBufferRef)convertTo32BGRA:(CVPixelBufferRef)pixelBuffer;
 
