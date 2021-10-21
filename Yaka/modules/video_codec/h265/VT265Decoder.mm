@@ -259,10 +259,6 @@ struct DecodeCallbackParams {
         }
     }
     
-    if (CFStringCompare(transfer, kCVImageBufferTransferFunction_ITU_R_2100_HLG, 0) == kCFCompareEqualTo) {
-        
-    }
-    
     if ( bits == 8 || bits == 10 ) {
         CFNumberRef formatRef = CFNumberCreate(NULL, kCFNumberSInt32Type, &videoFormat);
         const void *keys[] = { kCVPixelBufferPixelFormatTypeKey };
