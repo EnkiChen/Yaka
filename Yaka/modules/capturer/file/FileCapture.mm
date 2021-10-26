@@ -13,17 +13,6 @@
 
 static const int kDefaultFps = 24;
 
-
-size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
-    size_t read_size = 0;
-    size_t total_size = 0;
-    do {
-        read_size = fread(buffer + total_size, 1, lenght - total_size, fd);
-        total_size += read_size;
-    } while ( read_size != 0 && total_size != lenght );
-    return (int)total_size;
-}
-
 @interface FileCapture ()
 
 @property(nonatomic, strong) MutableI420Buffer *frameBuffer;
@@ -177,7 +166,9 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
     }
     VideoFrame *videoFrame = nil;
     do {
-        videoFrame = [self outputFrame];
+        @autoreleasepool {
+            videoFrame = [self outputFrame];
+        }
         usleep(1000.0 / (self.fps == 0 ? kDefaultFps : self.fps) * 1000);
     } while (videoFrame != nil && !self.cancel);
     self.cancel = YES;
@@ -213,133 +204,114 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
 }
 
 - (VideoFrame*)readFrame:(BOOL) isLoop {
-    if (self.format == kPixelFormatType_420_I420) {
-        return [self readI420Frame:isLoop];
-    } else if (self.format == kPixelFormatType_420_NV12) {
-        return [self readNV12Frame:isLoop];
-    } else if (self.format == kPixelFormatType_420_P010) {
-        return [self readP010Frame:isLoop];
-    }
-    return nil;
-}
-
-- (VideoFrame*)readI420Frame:(BOOL) isLoop {
-    size_t read_size = (int)read_data(self.frameBuffer.mutableDataY, self.frameSize, self.fd);
-    if (read_size != self.frameSize) {
-        if (isLoop) {
-            fseek(self.fd, 0, SEEK_SET);
-            read_size = read_data(self.frameBuffer.mutableDataY, self.frameSize, self.fd);
-        } else {
-            return nil;
-        }
-    }
-    return [[VideoFrame alloc] initWithBuffer:self.frameBuffer rotation:VideoRotation_0];
-}
-
-- (VideoFrame*)readNV12Frame:(BOOL) isLoop {
-    
-    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
-                                                                   pixelFormat:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange];
-    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
-    BOOL isContinue = NO;
-    BOOL isOk = NO;
+    VideoFrame *videoFrame = nil;
     do {
-        isOk = YES;
-        isContinue = NO;
-        unsigned char *src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
-        int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-        int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
-        int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
-        for (int i = 0; i < srcHeight; i++) {
-            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
-            if (read_size != srcWidth) {
-                if (isLoop) {
-                    fseek(self.fd, 0, SEEK_SET);
-                    isContinue = YES;
-                }
-                isOk = NO;
-                break;
+        if (self.format == kPixelFormatType_420_I420) {
+            videoFrame = [self readI420Frame];
+        } else if (self.format == kPixelFormatType_420_NV12) {
+            videoFrame = [self readNV12Frame];
+        } else if (self.format == kPixelFormatType_420_P010) {
+            videoFrame = [self readP010Frame];
+        }
+        if (videoFrame == nil && isLoop) {
+            fseek(self.fd, 0, SEEK_SET);
+            continue;
+        } else {
+            break;
+        }
+    } while (true);
+    return videoFrame;
+}
+
+- (VideoFrame*)readI420Frame {
+    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
+                                                                   pixelFormat:kCVPixelFormatType_420YpCbCr8Planar];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    for (int i = 0; i < 3; i++) {
+        uint8_t* src = (uint8_t*)CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, i);
+        int stride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, i);
+        int width = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, i);
+        int height = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, i);
+        for ( int j = 0; j < height; j++ ) {
+            int read_size = [self fread:src + stride * j length:width fd:self.fd];
+            if (read_size != width) {
+                CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+                CVPixelBufferRelease(pixelBuffer);
+                return nil;
             }
         }
-
-        src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
-        srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-        srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1) * 2;
-        srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
-        for (int i = 0; i < srcHeight; i++) {
-            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
-            if (read_size != srcWidth) {
-                if (isLoop) {
-                    fseek(self.fd, 0, SEEK_SET);
-                    isContinue = YES;
-                }
-                isOk = NO;
-                break;
-            }
-        }
-    } while (isContinue);
-
+    }
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
     
-    if ( !isOk ) {
-        CVPixelBufferRelease(pixelBuffer);
-        return nil;
-    }
-
     VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
-    
     CVPixelBufferRelease(pixelBuffer);
     return videoFrame;
 }
 
-- (VideoFrame*)readP010Frame:(BOOL) isLoop  {
+- (VideoFrame*)readNV12Frame {
+    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
+                                                                   pixelFormat:kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    unsigned char *src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+    int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    for (int i = 0; i < srcHeight; i++) {
+        int read_size = [self fread:src + srcStride * i length:srcWidth fd:self.fd];
+        if (read_size != srcWidth) {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+            CVPixelBufferRelease(pixelBuffer);
+            return nil;
+        }
+    }
+    src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1) * 2;
+    srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+    for (int i = 0; i < srcHeight; i++) {
+        int read_size = [self fread:src + srcStride * i length:srcWidth fd:self.fd];
+        if (read_size != srcWidth) {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+            CVPixelBufferRelease(pixelBuffer);
+            return nil;
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    
+    VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
+    CVPixelBufferRelease(pixelBuffer);
+    return videoFrame;
+}
+
+- (VideoFrame*)readP010Frame {
     CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
                                                                    pixelFormat:kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange];
     CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
-    BOOL isContinue = NO;
-    BOOL isOk = NO;
-    do {
-        isOk = YES;
-        isContinue = NO;
-        unsigned char *src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
-        int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-        int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0) * 2;
-        int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
-        for (int i = 0; i < srcHeight; i++) {
-            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
-            if (read_size != srcWidth) {
-                if (isLoop) {
-                    fseek(self.fd, 0, SEEK_SET);
-                    isContinue = YES;
-                }
-                isOk = NO;
-                break;
-            }
+    unsigned char *src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0) * 2;
+    int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    for (int i = 0; i < srcHeight; i++) {
+        int read_size = [self fread:src + srcStride * i length:srcWidth fd:self.fd];
+        if (read_size != srcWidth) {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+            CVPixelBufferRelease(pixelBuffer);
+            return nil;
         }
-        
-        src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
-        srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-        srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1) * 4;
-        srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
-        for (int i = 0; i < srcHeight; i++) {
-            size_t read_size = read_data(src + srcStride * i, srcWidth, self.fd);
-            if (read_size != srcWidth) {
-                if (isLoop) {
-                    fseek(self.fd, 0, SEEK_SET);
-                    isContinue = YES;
-                }
-                isOk = NO;
-                break;
-            }
-        }
-    } while (isContinue);
-    
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
-    
-    if ( !isOk ) {
-        CVPixelBufferRelease(pixelBuffer);
-        return nil;
     }
+    src = (unsigned char *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1) * 4;
+    srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+    for (int i = 0; i < srcHeight; i++) {
+        int read_size = [self fread:src + srcStride * i length:srcWidth fd:self.fd];
+        if (read_size != srcWidth) {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+            CVPixelBufferRelease(pixelBuffer);
+            return nil;
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
 
     CVBufferSetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_2020, kCVAttachmentMode_ShouldPropagate);
     CVBufferSetAttachment(pixelBuffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_2020, kCVAttachmentMode_ShouldPropagate);
@@ -347,8 +319,17 @@ size_t read_data(unsigned char* buffer, int lenght, FILE *fd) {
     
     VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
     CVPixelBufferRelease(pixelBuffer);
-
     return videoFrame;
+}
+
+- (int)fread:(void*)buffer length:(int)length fd:(FILE *)fd {
+    size_t read_size = 0;
+    size_t total_size = 0;
+    do {
+        read_size = fread((int8_t*)buffer + total_size, 1, length - total_size, fd);
+        total_size += read_size;
+    } while ( read_size != 0 && total_size != length );
+    return (int)total_size;
 }
 
 @end
