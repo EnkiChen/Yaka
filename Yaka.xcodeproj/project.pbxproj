@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8936CE19231A4E03009217FE /* FileConfigViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8936CE18231A4E03009217FE /* FileConfigViewController.m */; };
 		8936CE1F231D04DE009217FE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8936CE1E231D04DE009217FE /* VideoToolbox.framework */; };
+		893B8EDD2727924300CF0A51 /* FormatConvertVCtrl.mm in Sources */ = {isa = PBXBuildFile; fileRef = 893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */; };
 		895A31E72227D8AC00B952A8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E62227D8AC00B952A8 /* AppDelegate.m */; };
 		895A31EA2227D8AC00B952A8 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E92227D8AC00B952A8 /* ViewController.mm */; };
 		895A31EF2227D8AE00B952A8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 895A31ED2227D8AE00B952A8 /* Main.storyboard */; };
@@ -57,6 +58,8 @@
 		8936CE17231A4E03009217FE /* FileConfigViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileConfigViewController.h; sourceTree = "<group>"; };
 		8936CE18231A4E03009217FE /* FileConfigViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileConfigViewController.m; sourceTree = "<group>"; };
 		8936CE1E231D04DE009217FE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		893B8EDB2727924300CF0A51 /* FormatConvertVCtrl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FormatConvertVCtrl.h; sourceTree = "<group>"; };
+		893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FormatConvertVCtrl.mm; sourceTree = "<group>"; };
 		895A31E22227D8AC00B952A8 /* Yaka.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yaka.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		895A31E52227D8AC00B952A8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		895A31E62227D8AC00B952A8 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -203,6 +206,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		893B8EDA272791BA00CF0A51 /* ViewCtrl */ = {
+			isa = PBXGroup;
+			children = (
+				895A31E82227D8AC00B952A8 /* ViewController.h */,
+				895A31E92227D8AC00B952A8 /* ViewController.mm */,
+				8936CE17231A4E03009217FE /* FileConfigViewController.h */,
+				8936CE18231A4E03009217FE /* FileConfigViewController.m */,
+				893B8EDB2727924300CF0A51 /* FormatConvertVCtrl.h */,
+				893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */,
+			);
+			path = ViewCtrl;
+			sourceTree = "<group>";
+		};
 		895A31D92227D8AC00B952A8 = {
 			isa = PBXGroup;
 			children = (
@@ -228,13 +244,10 @@
 				89AEF38B269E80DA00DA9FAD /* third_party */,
 				895B2505235843DE0031B819 /* common */,
 				89B2C13126A3D33600D340CC /* View */,
+				893B8EDA272791BA00CF0A51 /* ViewCtrl */,
 				895A31FB2227D98400B952A8 /* Support Files */,
 				895A31E52227D8AC00B952A8 /* AppDelegate.h */,
 				895A31E62227D8AC00B952A8 /* AppDelegate.m */,
-				895A31E82227D8AC00B952A8 /* ViewController.h */,
-				895A31E92227D8AC00B952A8 /* ViewController.mm */,
-				8936CE17231A4E03009217FE /* FileConfigViewController.h */,
-				8936CE18231A4E03009217FE /* FileConfigViewController.m */,
 				895A31ED2227D8AE00B952A8 /* Main.storyboard */,
 				895B25022357894C0031B819 /* EncodeTestItem.h */,
 				895B25032357894C0031B819 /* EncodeTestItem.mm */,
@@ -701,6 +714,7 @@
 				8990537D26A995EC00358B8C /* CameraCapture.m in Sources */,
 				8990538026A995EC00358B8C /* NalUnitSourceFileImp.mm in Sources */,
 				89A74EA626C29D02001DB050 /* VT265Encoder.mm in Sources */,
+				893B8EDD2727924300CF0A51 /* FormatConvertVCtrl.mm in Sources */,
 				89A74EAD26C29D02001DB050 /* EncoderInterface.m in Sources */,
 				8990538426AA7B3D00358B8C /* PixelBufferTools.m in Sources */,
 				89AEF3FE269E80E800DA9FAD /* Shader.mm in Sources */,

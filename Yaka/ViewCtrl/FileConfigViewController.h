@@ -10,6 +10,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface OpenFileInfo : NSObject
+
+@property(nonatomic, copy) NSURL *filePath;
+@property(nonatomic, assign) NSUInteger width;
+@property(nonatomic, assign) NSUInteger height;
+@property(nonatomic, assign) NSUInteger fps;
+@property(nonatomic, assign) NSUInteger format;
+
+@end
+
 @class FileConfigViewController;
 
 @protocol FileConfigDelegate <NSObject>
@@ -25,6 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak) IBOutlet NSTextField *textFilePath;
 @property (weak) IBOutlet NSTextField *textWidth;
 @property (weak) IBOutlet NSTextField *textHeight;
+@property (weak) IBOutlet NSTextField *textFps;
 @property (weak) IBOutlet NSComboBox *formatComboBox;
 @property (weak) IBOutlet NSComboBox *sizeComboBox;
 

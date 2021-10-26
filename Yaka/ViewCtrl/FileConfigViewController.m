@@ -90,3 +90,7 @@
 }
 
 @end
+
+@implementation OpenFileInfo
+
+@end

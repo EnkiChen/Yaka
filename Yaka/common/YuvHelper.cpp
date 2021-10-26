@@ -66,6 +66,7 @@ void scaleYUV(const char *src_file, int width, int height, const char *dst_file,
                           libyuv::kFilterBox);
         
         size_t ws = fwrite(out_buffer, 1, out_frame_size, out_fd);
+        fflush(out_fd);
         
         if ( ws != out_frame_size ) {
             std::cout << "write fail." << std::endl;

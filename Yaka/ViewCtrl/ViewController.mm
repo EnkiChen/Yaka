@@ -9,6 +9,7 @@
 #include <iostream>
 #import "ViewController.h"
 #import "FileConfigViewController.h"
+#import "FormatConvertVCtrl.h"
 #import "DragOperationView.h"
 #import "VideoFrame.h"
 #import "CameraCapture.h"
@@ -63,6 +64,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 @property(nonatomic, assign) BOOL dumpType;
 
 @property(nonatomic, strong) NSWindowController *fileConfigWindowCtrl;
+@property(nonatomic, strong) NSWindowController *formatConvertWindowCtrl;
 
 @property(nonatomic, assign) BOOL isLoop;
 
@@ -111,7 +113,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 - (IBAction)saveDocumentAs:(id)sender {
     NSSavePanel *panel = [NSSavePanel savePanel];
     [panel setCanSelectHiddenExtension:NO];
-    [panel setNameFieldStringValue:@"Video_720x1280x30_I420.yuv"];
+    [panel setNameFieldStringValue:@"live_360x640x30_I420_vt264_800k.yuv"];
     [panel beginSheetModalForWindow:[NSApp mainWindow] completionHandler:^(NSModalResponse result) {
         if (result == NSModalResponseOK) {
             NSString *chooseFile = [[panel URL] path];
@@ -221,6 +223,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
     }
 }
 
+- (IBAction)openConvertTool:(id)sender {
+    NSStoryboard *storyBoard = [NSStoryboard storyboardWithName:@"Main" bundle:nil];
+    self.formatConvertWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"FormatConvert"];
+    [self.formatConvertWindowCtrl.window setLevel:NSFloatingWindowLevel];
+    [self.formatConvertWindowCtrl showWindow:nil];
+}
+
 - (IBAction)onRendererComboboxChanged:(id)sender {
     NSComboBox *combobox = (NSComboBox*)sender;
     id<VideoRenderer> renderView = self.videoRenderer;
@@ -325,6 +334,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
     [self renderFrame:frame];
+    
+//    [self.vt264Encoder encode:frame];
+//    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+//    [self.encodeFps update:1 now:now_ms];
 }
 
 
