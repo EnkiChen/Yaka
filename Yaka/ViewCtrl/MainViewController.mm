@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#import "ViewController.h"
+#import "MainViewController.h"
 #import "FileConfigViewController.h"
 #import "FormatConvertVCtrl.h"
 #import "DragOperationView.h"
@@ -32,7 +32,7 @@
 
 static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 
-@interface ViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
+@interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
 
 @property(nonatomic, weak) id<VideoRenderer> videoRenderer;
 
@@ -73,7 +73,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 @end
 
 
-@implementation ViewController
+@implementation MainViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];

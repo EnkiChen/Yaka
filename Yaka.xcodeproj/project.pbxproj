@@ -13,7 +13,7 @@
 		893B8EE1272830BC00CF0A51 /* vmaf_v0.6.1.json in Resources */ = {isa = PBXBuildFile; fileRef = 893B8EDF272830BB00CF0A51 /* vmaf_v0.6.1.json */; };
 		893B8EE2272830BC00CF0A51 /* vmaf_4k_v0.6.1.json in Resources */ = {isa = PBXBuildFile; fileRef = 893B8EE0272830BB00CF0A51 /* vmaf_4k_v0.6.1.json */; };
 		895A31E72227D8AC00B952A8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E62227D8AC00B952A8 /* AppDelegate.m */; };
-		895A31EA2227D8AC00B952A8 /* ViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E92227D8AC00B952A8 /* ViewController.mm */; };
+		895A31EA2227D8AC00B952A8 /* MainViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E92227D8AC00B952A8 /* MainViewController.mm */; };
 		895A31EF2227D8AE00B952A8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 895A31ED2227D8AE00B952A8 /* Main.storyboard */; };
 		895A32002227D98400B952A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 895A31FD2227D98400B952A8 /* Assets.xcassets */; };
 		895A32012227D98400B952A8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31FE2227D98400B952A8 /* main.m */; };
@@ -67,8 +67,8 @@
 		895A31E22227D8AC00B952A8 /* Yaka.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yaka.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		895A31E52227D8AC00B952A8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		895A31E62227D8AC00B952A8 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		895A31E82227D8AC00B952A8 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		895A31E92227D8AC00B952A8 /* ViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = ViewController.mm; sourceTree = "<group>"; };
+		895A31E82227D8AC00B952A8 /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		895A31E92227D8AC00B952A8 /* MainViewController.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MainViewController.mm; sourceTree = "<group>"; };
 		895A31EE2227D8AE00B952A8 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		895A31FC2227D98400B952A8 /* Yaka.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Yaka.entitlements; sourceTree = "<group>"; };
 		895A31FD2227D98400B952A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -213,8 +213,8 @@
 		893B8EDA272791BA00CF0A51 /* ViewCtrl */ = {
 			isa = PBXGroup;
 			children = (
-				895A31E82227D8AC00B952A8 /* ViewController.h */,
-				895A31E92227D8AC00B952A8 /* ViewController.mm */,
+				895A31E82227D8AC00B952A8 /* MainViewController.h */,
+				895A31E92227D8AC00B952A8 /* MainViewController.mm */,
 				8936CE17231A4E03009217FE /* FileConfigViewController.h */,
 				8936CE18231A4E03009217FE /* FileConfigViewController.m */,
 				893B8EDB2727924300CF0A51 /* FormatConvertVCtrl.h */,
@@ -741,7 +741,7 @@
 				89A74EAC26C29D02001DB050 /* OpenH264Encoder.mm in Sources */,
 				89AEF3FD269E80E800DA9FAD /* GLVideoRenderView.m in Sources */,
 				89AEF40D269E80F200DA9FAD /* VideoFrame.mm in Sources */,
-				895A31EA2227D8AC00B952A8 /* ViewController.mm in Sources */,
+				895A31EA2227D8AC00B952A8 /* MainViewController.mm in Sources */,
 				895B2509235844920031B819 /* YuvHelper.cpp in Sources */,
 				89A74EA926C29D02001DB050 /* VT264Decoder.mm in Sources */,
 				89AEF3F7269E80E800DA9FAD /* MTLRenderer.mm in Sources */,

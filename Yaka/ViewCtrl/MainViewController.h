@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  MainViewController.h
 //  Yaka
 //
 //  Created by Enki on 2019/2/28.
@@ -12,7 +12,7 @@
 #import "MTLNSVideoView.h"
 #import "PalyCtrlView.h"
 
-@interface ViewController : NSViewController
+@interface MainViewController : NSViewController
 
 @property (weak) IBOutlet GLVideoRenderView *glVideoView;
 @property (weak) IBOutlet SampleVideoRenderView *sampleRenderView;
