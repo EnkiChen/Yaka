@@ -8,6 +8,7 @@
 
 #import "FormatConvertVCtrl.h"
 #import "DragOperationView.h"
+#include "YuvHelper.h"
 
 static NSArray *kAllowedConvertFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 
@@ -61,7 +62,16 @@ static NSArray *kAllowedConvertFileTypes = @[@"yuv", @"h264", @"264", @"h265", @
 }
 
 - (IBAction)convertAction:(id)sender {
-    
+    if (self.formatComboBox.indexOfSelectedItem == 0 && self.formatOutputComboBox.indexOfSelectedItem == 0) {
+        int inputWidth = self.textWidth.intValue;
+        int inputHeight = self.textHeight.intValue;
+        NSString *inputPath = self.textFilePath.stringValue;
+        int outputWidth = self.textOutputWidth.intValue;
+        int outputHeight = self.textOutputHeight.intValue;
+        NSString *outputPath = self.textOutputFilePath.stringValue;
+        scaleYUV([inputPath cStringUsingEncoding:NSUTF8StringEncoding], inputWidth, inputHeight,
+                 [outputPath cStringUsingEncoding:NSUTF8StringEncoding], outputWidth, outputHeight);
+    }
 }
 
 - (IBAction)onSizeComboboxChanged:(id)sender {
@@ -117,15 +127,19 @@ static NSArray *kAllowedConvertFileTypes = @[@"yuv", @"h264", @"264", @"h265", @
     [self.sizeComboBox selectItemAtIndex:0];
     if ([self containsType:filePath types:@[@"i420", @"y420"]]) {
         [self.formatComboBox selectItemAtIndex:0];
-        return;
-    }
-    if ([self containsType:filePath types:@[@"nv12", @"420f", @"420v"]]) {
+    } else if ([self containsType:filePath types:@[@"nv12", @"420f", @"420v"]]) {
         [self.formatComboBox selectItemAtIndex:1];
-        return;
-    }
-    if ([self containsType:filePath types:@[@"p010", @"x420"]]) {
+    } else if ([self containsType:filePath types:@[@"p010", @"x420"]]) {
         [self.formatComboBox selectItemAtIndex:2];
-        return;
+    }
+    
+    if ([self.textOutputFilePath.stringValue length] == 0) {
+        NSString *outputPath = [url.path stringByReplacingOccurrencesOfString:@"." withString:@"_copy."];
+        [self.textOutputFilePath setStringValue:outputPath];
+        [self.sizeOutputComboBox selectItemAtIndex:0];
+        [self.formatOutputComboBox selectItemAtIndex:self.formatComboBox.indexOfSelectedItem];
+        [self.textOutputWidth setStringValue:self.textWidth.stringValue];
+        [self.textOutputHeight setStringValue:self.textHeight.stringValue];
     }
 }
 
