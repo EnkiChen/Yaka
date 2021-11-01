@@ -334,7 +334,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-734" y="-93"/>
+            <point key="canvasLocation" x="-1290" y="-1571"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -354,7 +354,7 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="65" y="468"/>
+            <point key="canvasLocation" x="-1483" y="-1241"/>
         </scene>
         <!--Main View Controller-->
         <scene sceneID="hIz-AP-VOD">
@@ -625,7 +625,7 @@
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="65" y="1047"/>
+            <point key="canvasLocation" x="-1483" y="-662"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="ccc-MT-FGW">
@@ -645,12 +645,12 @@
                 </windowController>
                 <customObject id="5Zn-uZ-cUj" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-734" y="460"/>
+            <point key="canvasLocation" x="-1183" y="-55"/>
         </scene>
-        <!--File Config View Controller-->
+        <!--文件信息-->
         <scene sceneID="iYo-1e-MhD">
             <objects>
-                <viewController id="kQh-EO-20A" customClass="FileConfigViewController" sceneMemberID="viewController">
+                <viewController title="文件信息" id="kQh-EO-20A" customClass="FileConfigViewController" sceneMemberID="viewController">
                     <view key="view" id="WmK-60-WF3">
                         <rect key="frame" x="0.0" y="0.0" width="350" height="217"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -870,7 +870,58 @@
                 </viewController>
                 <customObject id="LyI-ji-T80" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-734" y="872.5"/>
+            <point key="canvasLocation" x="-1183" y="358"/>
+        </scene>
+        <!--Window Controller-->
+        <scene sceneID="KN8-IW-W0q">
+            <objects>
+                <windowController storyboardIdentifier="MultiPlayViewCtrl" id="lDb-JF-FCR" sceneMemberID="viewController">
+                    <window key="window" title="播放器" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="5JP-2c-3Gh">
+                        <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+                        <rect key="contentRect" x="182" y="1742" width="480" height="270"/>
+                        <rect key="screenRect" x="-243" y="1280" width="2560" height="1415"/>
+                        <view key="contentView" id="SrC-qh-pCr">
+                            <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </view>
+                        <connections>
+                            <outlet property="delegate" destination="lDb-JF-FCR" id="iCR-1Z-7Sq"/>
+                        </connections>
+                    </window>
+                    <connections>
+                        <segue destination="VRd-zT-eS6" kind="relationship" relationship="window.shadowedContentViewController" id="uRV-z5-oaE"/>
+                    </connections>
+                </windowController>
+                <customObject id="mXh-3M-3in" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-652" y="-1193"/>
+        </scene>
+        <!--播放器-->
+        <scene sceneID="8y5-ug-uSw">
+            <objects>
+                <viewController title="播放器" id="VRd-zT-eS6" customClass="MultiPlayViewCtrl" sceneMemberID="viewController">
+                    <view key="view" id="I2a-Ha-CDE">
+                        <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <subviews>
+                            <stackView distribution="fillEqually" orientation="horizontal" alignment="top" spacing="0.0" horizontalStackHuggingPriority="249.99998474121094" verticalStackHuggingPriority="249.99998474121094" detachesHiddenViews="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QW8-QN-oV4">
+                                <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
+                            </stackView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="QW8-QN-oV4" secondAttribute="trailing" id="SIG-di-jvZ"/>
+                            <constraint firstItem="QW8-QN-oV4" firstAttribute="leading" secondItem="I2a-Ha-CDE" secondAttribute="leading" id="gdo-9r-MTN"/>
+                            <constraint firstAttribute="bottom" secondItem="QW8-QN-oV4" secondAttribute="bottom" id="geb-Jt-xle"/>
+                            <constraint firstItem="QW8-QN-oV4" firstAttribute="top" secondItem="I2a-Ha-CDE" secondAttribute="top" id="oLS-gY-V4B"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="verticalStackView" destination="QW8-QN-oV4" id="1jg-Qa-lbU"/>
+                    </connections>
+                </viewController>
+                <customObject id="hYp-mA-bLy" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-652" y="-716"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="XAB-bH-qEF">
@@ -894,7 +945,7 @@
                 </windowController>
                 <customObject id="u4q-gH-YIQ" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1210" y="1225"/>
+            <point key="canvasLocation" x="-1738" y="-55"/>
         </scene>
         <!--Format ConvertV Ctrl-->
         <scene sceneID="L5S-WS-VhV">
@@ -1260,7 +1311,7 @@
                 </viewController>
                 <customObject id="RXF-Bn-Idm" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1209" y="1693"/>
+            <point key="canvasLocation" x="-1738" y="359"/>
         </scene>
     </scenes>
     <resources>
