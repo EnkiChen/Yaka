@@ -13,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface PixelBufferTools : NSObject
 
++ (void)writeToFile:(CVPixelBufferRef)pixelBuffer fd:(FILE*)fd;
+
 + (CGImagePropertyOrientation)getOrientation:(CMSampleBufferRef) sampleBuffer;
 
 + (CMSampleBufferRef)createSampleBufferWithPixelBuffer:(CVPixelBufferRef)pixelBuffer;

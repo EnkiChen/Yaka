@@ -38,6 +38,26 @@
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 }
 
++ (void)writeToFile:(CVPixelBufferRef)pixelBuffer fd:(FILE*)fd {
+    const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    CVPixelBufferLockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+    if (CVPixelBufferIsPlanar(pixelBuffer)) {
+        int factor = format == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange ? 2 : 1;
+        int planeCount = (int)CVPixelBufferGetPlaneCount(pixelBuffer);
+        for (int i = 0; i < planeCount; i++) {
+            const uint8_t* src = (const uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, i));
+            const size_t srcStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, i);
+            const size_t srcWidth = CVPixelBufferGetWidthOfPlane(pixelBuffer, i);
+            const size_t srcHeight = CVPixelBufferGetHeightOfPlane(pixelBuffer, i);
+            size_t size = (i == 0) ? srcWidth * factor : srcWidth * ((planeCount == 2) ? 2 : 1) * factor;
+            for (int i = 0; i < srcHeight; i++) {
+                fwrite(src + srcStride * i, 1, size, fd);
+            }
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+}
+
 + (CVPixelBufferRef)createPixelBufferWithSize:(CGSize)size pixelFormat:(OSType)format {
     CVPixelBufferRef resultPixelBuffer;
     CFDictionaryRef options = NULL;

@@ -86,14 +86,18 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
     [self.fdLock lock];
     if ([frame.buffer isKindOfClass:CVPixelBuffer.class]) {
         CVPixelBuffer *pixelBuffer = (CVPixelBuffer*)frame.buffer;
-        [self writeToFile:pixelBuffer.pixelBuffer fd:self.fd_yuv];
-    } else {
-        id<I420Buffer> buffer = [frame.buffer toI420];
-        uint8_t* data[3] = {(uint8_t*)buffer.dataY, (uint8_t*)buffer.dataU, (uint8_t*)buffer.dataV};
-        int stride[2] = {buffer.strideY, buffer.strideU};
-        if ( self.fd_yuv != nil ) {
-            Write2File(self.fd_yuv, data, stride, frame.width, frame.height);
+        const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer.pixelBuffer);
+        if (format == kCVPixelFormatType_420YpCbCr8Planar) {
+            [self writeToFile:pixelBuffer.pixelBuffer fd:self.fd_yuv];
+            [self.fdLock unlock];
+            return;
         }
+    }
+    id<I420Buffer> buffer = [frame.buffer toI420];
+    uint8_t* data[3] = {(uint8_t*)buffer.dataY, (uint8_t*)buffer.dataU, (uint8_t*)buffer.dataV};
+    int stride[2] = {buffer.strideY, buffer.strideU};
+    if ( self.fd_yuv != nil ) {
+        Write2File(self.fd_yuv, data, stride, frame.width, frame.height);
     }
     [self.fdLock unlock];
 }
@@ -119,7 +123,7 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
             const size_t srcStride = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, i);
             const size_t srcWidth = CVPixelBufferGetWidthOfPlane(pixelBuffer, i);
             const size_t srcHeight = CVPixelBufferGetHeightOfPlane(pixelBuffer, i);
-            size_t size = (i == 0) ? srcWidth * factor : srcWidth * 2 * factor;
+            size_t size = (i == 0) ? srcWidth * factor : srcWidth * ((planeCount == 2) ? 2 : 1) * factor;
             for (int i = 0; i < srcHeight; i++) {
                 fwrite(src + srcStride * i, 1, size, fd);
             }
