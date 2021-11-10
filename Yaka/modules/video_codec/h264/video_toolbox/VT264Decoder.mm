@@ -66,17 +66,17 @@ struct DecodeCallbackParams {
         }
         int nextIndex = H264::findNalu(bytes + startIndex + H264::kNaluLongStartSequenceSize, length - startIndex - H264::kNaluLongStartSequenceSize);
         if ( nextIndex == -1 ) {
-            [self decodeFrame:bytes + startIndex length:length - startIndex];
+            [self decodeFrame:bytes + startIndex length:length - startIndex presentationTimeStamp:nal.presentationTimeStamp];
             break;
         } else {
-            [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize];
+            [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize presentationTimeStamp:nal.presentationTimeStamp];
             bytes += startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
             length -= startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
         }
     }
 }
 
-- (void)decodeFrame:(uint8_t*) buffer length:(NSUInteger) length {
+- (void)decodeFrame:(uint8_t*)buffer length:(NSUInteger)length presentationTimeStamp:(CMTime)pts {
     if ( length < H264::kNaluLongStartSequenceSize || !H264::isNalu(buffer) ) {
         return;
     }
@@ -96,14 +96,14 @@ struct DecodeCallbackParams {
             break;
         case H264::kIdr:
         case H264::kSlice:
-            [self decode:buffer length:length];
+            [self decode:buffer length:length presentationTimeStamp:pts];
             break;
         default:
             break;
     }
 }
 
-- (void)decode:(uint8_t*) buffer length:(NSUInteger) length {
+- (void)decode:(uint8_t*)buffer length:(NSUInteger)length presentationTimeStamp:(CMTime)pts {
     if (self.decoderSession == nil) {
         if (self.sps != nil && self.pps != nil) {
             [self setupDecoder:self.sps pps:self.pps];
@@ -142,6 +142,7 @@ struct DecodeCallbackParams {
     if (status == noErr) {
         if (callbackInfo.status == noErr && callbackInfo.pixelBuffer != nil) {
             VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:callbackInfo.pixelBuffer rotation:VideoRotation_0];
+            videoFrame.presentationTimeStamp = pts;
             [self.delegate decoder:self onDecoded:videoFrame];
             CVPixelBufferRelease(callbackInfo.pixelBuffer);
         } else {

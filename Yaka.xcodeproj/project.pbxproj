@@ -55,6 +55,9 @@
 		89AEF40C269E80F200DA9FAD /* I420Buffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 89AEF408269E80F200DA9FAD /* I420Buffer.cpp */; };
 		89AEF40D269E80F200DA9FAD /* VideoFrame.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89AEF409269E80F200DA9FAD /* VideoFrame.mm */; };
 		89B2C13726A3D3E600D340CC /* PalyCtrlView.m in Sources */ = {isa = PBXBuildFile; fileRef = 89B2C13626A3D3E600D340CC /* PalyCtrlView.m */; };
+		89B83F2E2734175C009DB332 /* FlvFileCaptureImp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F2D2734175C009DB332 /* FlvFileCaptureImp.mm */; };
+		89B83F312738C156009DB332 /* FileUnit.m in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F302738C155009DB332 /* FileUnit.m */; };
+		89B83F37273A68A2009DB332 /* FormatConvert.m in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F36273A68A1009DB332 /* FormatConvert.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -187,6 +190,12 @@
 		89AEF40B269E80F200DA9FAD /* VideoSourceInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VideoSourceInterface.h; sourceTree = "<group>"; };
 		89B2C13526A3D3E600D340CC /* PalyCtrlView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PalyCtrlView.h; sourceTree = "<group>"; };
 		89B2C13626A3D3E600D340CC /* PalyCtrlView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PalyCtrlView.m; sourceTree = "<group>"; };
+		89B83F2C2734175C009DB332 /* FlvFileCaptureImp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FlvFileCaptureImp.h; sourceTree = "<group>"; };
+		89B83F2D2734175C009DB332 /* FlvFileCaptureImp.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FlvFileCaptureImp.mm; sourceTree = "<group>"; };
+		89B83F2F2738C155009DB332 /* FileUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileUnit.h; sourceTree = "<group>"; };
+		89B83F302738C155009DB332 /* FileUnit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileUnit.m; sourceTree = "<group>"; };
+		89B83F35273A68A1009DB332 /* FormatConvert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FormatConvert.h; sourceTree = "<group>"; };
+		89B83F36273A68A1009DB332 /* FormatConvert.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FormatConvert.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -299,6 +308,8 @@
 				89A74EB226C51D6F001DB050 /* RateStatistics.m */,
 				8990538B26AECCA100358B8C /* SystemTools.h */,
 				8990538A26AECCA100358B8C /* SystemTools.mm */,
+				89B83F35273A68A1009DB332 /* FormatConvert.h */,
+				89B83F36273A68A1009DB332 /* FormatConvert.m */,
 			);
 			path = common;
 			sourceTree = "<group>";
@@ -355,10 +366,14 @@
 		8990537826A995EC00358B8C /* file */ = {
 			isa = PBXGroup;
 			children = (
+				89B83F2F2738C155009DB332 /* FileUnit.h */,
+				89B83F302738C155009DB332 /* FileUnit.m */,
 				8990537A26A995EC00358B8C /* FileCapture.h */,
 				8990537926A995EC00358B8C /* FileCapture.mm */,
 				8990537B26A995EC00358B8C /* NalUnitSourceFileImp.h */,
 				8990537C26A995EC00358B8C /* NalUnitSourceFileImp.mm */,
+				89B83F2C2734175C009DB332 /* FlvFileCaptureImp.h */,
+				89B83F2D2734175C009DB332 /* FlvFileCaptureImp.mm */,
 			);
 			path = file;
 			sourceTree = "<group>";
@@ -725,6 +740,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				89B83F37273A68A2009DB332 /* FormatConvert.m in Sources */,
 				89A74EA826C29D02001DB050 /* X264Encoder.mm in Sources */,
 				89AEF3FF269E80E800DA9FAD /* I420TextureCache.mm in Sources */,
 				898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */,
@@ -735,6 +751,7 @@
 				8990537D26A995EC00358B8C /* CameraCapture.m in Sources */,
 				8990538026A995EC00358B8C /* NalUnitSourceFileImp.mm in Sources */,
 				89A74EA626C29D02001DB050 /* VT265Encoder.mm in Sources */,
+				89B83F312738C156009DB332 /* FileUnit.m in Sources */,
 				893B8EDD2727924300CF0A51 /* FormatConvertVCtrl.mm in Sources */,
 				89A74EAD26C29D02001DB050 /* EncoderInterface.m in Sources */,
 				8990538426AA7B3D00358B8C /* PixelBufferTools.m in Sources */,
@@ -753,6 +770,7 @@
 				89AEF3F7269E80E800DA9FAD /* MTLRenderer.mm in Sources */,
 				89A74EB326C51D70001DB050 /* RateStatistics.m in Sources */,
 				895A32012227D98400B952A8 /* main.m in Sources */,
+				89B83F2E2734175C009DB332 /* FlvFileCaptureImp.mm in Sources */,
 				89AEF3F8269E80E800DA9FAD /* MTLNSVideoView.m in Sources */,
 				89AEF3FC269E80E800DA9FAD /* DefaultShader.mm in Sources */,
 				89AEF40C269E80F200DA9FAD /* I420Buffer.cpp in Sources */,

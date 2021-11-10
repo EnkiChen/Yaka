@@ -145,7 +145,7 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
     }
 }
 
--(BOOL)isRunning {
+- (BOOL)isRunning {
     return !self.cancel;
 }
 

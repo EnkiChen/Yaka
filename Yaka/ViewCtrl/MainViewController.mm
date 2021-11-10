@@ -18,6 +18,7 @@
 #import "YuvFileDumper.h"
 #import "H264FileDumper.h"
 #import "NalUnitSourceFileImp.h"
+#import "FlvFileCaptureImp.h"
 #import "Openh264Decoder.h"
 #import "VT264Encoder.h"
 #import "VT264Decoder.h"
@@ -29,8 +30,9 @@
 #import "EncodeTestItem.h"
 #include "YuvHelper.h"
 #import "RateStatistics.h"
+#import "FormatConvert.h"
 
-static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
+static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", @"flv"];
 
 @interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
 
@@ -57,6 +59,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 @property(nonatomic, copy) NSString *filePath;
 @property(nonatomic, strong) FileCapture *fileCapture;
 @property(nonatomic, strong) NalUnitSourceFileImp *naluFileSoucre;
+@property(nonatomic, strong) FlvFileCaptureImp *flvFileCaptureImp;
 
 @property(nonatomic, strong) YuvFileDumper *yuvFileDumper;
 @property(nonatomic, strong) H264FileDumper *h264FileDumper;
@@ -69,6 +72,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 @property(nonatomic, assign) BOOL isLoop;
 
 @property(nonatomic, assign) uint64_t lastPrintLog;
+@property(nonatomic, assign) NSUInteger count;
+
+@property(nonatomic, strong) NSMutableArray<VideoFrame*> *frameOrderedList;
+
+@property(nonatomic, strong) FormatConvert *formatConvert;
 
 @end
 
@@ -90,8 +98,8 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 - (void)viewWillDisappear {
     if ( self.capture.isRunning ) {
         [self.capture stop];
-        [self.yuvFileDumper stop];
     }
+    [self.yuvFileDumper stop];
 }
 
 
@@ -228,6 +236,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
     self.formatConvertWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"FormatConvert"];
     [self.formatConvertWindowCtrl.window setLevel:NSFloatingWindowLevel];
     [self.formatConvertWindowCtrl showWindow:nil];
+
+    // NSWindowController *playWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"MultiPlayViewCtrl"];
+    // [playWindowCtrl.window setLevel:NSFloatingWindowLevel];
+    // [playWindowCtrl showWindow:nil];
 }
 
 - (IBAction)onRendererComboboxChanged:(id)sender {
@@ -323,7 +335,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 
 #pragma mark - h264 capture Action
 - (void)h264Source:(id<H264SourceInterface>) source onEncodedImage:(Nal *)nal {
-    if ([self.filePath hasSuffix:@"h264"] || [self.filePath hasSuffix:@"264"]) {
+    if ([self.filePath hasSuffix:@"h264"] || [self.filePath hasSuffix:@"264"] || [self.filePath hasSuffix:@"flv"]) {
         [self.vt264Decoder decode:nal];
     } else if ([self.filePath hasSuffix:@"h265"] || [self.filePath hasSuffix:@"265"]) {
         [self.vt265Decoder decode:nal];
@@ -484,6 +496,24 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
         [self.palyCtrlView.progressSlider setIntValue:1];
         self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
         self.palyCtrlView.playState = PlayControlState_Stop;
+
+    } else if ([filePath.path hasSuffix:@"flv"]) {
+        [self performClose:nil];
+        
+        self.flvFileCaptureImp = [[FlvFileCaptureImp alloc] initWithPath:filePath.path];
+        self.fileSourceCapture = self.naluFileSoucre;
+        
+        self.flvFileCaptureImp.delegate = self;
+        self.flvFileCaptureImp.fileSourceDelegate = self;
+        [self.flvFileCaptureImp start];
+        
+        self.palyCtrlView.progressSlider.minValue = 1;
+        self.palyCtrlView.progressSlider.maxValue = self.flvFileCaptureImp.totalFrames;
+        self.palyCtrlView.formatComboBox.enabled = NO;
+        [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.flvFileCaptureImp.totalFrames]];
+        [self.palyCtrlView.progressSlider setIntValue:1];
+        self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
+        self.palyCtrlView.playState = PlayControlState_Stop;
     }
 }
 
@@ -498,9 +528,32 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
 }
 
 - (void)renderFrame:(VideoFrame *)frame {
-    [self.videoRenderer renderFrame:frame];
     if ( self.yuvFileDumper != nil ) {
         [self.yuvFileDumper dumpToFile:frame];
+    }
+
+    frame = [self pushFrameToOrderedlist:frame];
+    if (frame != nil) {
+        [self.videoRenderer renderFrame:frame];
+    }
+}
+
+- (VideoFrame*)pushFrameToOrderedlist:(VideoFrame*)frame {
+    NSUInteger index = 0;
+    for (; index < self.frameOrderedList.count; index++) {
+        if (CMTimeCompare(frame.presentationTimeStamp, self.frameOrderedList[index].presentationTimeStamp) == -1) {
+            break;
+        }
+    }
+    
+    [self.frameOrderedList insertObject:frame atIndex:index];
+    
+    if (self.frameOrderedList.count < 2) {
+        return nil;
+    } else {
+        frame = self.frameOrderedList.firstObject;
+        [self.frameOrderedList removeObjectAtIndex:0];
+        return frame;
     }
 }
 
@@ -665,6 +718,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265"];
         _encodeFps = [[RateStatistics alloc] initWithWindowSize:1000];
     }
     return _encodeFps;
+}
+
+- (NSMutableArray*)frameOrderedList {
+    if (_frameOrderedList == nil) {
+        _frameOrderedList = [[NSMutableArray alloc] init];
+    }
+    return _frameOrderedList;
 }
 
 @end

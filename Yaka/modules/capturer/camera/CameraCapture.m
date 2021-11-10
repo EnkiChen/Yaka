@@ -120,7 +120,7 @@
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     CVPixelBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:imageBuffer rotation:VideoRotation_0];
-    videoFrame.pts = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
+    videoFrame.presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer);
     if (self.delegate) {
         [self.delegate captureSource:self onFrame:videoFrame];
     }

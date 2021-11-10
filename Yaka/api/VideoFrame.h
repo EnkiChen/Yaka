@@ -101,7 +101,7 @@ typedef NS_ENUM(NSInteger, VideoRotation) {
 
 @property(nonatomic, readonly) VideoRotation rotation;
 
-@property(nonatomic, assign) CMTime pts;
+@property(nonatomic, assign) CMTime presentationTimeStamp;
 
 @property(nonatomic, readonly) id<VideoFrameBuffer> buffer;
 
@@ -137,6 +137,10 @@ typedef NS_ENUM(NSInteger, VideoRotation) {
 @interface Nal : NSObject
 
 @property(nonatomic, readonly) NalBuffer *buffer;
+
+@property(nonatomic, assign) CMTime duration;
+@property(nonatomic, assign) CMTime presentationTimeStamp;
+@property(nonatomic, assign) CMTime decodeTimeStamp;
 
 @property(nonatomic, assign) double encodeTime;
 @property(nonatomic, assign) int type;
