@@ -15,10 +15,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, assign) NSUInteger startIndex;
 @property(nonatomic, assign) NSInteger total;
+@property(nonatomic, assign) BOOL isOrdered;
 
 - (instancetype)initWithPath:(NSString*)filePath;
 
 - (void)dumpToFile:(VideoFrame *)frame;
+
+- (void)flush;
 
 - (void)stop;
 

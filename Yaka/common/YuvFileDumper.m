@@ -43,6 +43,8 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
 
 @property(nonatomic, assign) NSUInteger index;
 
+@property(nonatomic, strong) NSMutableArray<VideoFrame*> *frameOrderedList;
+
 @end
 
 @implementation YuvFileDumper
@@ -54,6 +56,8 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
         self.index = 0;
         self.startIndex = 0;
         self.total = -1;
+        self.isOrdered = NO;
+        self.frameOrderedList = [[NSMutableArray alloc] initWithCapacity:3];
     }
     return self;
 }
@@ -67,6 +71,38 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
 }
 
 - (void)dumpToFile:(VideoFrame *)frame {
+    if (!self.isOrdered) {
+        [self dumpFrame:frame];
+        return;
+    }
+    
+    frame = [self pushFrameToOrderedlist:frame];
+    if (frame == nil) {
+        return;
+    }
+    [self dumpFrame:frame];
+}
+
+- (void)flush {
+    while (self.frameOrderedList.count != 0) {
+        [self dumpFrame:self.frameOrderedList.firstObject];
+        [self.frameOrderedList removeObjectAtIndex:0];
+    }
+    fflush(self.fd_yuv);
+}
+
+- (void)stop {
+    [self flush];
+    [self.fdLock lock];
+    self.index = 0;
+    self.startIndex = 0;
+    self.total = -1;
+    fclose(self.fd_yuv);
+    self.fd_yuv = NULL;
+    [self.fdLock unlock];
+}
+
+- (void)dumpFrame:(VideoFrame *)frame {
     if ( self.fd_yuv == NULL ) {
         [self setup];
     }
@@ -102,14 +138,23 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
     [self.fdLock unlock];
 }
 
-- (void)stop {
-    [self.fdLock lock];
-    self.index = 0;
-    self.startIndex = 0;
-    self.total = -1;
-    fclose(self.fd_yuv);
-    self.fd_yuv = NULL;
-    [self.fdLock unlock];
+- (VideoFrame*)pushFrameToOrderedlist:(VideoFrame*)frame {
+    NSUInteger index = 0;
+    for (; index < self.frameOrderedList.count; index++) {
+        if (CMTimeCompare(frame.presentationTimeStamp, self.frameOrderedList[index].presentationTimeStamp) == -1) {
+            break;
+        }
+    }
+    
+    [self.frameOrderedList insertObject:frame atIndex:index];
+    
+    if (self.frameOrderedList.count < 2) {
+        return nil;
+    } else {
+        frame = self.frameOrderedList.firstObject;
+        [self.frameOrderedList removeObjectAtIndex:0];
+        return frame;
+    }
 }
 
 - (void)writeToFile:(CVPixelBufferRef)pixelBuffer fd:(FILE*)fd {
@@ -126,6 +171,7 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
             size_t size = (i == 0) ? srcWidth * factor : srcWidth * ((planeCount == 2) ? 2 : 1) * factor;
             for (int i = 0; i < srcHeight; i++) {
                 fwrite(src + srcStride * i, 1, size, fd);
+                fflush(fd);
             }
         }
     }
