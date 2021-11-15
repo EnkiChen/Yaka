@@ -317,6 +317,7 @@
     self = [super init];
     if ( self ) {
         self.buffer = buffer;
+        self.nalType = NalType_H264;
     }
     return self;
 }

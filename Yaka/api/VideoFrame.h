@@ -134,8 +134,15 @@ typedef NS_ENUM(NSInteger, VideoRotation) {
 
 @end
 
+typedef NS_ENUM(NSInteger, NalType) {
+    NalType_H264 = 0,
+    NalType_HEVC = 1,
+    NalType_VP8 = 2,
+};
+
 @interface Nal : NSObject
 
+@property(nonatomic, assign) NalType nalType;
 @property(nonatomic, readonly) NalBuffer *buffer;
 
 @property(nonatomic, assign) CMTime duration;

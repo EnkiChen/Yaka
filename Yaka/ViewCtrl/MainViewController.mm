@@ -127,6 +127,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
             NSString *chooseFile = [[panel URL] path];
             if ([chooseFile hasSuffix:@".yuv"]) {
                 self.yuvFileDumper = [[YuvFileDumper alloc] initWithPath:chooseFile];
+                self.yuvFileDumper.isOrdered = YES;
             } else if ( [chooseFile hasSuffix:@".h264"] ) {
                 self.h264FileDumper = [[H264FileDumper alloc] initWithPath:chooseFile];
             }
@@ -335,9 +336,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - h264 capture Action
 - (void)h264Source:(id<H264SourceInterface>) source onEncodedImage:(Nal *)nal {
-    if ([self.filePath hasSuffix:@"h264"] || [self.filePath hasSuffix:@"264"] || [self.filePath hasSuffix:@"flv"]) {
+    if (nal.nalType == NalType_H264) {
         [self.vt264Decoder decode:nal];
-    } else if ([self.filePath hasSuffix:@"h265"] || [self.filePath hasSuffix:@"265"]) {
+    } else if (nal.nalType == NalType_HEVC) {
         [self.vt265Decoder decode:nal];
     }
 }
@@ -725,6 +726,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         _frameOrderedList = [[NSMutableArray alloc] init];
     }
     return _frameOrderedList;
+}
+
+- (FormatConvert*)formatConvert {
+    if (_formatConvert == nil) {
+        _formatConvert = [[FormatConvert alloc] init];
+    }
+    return _formatConvert;
 }
 
 @end

@@ -143,7 +143,7 @@ typedef uint8_t flv_audio_tag;
 #define FLV_VIDEO_TAG_CODEC_SCREEN_VIDEO_V2 6
 #define FLV_VIDEO_TAG_CODEC_AVC             7
 #define FLV_VIDEO_TAG_CODEC_HEVC            0x0C
-#define FLV_VIDEO_TAG_CODEC_VP8             x0D
+#define FLV_VIDEO_TAG_CODEC_VP8             0x0D
 
 #define FLV_VIDEO_TAG_FRAME_TYPE_KEYFRAME               1
 #define FLV_VIDEO_TAG_FRAME_TYPE_INTERFRAME             2
@@ -430,13 +430,7 @@ static const int kDefaultFps = 24;
                 fseek(self.fd, length, SEEK_CUR);
                 
             } else if (video_tag_header.codec_id == FLV_VIDEO_TAG_CODEC_HEVC) {
-                uint32_t heve_length = 0;
-                if ([self fread:&heve_length length:sizeof(heve_length) fd:self.fd] != sizeof(heve_length)) {
-                    break;
-                }
-                length -= sizeof(heve_length);
-                
-                FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:heve_length];
+                FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:length];
                 videoTagUnit.tagType = flvTag.type;
                 videoTagUnit.timestamp = flv_tag_get_timestamp(flvTag);
                 videoTagUnit.streamId = flv_tag_get_stream_id(flvTag);
@@ -446,19 +440,8 @@ static const int kDefaultFps = 24;
                 videoTagUnit.compositionTime = uint24_be_to_uint32(video_tag_header.composition_time);
                 [self.videoTags addObject:videoTagUnit];
                 
-                fseek(self.fd, heve_length, SEEK_CUR);
-                length -= heve_length;
-                
-                videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:length];
-                videoTagUnit.tagType = flvTag.type;
-                videoTagUnit.timestamp = flv_tag_get_timestamp(flvTag);
-                videoTagUnit.streamId = flv_tag_get_stream_id(flvTag);
-                videoTagUnit.codecId = video_tag_header.codec_id;
-                videoTagUnit.frameType = video_tag_header.frame_type;
-                videoTagUnit.avcPacketType = video_tag_header.avc_packet_type;
-                videoTagUnit.compositionTime = uint24_be_to_uint32(video_tag_header.composition_time);
-                [self.videoTags addObject:videoTagUnit];
                 fseek(self.fd, length, SEEK_CUR);
+                length -= length;
 
             } else {
                 fseek(self.fd, length, SEEK_CUR);
@@ -519,14 +502,25 @@ static const int kDefaultFps = 24;
     }
     
     fseek(self.fd, videoTagUnint.offset, SEEK_SET);
-    NalBuffer *nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length + 4];
-    nalBuffer.bytes[0] = 0x00;
-    nalBuffer.bytes[1] = 0x00;
-    nalBuffer.bytes[2] = 0x00;
-    nalBuffer.bytes[3] = 0x01;
-    int size = [self fread:nalBuffer.bytes + 4 length:(int)videoTagUnint.length fd:self.fd];
-    if (size == videoTagUnint.length) {
+    NalBuffer *nalBuffer = nil;
+    int readSize = 0;
+    NalType type = NalType_H264;
+    if (videoTagUnint.codecId == FLV_VIDEO_TAG_CODEC_AVC) {
+        nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length + 4];
+        nalBuffer.bytes[0] = 0x00;
+        nalBuffer.bytes[1] = 0x00;
+        nalBuffer.bytes[2] = 0x00;
+        nalBuffer.bytes[3] = 0x01;
+        readSize = [self fread:nalBuffer.bytes + 4 length:(int)videoTagUnint.length fd:self.fd];
+        type = NalType_H264;
+    } else if (videoTagUnint.codecId == FLV_VIDEO_TAG_CODEC_HEVC) {
+        nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length];
+        readSize = [self fread:nalBuffer.bytes length:(int)videoTagUnint.length fd:self.fd];
+        type = NalType_HEVC;
+    }
+    if (readSize == videoTagUnint.length) {
         Nal *nal = [[Nal alloc] initWithNalBuffer:nalBuffer];
+        nal.nalType = type;
         nal.decodeTimeStamp = CMTimeMake(videoTagUnint.timestamp, 1);
         nal.presentationTimeStamp = CMTimeMake(videoTagUnint.timestamp + videoTagUnint.compositionTime, 1);
         nal.duration = kCMTimeInvalid;

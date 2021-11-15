@@ -8,10 +8,12 @@
 
 #import "FormatConvert.h"
 #import "YuvFileDumper.h"
+#import "FileCapture.h"
 #import "NalUnitSourceFileImp.h"
 #import "FlvFileCaptureImp.h"
 #import "VT264Decoder.h"
 #import "VT265Decoder.h"
+#include "YuvHelper.h"
 
 @interface FormatConvert () <VideoSourceSink, H264SourceSink, DecoderDelegate, FileSourceDelegate>
 
@@ -20,6 +22,7 @@
 
 @property(nonatomic, strong) YuvFileDumper *yuvFileDumper;
 
+@property(nonatomic, strong) FileCapture *fileCapture;
 @property(nonatomic, strong) id<H264FileSourceInterface> nalUnitFileSource;
 @property(nonatomic, strong) NalUnitSourceFileImp *naluFileSoucre;
 @property(nonatomic, strong) FlvFileCaptureImp *flvFileCaptureImp;
@@ -44,6 +47,55 @@
 }
 
 - (void)startTask {
+    [self dowmska];
+}
+
+- (void)scaleFrame {
+    NSArray* numbers = @[@"A", @"B", @"E", @"G"];
+    NSArray* resolutions = @[@"368x640x10"];
+    NSArray* bitrates = @[@"200", @"400"];
+    for (NSString *num in numbers) {
+        for (NSString *resl in resolutions) {
+            for (NSString *br in bitrates) {
+                NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_%@_I420_vt264_%@k.yuv", num, num, resl, br];
+                NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_720x1280x10_I420_%@_UP_vt264_%@k.yuv", num, num, resl, br];
+                scaleYUV([inputFile cStringUsingEncoding:NSUTF8StringEncoding], 368, 640, [outputFile cStringUsingEncoding:NSUTF8StringEncoding], 720, 1280);
+            }
+        }
+    }
+}
+
+- (void)flvToYuv {
+    NSArray* numbers = @[@"A", @"B", @"E", @"G"];
+    NSArray* resolutions = @[@"240x432x15"];
+    NSArray* bitrates = @[@"600", @"800"];
+    NSMutableDictionary *filePaths = [[NSMutableDictionary alloc] init];
+    for (NSString *num in numbers) {
+        for (NSString *resl in resolutions) {
+            for (NSString *br in bitrates) {
+                NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_%@_vt264_%@k.flv", num, num, resl, br];
+                NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_%@_I420_vt264_%@k.yuv", num, num, resl, br];
+                [filePaths setValue:outputFile forKey:inputFile];
+            }
+        }
+    }
+    self.files = filePaths;
+    [self startConvert];
+}
+
+- (void)dowmska {
+    NSArray* numbers = @[@"A", @"B", @"C", @"D", @"E", @"F", @"G", @"H"];
+    NSMutableDictionary *filePaths = [[NSMutableDictionary alloc] init];
+    for (NSString *num in numbers) {
+        NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/video/%@_720x1280x30_I420.yuv", num];
+        NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/video/%@_720x1280x5_I420.yuv", num];
+        [filePaths setValue:outputFile forKey:inputFile];
+    }
+    self.files = filePaths;
+    [self startConvert];
+}
+
+- (void)startConvert {
     [self stop];
     if (self.index < self.files.count) {
         NSArray *keys = self.files.allKeys;
@@ -62,15 +114,38 @@
     } else if ([self.filePath hasSuffix:@"flv"]) {
         self.flvFileCaptureImp = [[FlvFileCaptureImp alloc] initWithPath:self.filePath];
         self.nalUnitFileSource = self.flvFileCaptureImp;
+    } else if ([self.filePath hasSuffix:@"yuv"]) {
+        int width = 0;
+        int height = 0;
+        NSString *filePath = [self.filePath lowercaseString];
+        NSRange range = [filePath rangeOfString:@"[1-9][0-9]*[x,X,_][0-9]*" options:NSRegularExpressionSearch];
+        if (range.location != NSNotFound) {
+            NSString *result = [filePath substringWithRange:range];
+            range = [result rangeOfString:@"^[0-9]*" options:NSRegularExpressionSearch];
+            if (range.location != NSNotFound) {
+                width = [[result substringWithRange:range] intValue];
+            }
+            range = [result rangeOfString:@"[0-9]*$" options:NSRegularExpressionSearch];
+            if (range.location != NSNotFound) {
+                height = [[result substringWithRange:range] intValue];
+            }
+        }
+        self.fileCapture = [[FileCapture alloc] initWithPath:self.filePath width:width height:height pixelFormatType:kPixelFormatType_420_I420];
+        self.fileCapture.delegate = self;
+        self.fileCapture.fileSourceDelegate = self;
+        self.fileCapture.fps = 240;
+        self.fileCapture.isLoop = NO;
     }
     
     self.yuvFileDumper = [[YuvFileDumper alloc] initWithPath:self.outputFilePath];
+    self.yuvFileDumper.isOrdered = YES;
     self.nalUnitFileSource.isLoop = NO;
     self.nalUnitFileSource.fps = 240;
     self.nalUnitFileSource.delegate = self;
     self.nalUnitFileSource.fileSourceDelegate = self;
     
     [self.nalUnitFileSource start];
+    [self.fileCapture start];
 }
 
 - (void)stop {
@@ -100,7 +175,7 @@
 
 #pragma mark - VideoSourceSink
 - (void)captureSource:(id<VideoSourceInterface>)source onFrame:(VideoFrame *)frame {
-    
+    [self.yuvFileDumper dumpToFile:frame];
 }
 
 #pragma mark - H264SourceSink
