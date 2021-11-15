@@ -94,11 +94,10 @@ struct DecodeCallbackParams {
             self.pps = [[NSMutableData alloc] initWithBytes:buffer + H264::kNaluLongStartSequenceSize
                                                      length:length - H264::kNaluLongStartSequenceSize];
             break;
-        case H264::kIdr:
-        case H264::kSlice:
-            [self decode:buffer length:length presentationTimeStamp:pts];
+        case H264::kSei:
             break;
         default:
+            [self decode:buffer length:length presentationTimeStamp:pts];
             break;
     }
 }

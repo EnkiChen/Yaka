@@ -74,7 +74,7 @@ struct DecodeCallbackParams {
     
 }
 
-- (void)decode:(Nal*) nal {
+- (void)decode:(Nal*)nal {
     uint8_t *bytes = nal.buffer.bytes;
     int length = (int)nal.buffer.length;
     while (length > H264::kNaluLongStartSequenceSize) {
@@ -84,10 +84,10 @@ struct DecodeCallbackParams {
         }
         int nextIndex = H264::findNalu(bytes + startIndex + H264::kNaluLongStartSequenceSize, length - startIndex - H264::kNaluLongStartSequenceSize);
         if ( nextIndex == -1 ) {
-            [self decodeFrame:bytes + startIndex length:length - startIndex];
+            [self decodeFrame:bytes + startIndex length:length - startIndex presentationTimeStamp:nal.presentationTimeStamp];
             break;
         } else {
-            [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize];
+            [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize presentationTimeStamp:nal.presentationTimeStamp];
             bytes += startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
             length -= startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
         }
@@ -98,7 +98,7 @@ struct DecodeCallbackParams {
     [self destroySession];
 }
 
-- (void)decodeFrame:(uint8_t*) buffer length:(NSUInteger) length {
+- (void)decodeFrame:(uint8_t*)buffer length:(NSUInteger)length presentationTimeStamp:(CMTime)pts {
     if (length < H264::kNaluLongStartSequenceSize ) {
         return;
     }
@@ -120,22 +120,16 @@ struct DecodeCallbackParams {
             self.pps = [[NSMutableData alloc] initWithBytes:buffer + H264::kNaluLongStartSequenceSize
                                                      length:length - H264::kNaluLongStartSequenceSize];
             break;
-        case NAL_IDR_N_LP:
-        case NAL_IDR_W_RADL:
-        case NAL_TRAIL_R:
-        case NAL_TSA_N:
-        case NAL_TSA_R:
-            [self decode:buffer length:length];
-            break;
         case NAL_SEI_PREFIX:
         case NAL_SEI_SUFFIX:
             break;
         default:
+            [self decode:buffer length:length presentationTimeStamp:pts];
             break;
     }
 }
 
-- (void)decode:(uint8_t*) buffer length:(NSUInteger) length {
+- (void)decode:(uint8_t*)buffer length:(NSUInteger)length presentationTimeStamp:(CMTime)pts {
     
     if ( self.decoderSession == nil ) {
         if (self.vps != nil && self.sps != nil && self.pps != nil) {
@@ -173,6 +167,7 @@ struct DecodeCallbackParams {
     if (status == noErr) {
         if (callbackInfo.status == noErr && callbackInfo.pixelBuffer != nil) {
             VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:callbackInfo.pixelBuffer rotation:VideoRotation_0];
+            videoFrame.presentationTimeStamp = pts;
             [self.delegate decoder:self onDecoded:videoFrame];
             CVPixelBufferRelease(callbackInfo.pixelBuffer);
         } else {
