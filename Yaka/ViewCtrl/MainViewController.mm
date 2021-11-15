@@ -142,6 +142,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         self.capture = nil;
     }
     
+    if (self.flvFileCaptureImp != nil) {
+        [self.flvFileCaptureImp stop];
+        self.flvFileCaptureImp = nil;
+    }
+    
     if ( self.naluFileSoucre != nil ) {
         [self.naluFileSoucre stop];
         self.naluFileSoucre = nil;
@@ -502,7 +507,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         [self performClose:nil];
         
         self.flvFileCaptureImp = [[FlvFileCaptureImp alloc] initWithPath:filePath.path];
-        self.fileSourceCapture = self.naluFileSoucre;
+        self.fileSourceCapture = self.flvFileCaptureImp;
         
         self.flvFileCaptureImp.delegate = self;
         self.flvFileCaptureImp.fileSourceDelegate = self;
