@@ -554,7 +554,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     
     [self.frameOrderedList insertObject:frame atIndex:index];
     
-    if (self.frameOrderedList.count < 2) {
+    if (self.frameOrderedList.count < 4) {
         return nil;
     } else {
         frame = self.frameOrderedList.firstObject;

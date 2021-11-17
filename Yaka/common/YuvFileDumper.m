@@ -148,7 +148,7 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
     
     [self.frameOrderedList insertObject:frame atIndex:index];
     
-    if (self.frameOrderedList.count < 2) {
+    if (self.frameOrderedList.count < 4) {
         return nil;
     } else {
         frame = self.frameOrderedList.firstObject;
