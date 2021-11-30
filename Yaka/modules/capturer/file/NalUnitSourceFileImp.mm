@@ -294,7 +294,13 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
     NalBuffer *nalBuffer = [[NalBuffer alloc] initWithLength:(int)fileNalUnint.length];
     int size = readData(nalBuffer.bytes, (int)fileNalUnint.length, self.fd);
     if (size == fileNalUnint.length) {
-        return [[Nal alloc] initWithNalBuffer:nalBuffer];
+        Nal *nal = [[Nal alloc] initWithNalBuffer:nalBuffer];
+        if ([[self.filePath lowercaseString] hasSuffix:@"264"]) {
+            nal.nalType = NalType_H264;
+        } else if ([[self.filePath lowercaseString] hasSuffix:@"265"]) {
+            nal.nalType = NalType_HEVC;
+        }
+        return nal;
     }
     self.index--;
     return nil;
