@@ -31,12 +31,15 @@
 #include "YuvHelper.h"
 #import "RateStatistics.h"
 #import "FormatConvert.h"
+#import "BulletinView.h"
 
 static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", @"flv"];
 
 @interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
 
 @property(nonatomic, weak) id<VideoRenderer> videoRenderer;
+@property(nonatomic, assign) NSUInteger renderCount;
+@property(nonatomic, strong) RateStatistics *renderFps;
 
 @property(nonatomic, strong) id<DecoderInterface> decoder;
 @property(nonatomic, strong) Openh264Decoder *openh264Decoder;
@@ -68,6 +71,8 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 @property(nonatomic, strong) NSWindowController *fileConfigWindowCtrl;
 @property(nonatomic, strong) NSWindowController *formatConvertWindowCtrl;
+
+@property(nonatomic, strong) BulletinView *bulletinView;
 
 @property(nonatomic, assign) BOOL isLoop;
 
@@ -166,6 +171,8 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.palyCtrlView.textCurFrameIndex setStringValue:@"-"];
     [self.palyCtrlView.progressSlider setIntValue:1];
     self.palyCtrlView.playState = PlayControlState_RecordStart;
+    
+    self.renderCount = 0;
     
     [self clearRecordState];
 }
@@ -534,6 +541,14 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)renderFrame:(VideoFrame *)frame {
+    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+    [self.renderFps update:1 now:now_ms];
+    self.renderCount++;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.bulletinView.renderFps setStringValue:[NSString stringWithFormat:@"渲染帧率：%llu", [self.renderFps rate:now_ms]]];
+        [self.bulletinView.renderCount setStringValue:[NSString stringWithFormat:@"渲染帧数：%lu", (unsigned long)self.renderCount]];
+    });
+
     if ( self.yuvFileDumper != nil ) {
         [self.yuvFileDumper dumpToFile:frame];
     }
@@ -578,6 +593,12 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.encoder = self.openh264Encoder;
     self.palyCtrlView.delegate = self;
     [self updateRecordMenu];
+    [self setupBuView];
+}
+
+- (void)setupBuView {
+    self.bulletinView = [[BulletinView alloc] initWithFrame:CGRectMake(10, 10, 100, 30)];
+    [self.sampleRenderView.superview addSubview:self.bulletinView];
 }
 
 - (void)updateRecordMenu {
@@ -724,6 +745,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         _encodeFps = [[RateStatistics alloc] initWithWindowSize:1000];
     }
     return _encodeFps;
+}
+
+- (RateStatistics*)renderFps {
+    if (_renderFps == nil) {
+        _renderFps = [[RateStatistics alloc] initWithWindowSize:1000];
+    }
+    return _renderFps;
 }
 
 - (NSMutableArray*)frameOrderedList {
