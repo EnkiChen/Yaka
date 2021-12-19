@@ -10,8 +10,9 @@
 
 @interface BulletinView ()
 
-@property(nonatomic, strong) NSTextField *renderFps;
-@property(nonatomic, strong) NSTextField *renderCount;
+@property(nonatomic, strong) NSTextField *renderFpsTextField;
+@property(nonatomic, strong) NSTextField *renderCountTextField;
+@property(nonatomic, strong) NSTextField *bitrateTextField;
 
 @end
 
@@ -32,17 +33,21 @@
 
 - (void)setup {
     NSRect frame = self.bounds;
-    self.renderFps = [[NSTextField alloc] initWithFrame:frame];
-    self.renderCount = [[NSTextField alloc] initWithFrame:frame];
+    self.renderFpsTextField = [[NSTextField alloc] initWithFrame:frame];
+    self.renderCountTextField = [[NSTextField alloc] initWithFrame:frame];
+    self.bitrateTextField = [[NSTextField alloc] initWithFrame:frame];
     
-    [self.renderFps setStringValue:@"渲染帧率：-"];
-    [self.renderCount setStringValue:@"渲染帧数：-"];
+    [self.renderFpsTextField setStringValue:@"渲染帧率：-"];
+    [self.renderCountTextField setStringValue:@"渲染帧数：-"];
+    [self.bitrateTextField setStringValue:@"编码码率：0kbps"];
     
-    [self setupStyle:self.renderFps];
-    [self setupStyle:self.renderCount];
+    [self setupStyle:self.renderFpsTextField];
+    [self setupStyle:self.renderCountTextField];
+    [self setupStyle:self.bitrateTextField];
     
-    [self addArrangedSubview:self.renderFps];
-    [self addArrangedSubview:self.renderCount];
+    [self addArrangedSubview:self.renderFpsTextField];
+    [self addArrangedSubview:self.renderCountTextField];
+    [self addArrangedSubview:self.bitrateTextField];
     
     self.orientation = NSUserInterfaceLayoutOrientationVertical;
     self.spacing = 0;

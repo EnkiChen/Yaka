@@ -12,8 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BulletinView : NSStackView
 
-@property(nonatomic, strong, readonly) NSTextField *renderFps;
-@property(nonatomic, strong, readonly) NSTextField *renderCount;
+@property(nonatomic, strong, readonly) NSTextField *renderFpsTextField;
+@property(nonatomic, strong, readonly) NSTextField *renderCountTextField;
+@property(nonatomic, strong, readonly) NSTextField *bitrateTextField;
 
 @end
 

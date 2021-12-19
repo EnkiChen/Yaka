@@ -358,11 +358,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-    [self renderFrame:frame];
+//    [self renderFrame:frame];
     
-//    [self.vt264Encoder encode:frame];
-//    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
-//    [self.encodeFps update:1 now:now_ms];
+    [self.vt264Encoder encode:frame];
+    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+    [self.encodeFps update:1 now:now_ms];
 }
 
 
@@ -545,8 +545,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.renderFps update:1 now:now_ms];
     self.renderCount++;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.bulletinView.renderFps setStringValue:[NSString stringWithFormat:@"渲染帧率：%llu", [self.renderFps rate:now_ms]]];
-        [self.bulletinView.renderCount setStringValue:[NSString stringWithFormat:@"渲染帧数：%lu", (unsigned long)self.renderCount]];
+        [self.bulletinView.renderFpsTextField setStringValue:[NSString stringWithFormat:@"渲染帧率：%llu", [self.renderFps rate:now_ms]]];
+        [self.bulletinView.renderCountTextField setStringValue:[NSString stringWithFormat:@"渲染帧数：%lu", (unsigned long)self.renderCount]];
+        [self.bulletinView.bitrateTextField setStringValue:[NSString stringWithFormat:@"编码码率：%llukbps", [self.encodeBitrate rate:now_ms] / 1000]];
     });
 
     if ( self.yuvFileDumper != nil ) {
@@ -597,7 +598,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)setupBuView {
-    self.bulletinView = [[BulletinView alloc] initWithFrame:CGRectMake(10, 10, 100, 30)];
+    self.bulletinView = [[BulletinView alloc] initWithFrame:CGRectMake(10, 10, 100, 45)];
     [self.sampleRenderView.superview addSubview:self.bulletinView];
 }
 
