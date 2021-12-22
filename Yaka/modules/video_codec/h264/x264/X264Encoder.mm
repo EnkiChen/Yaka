@@ -11,12 +11,12 @@
 #import "x264.h"
 #import "H264Common.h"
 
-static const int kDefaultMaxQp = 23;
+static const int kDefaultMaxQp = 51;
 static const int kDefaultMinQp = 23;
 static const int kDefaultQpStep = 2;
 static const int kTargetBitrateBps = 1 * 1000 * 1000;
 static const int kMaxBitrateBps = 1 * 1000 * 1000;
-static const int kMaxFramerate = 15;
+static const int kMaxFramerate = 30;
 static const int kGopSize = 300;
 static const char *kProfile = "high";
 static const char *kPreset = "superfast";
@@ -148,8 +148,11 @@ static const uint8_t start_code[4] = { 0, 0, 0, 1 };
     
     // Rate Control mode
     encoder_params.rc.i_rc_method = X264_RC_ABR;
+    encoder_params.rc.f_rate_tolerance = 1.0;
     encoder_params.rc.i_bitrate = self.targetBitrateBps / 1000;
     encoder_params.rc.i_vbv_max_bitrate = self.maxBitrateBps / 1000;
+    encoder_params.rc.i_vbv_buffer_size = self.maxBitrateBps / 1000;
+    encoder_params.rc.f_vbv_buffer_init = 0.5;
     encoder_params.rc.i_qp_min = self.minQp;
     encoder_params.rc.i_qp_max = self.maxQp;
     encoder_params.rc.i_qp_step = self.qpStep;
