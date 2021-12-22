@@ -8,13 +8,6 @@
 
 #import "BulletinView.h"
 
-@interface BulletinView ()
-
-@property(nonatomic, strong) NSTextField *renderFpsTextField;
-@property(nonatomic, strong) NSTextField *renderCountTextField;
-@property(nonatomic, strong) NSTextField *bitrateTextField;
-
-@end
 
 @implementation BulletinView
 
@@ -32,26 +25,32 @@
 }
 
 - (void)setup {
-    NSRect frame = self.bounds;
-    self.renderFpsTextField = [[NSTextField alloc] initWithFrame:frame];
-    self.renderCountTextField = [[NSTextField alloc] initWithFrame:frame];
-    self.bitrateTextField = [[NSTextField alloc] initWithFrame:frame];
-    
-    [self.renderFpsTextField setStringValue:@"渲染帧率：-"];
-    [self.renderCountTextField setStringValue:@"渲染帧数：-"];
-    [self.bitrateTextField setStringValue:@"编码码率：0kbps"];
-    
-    [self setupStyle:self.renderFpsTextField];
-    [self setupStyle:self.renderCountTextField];
-    [self setupStyle:self.bitrateTextField];
-    
-    [self addArrangedSubview:self.renderFpsTextField];
-    [self addArrangedSubview:self.renderCountTextField];
-    [self addArrangedSubview:self.bitrateTextField];
-    
     self.orientation = NSUserInterfaceLayoutOrientationVertical;
     self.spacing = 0;
     self.alignment = NSLayoutAttributeLeft;
+}
+
+- (void)setRowCount:(NSUInteger)rowCount {
+    if (rowCount == _rowCount) {
+        return;
+    }
+    if (_rowCount < rowCount) {
+        for (; _rowCount < rowCount; _rowCount++) {
+            NSTextField *textField = [[NSTextField alloc] initWithFrame:self.bounds];
+            [self setupStyle:textField];
+            [self addArrangedSubview:textField];
+        }
+    } else {
+        for (; _rowCount > rowCount; _rowCount--) {
+            NSView *view = [self.arrangedSubviews lastObject];
+            [self removeArrangedSubview:view];
+        }
+    }
+}
+
+- (void)setStringValue:(NSString *)string withRow:(NSUInteger)row {
+    NSTextField *textField = [self.arrangedSubviews objectAtIndex:row];
+    [textField setStringValue:string];
 }
 
 - (void)setupStyle:(NSTextField*)textField {

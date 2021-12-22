@@ -12,9 +12,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BulletinView : NSStackView
 
-@property(nonatomic, strong, readonly) NSTextField *renderFpsTextField;
-@property(nonatomic, strong, readonly) NSTextField *renderCountTextField;
-@property(nonatomic, strong, readonly) NSTextField *bitrateTextField;
+@property(nonatomic, assign) NSUInteger rowCount;
+
+- (void)setStringValue:(NSString *)string withRow:(NSUInteger)row;
 
 @end
 

@@ -545,9 +545,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.renderFps update:1 now:now_ms];
     self.renderCount++;
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.bulletinView.renderFpsTextField setStringValue:[NSString stringWithFormat:@"渲染帧率：%llu", [self.renderFps rate:now_ms]]];
-        [self.bulletinView.renderCountTextField setStringValue:[NSString stringWithFormat:@"渲染帧数：%lu", (unsigned long)self.renderCount]];
-        [self.bulletinView.bitrateTextField setStringValue:[NSString stringWithFormat:@"编码码率：%llukbps", [self.encodeBitrate rate:now_ms] / 1000]];
+        [self.bulletinView setStringValue:[NSString stringWithFormat:@"渲染分辨率：%dx%d", frame.width, frame.height] withRow:0];
+        [self.bulletinView setStringValue:[NSString stringWithFormat:@"渲染帧率：%llu", [self.renderFps rate:now_ms]] withRow:1];
+        [self.bulletinView setStringValue:[NSString stringWithFormat:@"渲染帧数：%lu", (unsigned long)self.renderCount] withRow:2];
+        [self.bulletinView setStringValue:[NSString stringWithFormat:@"编码码率：%llukbps", [self.encodeBitrate rate:now_ms] / 1000] withRow:3];
     });
 
     if ( self.yuvFileDumper != nil ) {
@@ -594,11 +595,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.encoder = self.openh264Encoder;
     self.palyCtrlView.delegate = self;
     [self updateRecordMenu];
-    [self setupBuView];
+    [self setupBulletinView];
 }
 
-- (void)setupBuView {
-    self.bulletinView = [[BulletinView alloc] initWithFrame:CGRectMake(10, 10, 100, 45)];
+- (void)setupBulletinView {
+    int rowCount = 4;
+    self.bulletinView = [[BulletinView alloc] initWithFrame:CGRectMake(10, 10, 300, rowCount * 15)];
+    self.bulletinView.rowCount = rowCount;
     [self.sampleRenderView.superview addSubview:self.bulletinView];
 }
 
