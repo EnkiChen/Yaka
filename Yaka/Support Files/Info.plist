@@ -31,7 +31,7 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>$(PRODUCT_NAME) 需要使用你的麦克风</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>$(PRODUCT_NAME) 需要使用的相册</string>
+	<string>$(PRODUCT_NAME) 需要使用你的相册</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>
