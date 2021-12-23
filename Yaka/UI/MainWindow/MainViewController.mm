@@ -359,13 +359,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-    [self renderFrame:frame];
+//    [self renderFrame:frame];
     
-//    dispatch_async(self.encodeQueue, ^{
-//        [self.vt264Encoder encode:frame];
-//        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
-//        [self.encodeFps update:1 now:now_ms];
-//    });
+    dispatch_async(self.encodeQueue, ^{
+        [self.vt264Encoder encode:frame];
+        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+        [self.encodeFps update:1 now:now_ms];
+    });
 }
 
 #pragma mark - h264 Encode Action

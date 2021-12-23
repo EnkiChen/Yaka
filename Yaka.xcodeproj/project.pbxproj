@@ -17,7 +17,6 @@
 		895A31EF2227D8AE00B952A8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 895A31ED2227D8AE00B952A8 /* Main.storyboard */; };
 		895A32002227D98400B952A8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 895A31FD2227D98400B952A8 /* Assets.xcassets */; };
 		895A32012227D98400B952A8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31FE2227D98400B952A8 /* main.m */; };
-		895B25042357894C0031B819 /* EncodeTestItem.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895B25032357894C0031B819 /* EncodeTestItem.mm */; };
 		895B2509235844920031B819 /* YuvHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 895B2507235844920031B819 /* YuvHelper.cpp */; };
 		895E7B03272D81FE00400B49 /* MultiPlayViewCtrl.m in Sources */ = {isa = PBXBuildFile; fileRef = 895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */; };
 		898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 898825D426B96E9E00B90B26 /* DragOperationView.m */; };
@@ -79,8 +78,6 @@
 		895A31FD2227D98400B952A8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		895A31FE2227D98400B952A8 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		895A31FF2227D98400B952A8 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		895B25022357894C0031B819 /* EncodeTestItem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EncodeTestItem.h; sourceTree = "<group>"; };
-		895B25032357894C0031B819 /* EncodeTestItem.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = EncodeTestItem.mm; sourceTree = "<group>"; };
 		895B25062358445D0031B819 /* YuvHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YuvHelper.h; sourceTree = "<group>"; };
 		895B2507235844920031B819 /* YuvHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YuvHelper.cpp; sourceTree = "<group>"; };
 		895E7B01272D81FE00400B49 /* MultiPlayViewCtrl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultiPlayViewCtrl.h; sourceTree = "<group>"; };
@@ -225,19 +222,14 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		893B8EDA272791BA00CF0A51 /* ViewCtrl */ = {
+		893B8EDA272791BA00CF0A51 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				895A31E82227D8AC00B952A8 /* MainViewController.h */,
-				895A31E92227D8AC00B952A8 /* MainViewController.mm */,
-				8936CE17231A4E03009217FE /* FileConfigViewController.h */,
-				8936CE18231A4E03009217FE /* FileConfigViewController.m */,
-				893B8EDB2727924300CF0A51 /* FormatConvertVCtrl.h */,
-				893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */,
-				895E7B01272D81FE00400B49 /* MultiPlayViewCtrl.h */,
-				895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */,
+				89B2C13126A3D33600D340CC /* View */,
+				89FBCC322774183600844DC9 /* MainWindow */,
+				89FBCC332774189600844DC9 /* FormatConvertWindow */,
 			);
-			path = ViewCtrl;
+			path = UI;
 			sourceTree = "<group>";
 		};
 		893B8EDE272830BB00CF0A51 /* models */ = {
@@ -269,18 +261,11 @@
 		895A31E42227D8AC00B952A8 /* Yaka */ = {
 			isa = PBXGroup;
 			children = (
-				89AEF406269E80F200DA9FAD /* api */,
-				89AEF3B7269E80E800DA9FAD /* modules */,
-				89AEF38B269E80DA00DA9FAD /* third_party */,
-				895B2505235843DE0031B819 /* common */,
-				89B2C13126A3D33600D340CC /* View */,
-				893B8EDA272791BA00CF0A51 /* ViewCtrl */,
+				893B8EDA272791BA00CF0A51 /* UI */,
+				895B2505235843DE0031B819 /* Common */,
+				89FBCC342774193700844DC9 /* MediaEngine */,
 				895A31FB2227D98400B952A8 /* Support Files */,
-				895A31E52227D8AC00B952A8 /* AppDelegate.h */,
-				895A31E62227D8AC00B952A8 /* AppDelegate.m */,
 				895A31ED2227D8AE00B952A8 /* Main.storyboard */,
-				895B25022357894C0031B819 /* EncodeTestItem.h */,
-				895B25032357894C0031B819 /* EncodeTestItem.mm */,
 			);
 			path = Yaka;
 			sourceTree = "<group>";
@@ -288,15 +273,17 @@
 		895A31FB2227D98400B952A8 /* Support Files */ = {
 			isa = PBXGroup;
 			children = (
+				895A31E52227D8AC00B952A8 /* AppDelegate.h */,
+				895A31E62227D8AC00B952A8 /* AppDelegate.m */,
+				895A31FE2227D98400B952A8 /* main.m */,
 				895A31FC2227D98400B952A8 /* Yaka.entitlements */,
 				895A31FD2227D98400B952A8 /* Assets.xcassets */,
-				895A31FE2227D98400B952A8 /* main.m */,
 				895A31FF2227D98400B952A8 /* Info.plist */,
 			);
 			path = "Support Files";
 			sourceTree = "<group>";
 		};
-		895B2505235843DE0031B819 /* common */ = {
+		895B2505235843DE0031B819 /* Common */ = {
 			isa = PBXGroup;
 			children = (
 				89AEF386269E7F8F00DA9FAD /* H264FileDumper.h */,
@@ -314,7 +301,7 @@
 				89B83F35273A68A1009DB332 /* FormatConvert.h */,
 				89B83F36273A68A1009DB332 /* FormatConvert.mm */,
 			);
-			path = common;
+			path = Common;
 			sourceTree = "<group>";
 		};
 		89891A1127199FE600C22745 /* vmaf */ = {
@@ -671,8 +658,40 @@
 				89FBCBEC276B419B00844DC9 /* BulletinView.m */,
 			);
 			name = View;
-			path = Yaka/View;
+			path = Yaka/UI/View;
 			sourceTree = SOURCE_ROOT;
+		};
+		89FBCC322774183600844DC9 /* MainWindow */ = {
+			isa = PBXGroup;
+			children = (
+				895A31E82227D8AC00B952A8 /* MainViewController.h */,
+				895A31E92227D8AC00B952A8 /* MainViewController.mm */,
+				8936CE17231A4E03009217FE /* FileConfigViewController.h */,
+				8936CE18231A4E03009217FE /* FileConfigViewController.m */,
+				895E7B01272D81FE00400B49 /* MultiPlayViewCtrl.h */,
+				895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */,
+			);
+			path = MainWindow;
+			sourceTree = "<group>";
+		};
+		89FBCC332774189600844DC9 /* FormatConvertWindow */ = {
+			isa = PBXGroup;
+			children = (
+				893B8EDB2727924300CF0A51 /* FormatConvertVCtrl.h */,
+				893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */,
+			);
+			path = FormatConvertWindow;
+			sourceTree = "<group>";
+		};
+		89FBCC342774193700844DC9 /* MediaEngine */ = {
+			isa = PBXGroup;
+			children = (
+				89AEF406269E80F200DA9FAD /* api */,
+				89AEF3B7269E80E800DA9FAD /* modules */,
+				89AEF38B269E80DA00DA9FAD /* third_party */,
+			);
+			path = MediaEngine;
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -764,7 +783,6 @@
 				89AEF3FE269E80E800DA9FAD /* Shader.mm in Sources */,
 				895E7B03272D81FE00400B49 /* MultiPlayViewCtrl.m in Sources */,
 				8990537F26A995EC00358B8C /* FileCapture.mm in Sources */,
-				895B25042357894C0031B819 /* EncodeTestItem.mm in Sources */,
 				89AEF389269E7F8F00DA9FAD /* H264FileDumper.m in Sources */,
 				89AEF3F9269E80E800DA9FAD /* MTLNV12Renderer.mm in Sources */,
 				89A74EAC26C29D02001DB050 /* OpenH264Encoder.mm in Sources */,
