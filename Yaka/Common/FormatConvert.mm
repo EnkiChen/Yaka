@@ -47,7 +47,7 @@
 }
 
 - (void)startTask {
-    [self dowmska];
+    
 }
 
 - (void)scaleFrame {
@@ -180,9 +180,9 @@
 
 #pragma mark - H264SourceSink
 - (void)h264Source:(id<H264SourceInterface>)source onEncodedImage:(Nal *)nal {
-    if ([self.filePath hasSuffix:@"h264"] || [self.filePath hasSuffix:@"264"] || [self.filePath hasSuffix:@"flv"]) {
+    if (nal.nalType == NalType_H264) {
         [self.vt264Decoder decode:nal];
-    } else if ([self.filePath hasSuffix:@"h265"] || [self.filePath hasSuffix:@"265"]) {
+    } else if (nal.nalType == NalType_HEVC) {
         [self.vt265Decoder decode:nal];
     }
 }
