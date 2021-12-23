@@ -46,6 +46,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 @property(nonatomic, strong) VT264Decoder *vt264Decoder;
 @property(nonatomic, strong) VT265Decoder *vt265Decoder;
 
+@property(nonatomic, strong) dispatch_queue_t encodeQueue;
 @property(nonatomic, strong) id<EncoderInterface> encoder;
 @property(nonatomic, strong) OpenH264Encoder *openh264Encoder;
 @property(nonatomic, strong) X264Encoder *x264Encoder;
@@ -358,13 +359,14 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-//    [self renderFrame:frame];
+    [self renderFrame:frame];
     
-    [self.vt264Encoder encode:frame];
-    uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
-    [self.encodeFps update:1 now:now_ms];
+//    dispatch_async(self.encodeQueue, ^{
+//        [self.vt264Encoder encode:frame];
+//        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+//        [self.encodeFps update:1 now:now_ms];
+//    });
 }
-
 
 #pragma mark - h264 Encode Action
 - (void)encoder:(id<EncoderInterface>) encoder onEncoded:(Nal *) nal {
@@ -690,6 +692,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         [_vt264Decoder initDecoder];
     }
     return _vt264Decoder;
+}
+
+- (dispatch_queue_t)encodeQueue {
+    if (_encodeQueue == nil) {
+        _encodeQueue = dispatch_queue_create("com.enkichen.yaka.encode_queue", DISPATCH_QUEUE_SERIAL);
+    }
+    return _encodeQueue;
 }
 
 - (VT264Encoder*)vt264Encoder {
