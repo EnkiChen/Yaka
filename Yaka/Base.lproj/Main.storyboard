@@ -169,6 +169,51 @@
                                     </items>
                                 </menu>
                             </menuItem>
+                            <menuItem title="显示" id="H8h-7b-M4v">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="显示" id="HyV-fh-RgO">
+                                    <items>
+                                        <menuItem title="进入全屏" keyEquivalent="f" id="4J7-dP-txa">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="dU3-MA-1Rq"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="hB3-LF-h0Y"/>
+                                        <menuItem title="向左旋转" keyEquivalent="L" identifier="rotateLeft" id="snW-S8-Cw5">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="IWo-cb-FIo"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="向右旋转" keyEquivalent="R" identifier="rotateRight" id="W3a-9K-rmj">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="REI-oR-skZ"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="水平翻转" keyEquivalent="H" identifier="rotateHorizintal" id="jwF-Wr-ZOc">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="rIw-49-O9u"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="垂直翻转" keyEquivalent="V" identifier="rotateVertical" id="xLq-0d-cdH">
+                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="EDy-Sn-4Io"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="wMj-bH-1hu"/>
+                                        <menuItem title="循环播放" keyEquivalent="l" id="v7m-kU-P3g">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="loopStatUpdated:" target="Ady-hI-5gd" id="rLM-Io-RK7"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
                             <menuItem title="控制器" id="jxT-CU-nIS">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="控制器" id="GEO-Iw-cKr">
@@ -226,51 +271,6 @@
                                         </menuItem>
                                         <menuItem title="显示参数控制面板" id="9va-0f-yCh">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                        </menuItem>
-                                    </items>
-                                </menu>
-                            </menuItem>
-                            <menuItem title="显示" id="H8h-7b-M4v">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="显示" id="HyV-fh-RgO">
-                                    <items>
-                                        <menuItem title="进入全屏" keyEquivalent="f" id="4J7-dP-txa">
-                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="toggleFullScreen:" target="Ady-hI-5gd" id="dU3-MA-1Rq"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="hB3-LF-h0Y"/>
-                                        <menuItem title="向左旋转" keyEquivalent="L" identifier="rotateLeft" id="snW-S8-Cw5">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="IWo-cb-FIo"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="向右旋转" keyEquivalent="R" identifier="rotateRight" id="W3a-9K-rmj">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="REI-oR-skZ"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="水平翻转" keyEquivalent="H" identifier="rotateHorizintal" id="jwF-Wr-ZOc">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="rIw-49-O9u"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="垂直翻转" keyEquivalent="V" identifier="rotateVertical" id="xLq-0d-cdH">
-                                            <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="rotateAction:" target="Ady-hI-5gd" id="EDy-Sn-4Io"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="wMj-bH-1hu"/>
-                                        <menuItem title="循环播放" keyEquivalent="l" id="v7m-kU-P3g">
-                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
-                                            <connections>
-                                                <action selector="loopStatUpdated:" target="Ady-hI-5gd" id="rLM-Io-RK7"/>
-                                            </connections>
                                         </menuItem>
                                     </items>
                                 </menu>
@@ -334,7 +334,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1290" y="-1571"/>
+            <point key="canvasLocation" x="-1415" y="-1694"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">

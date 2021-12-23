@@ -644,7 +644,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - getter&setter
 - (BOOL)isLoop {
-    NSMenuItem *loopMenuItem = [[[NSApp menu] itemAtIndex:4].submenu itemAtIndex:7];
+    NSMenuItem *loopMenuItem = [[[NSApp menu] itemAtIndex:3].submenu itemAtIndex:7];
     if (loopMenuItem) {
         return loopMenuItem.state == NSControlStateValueOn;
     }
@@ -652,7 +652,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)setIsLoop:(BOOL)isLoop {
-    NSMenuItem *loopMenuItem = [[[NSApp menu] itemAtIndex:4].submenu itemAtIndex:7];
+    NSMenuItem *loopMenuItem = [[[NSApp menu] itemAtIndex:3].submenu itemAtIndex:7];
     if (isLoop) {
         loopMenuItem.state = NSControlStateValueOn;
     } else {
