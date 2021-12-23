@@ -41,7 +41,7 @@ const size_t kNaluLongStartSequenceSize = 4;
 - (void)encode:(VideoFrame*) frame {
     if ([frame.buffer isKindOfClass:CVPixelBuffer.class]) {
         CVPixelBuffer *pixelBuffer = (CVPixelBuffer*)frame.buffer;
-        [self encodePixelBuffer:pixelBuffer.pixelBuffer presentationTimeStamp:CMTimeMake(self.pts++, 1000)];
+        [self encodePixelBuffer:pixelBuffer.pixelBuffer presentationTimeStamp:frame.presentationTimeStamp];
         return;
     }
 
@@ -139,19 +139,20 @@ const size_t kNaluLongStartSequenceSize = 4;
     }
     
     int frameRate = 30;
-    int keyFrameIntervalDuration = 3;
+    int keyFrameIntervalDuration = 30;
     int keyFrameInterval = keyFrameIntervalDuration * frameRate;
-    int averageBitRate = 3 * 1000 * 1000;
+    int averageBitRate = 800 * 1000;
 
     status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_High_AutoLevel);
     status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
     status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_AllowFrameReordering, kCFBooleanFalse);
     status = VTSessionSetProperty(self.encoderSession, kVTCompressionPropertyKey_AllowTemporalCompression, kCFBooleanTrue);
+    status = VTSessionSetProperty_int(_encoderSession, kVTCompressionPropertyKey_MaxFrameDelayCount, 0);
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, keyFrameInterval);
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_MaxKeyFrameIntervalDuration, keyFrameIntervalDuration);
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_ExpectedFrameRate, frameRate);
     status = VTSessionSetProperty_int(self.encoderSession, kVTCompressionPropertyKey_AverageBitRate, averageBitRate);
-    
+    status = VTSessionSetDataRateLimits(self.encoderSession, averageBitRate, 1);
     
     CVAttachmentMode attachmentMode = kCVAttachmentMode_ShouldNotPropagate;
     CFTypeRef matrix = CVBufferGetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, &attachmentMode);
@@ -269,13 +270,30 @@ void CompressSessionEncodedCallback(void *refCon,
     }
 }
 
-OSStatus VTSessionSetProperty_int(VTCompressionSessionRef session, CFStringRef name, int val)
-{
+OSStatus VTSessionSetProperty_int(VTCompressionSessionRef session, CFStringRef name, int val) {
     CFNumberRef num = CFNumberCreate(NULL, kCFNumberIntType, &val);
     OSStatus status = VTSessionSetProperty(session, name, num);
     CFRelease(num);
     return status;
 }
+
+OSStatus VTSessionSetDataRateLimits(VTCompressionSessionRef session, int bytes, int second) {
+    CFNumberRef n1 = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &bytes);
+    CFNumberRef n2 = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &second);
+    const void *vals[] = {n1, n2};
+    CFArrayRef dataRateLimits = CFArrayCreate(kCFAllocatorDefault,
+                                              (const void **)&vals,
+                                              sizeof(vals)/sizeof(vals[0]),
+                                              NULL);
+    OSStatus status = VTSessionSetProperty(session,
+                                           kVTCompressionPropertyKey_DataRateLimits,
+                                           dataRateLimits);
+    CFRelease(dataRateLimits);
+    CFRelease(n1);
+    CFRelease(n2);
+    return status;
+}
+
 }
 
 @end
