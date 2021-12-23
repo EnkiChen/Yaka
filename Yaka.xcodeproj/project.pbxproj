@@ -940,7 +940,7 @@
 					"$(PROJECT_DIR)/Yaka/third_party/vmaf/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.enkichen.yaka;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -968,7 +968,7 @@
 					"$(PROJECT_DIR)/Yaka/third_party/vmaf/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.enkichen.yaka;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
