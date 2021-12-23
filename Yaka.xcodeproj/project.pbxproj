@@ -20,7 +20,6 @@
 		895B2509235844920031B819 /* YuvHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 895B2507235844920031B819 /* YuvHelper.cpp */; };
 		895E7B03272D81FE00400B49 /* MultiPlayViewCtrl.m in Sources */ = {isa = PBXBuildFile; fileRef = 895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */; };
 		898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 898825D426B96E9E00B90B26 /* DragOperationView.m */; };
-		89891A1B27199FE700C22745 /* libvmaf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89891A1A27199FE600C22745 /* libvmaf.a */; };
 		8990537D26A995EC00358B8C /* CameraCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537326A995EC00358B8C /* CameraCapture.m */; };
 		8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537726A995EC00358B8C /* DesktopCapture.m */; };
 		8990537F26A995EC00358B8C /* FileCapture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990537926A995EC00358B8C /* FileCapture.mm */; };
@@ -58,6 +57,7 @@
 		89B83F312738C156009DB332 /* FileUnit.m in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F302738C155009DB332 /* FileUnit.m */; };
 		89B83F37273A68A2009DB332 /* FormatConvert.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F36273A68A1009DB332 /* FormatConvert.mm */; };
 		89FBCBED276B419B00844DC9 /* BulletinView.m in Sources */ = {isa = PBXBuildFile; fileRef = 89FBCBEC276B419B00844DC9 /* BulletinView.m */; };
+		89FBCC3627749C8B00844DC9 /* libvmaf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89891A1A27199FE600C22745 /* libvmaf.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -204,7 +204,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8936CE1F231D04DE009217FE /* VideoToolbox.framework in Frameworks */,
-				89891A1B27199FE700C22745 /* libvmaf.a in Frameworks */,
+				89FBCC3627749C8B00844DC9 /* libvmaf.a in Frameworks */,
 				89AEF3B6269E80DA00DA9FAD /* libopenh264.a in Frameworks */,
 				89A03C0F26B6C7270071891E /* libyuv.a in Frameworks */,
 				89AEF3B4269E80DA00DA9FAD /* libx264.a in Frameworks */,
@@ -952,10 +952,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Yaka/third_party/x264/lib",
-					"$(PROJECT_DIR)/Yaka/third_party/libyuv/lib",
-					"$(PROJECT_DIR)/Yaka/third_party/openh264/lib",
-					"$(PROJECT_DIR)/Yaka/third_party/vmaf/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/x264/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/libyuv/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/openh264/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/vmaf/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 0.0.1;
@@ -980,10 +980,10 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(PROJECT_DIR)/Yaka/third_party/x264/lib",
-					"$(PROJECT_DIR)/Yaka/third_party/libyuv/lib",
-					"$(PROJECT_DIR)/Yaka/third_party/openh264/lib",
-					"$(PROJECT_DIR)/Yaka/third_party/vmaf/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/x264/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/libyuv/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/openh264/lib",
+					"$(PROJECT_DIR)/Yaka/MediaEngine/third_party/vmaf/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MARKETING_VERSION = 0.0.1;
