@@ -32,11 +32,13 @@ typedef NS_ENUM(NSInteger, PlayControlState) {
 
 @protocol PalyCtrlViewDelegae <NSObject>
 
-- (void)palyCtrlView:(PalyCtrlView*) palyCtrlView formatUpdated:(NSInteger) indexOfSelectedItem;
+- (void)palyCtrlView:(PalyCtrlView*)palyCtrlView progressUpdated:(NSInteger)index;
 
-- (void)palyCtrlView:(PalyCtrlView*) palyCtrlView fpsUpdated:(int) fps;
+- (void)palyCtrlView:(PalyCtrlView*)palyCtrlView formatUpdated:(NSInteger)indexOfSelectedItem;
 
-- (void)palyCtrlView:(PalyCtrlView*) palyCtrlView playStatusUpdated:(CtrlType) ctrlType;
+- (void)palyCtrlView:(PalyCtrlView*)palyCtrlView fpsUpdated:(int)fps;
+
+- (void)palyCtrlView:(PalyCtrlView*)palyCtrlView playStatusUpdated:(CtrlType)ctrlType;
 
 @end
 
@@ -45,6 +47,7 @@ typedef NS_ENUM(NSInteger, PlayControlState) {
 @property (weak) id<PalyCtrlViewDelegae> delegate;
 
 @property (nonatomic, assign) PlayControlState playState;
+@property (nonatomic, assign) BOOL isDragging;
 
 @property (weak) IBOutlet NSButton *playButton;
 @property (weak) IBOutlet NSSlider *progressSlider;

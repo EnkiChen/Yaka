@@ -54,6 +54,22 @@
     }
 }
 
+- (IBAction)onSliderValueChanged:(id)sender {
+    NSEvent *event = [[NSApplication sharedApplication] currentEvent];
+    if (event.type == NSEventTypeLeftMouseDown) {
+        self.isDragging = YES;
+    }
+    
+    NSSlider *slider = sender;
+    if (self.delegate != nil) {
+        [self.delegate palyCtrlView:self progressUpdated:[slider integerValue]];
+    }
+    
+    if (event.type == NSEventTypeLeftMouseUp) {
+        self.isDragging = NO;
+    }
+}
+
 - (IBAction)onPlayStateChanged:(NSButton *)sender {
     CtrlType type = (CtrlType)sender.tag;
     if (self.delegate != nil) {

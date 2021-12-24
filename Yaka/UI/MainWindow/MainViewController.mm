@@ -358,13 +358,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-//    [self renderFrame:frame];
+    [self renderFrame:frame];
     
-    dispatch_async(self.encodeQueue, ^{
-        [self.vt264Encoder encode:frame];
-        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
-        [self.encodeFps update:1 now:now_ms];
-    });
+//    dispatch_async(self.encodeQueue, ^{
+//        [self.vt264Encoder encode:frame];
+//        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+//        [self.encodeFps update:1 now:now_ms];
+//    });
 }
 
 #pragma mark - h264 Encode Action
@@ -391,7 +391,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 #pragma mark - FileSourceInterface Action
 - (void)fileSource:(id<FileSourceInterface>) fileSource progressUpdated:(NSUInteger) index {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.palyCtrlView.progressSlider setIntValue:(int)index + 1];
+        if (!self.palyCtrlView.isDragging) {
+            [self.palyCtrlView.progressSlider setIntValue:(int)index + 1];
+        }
         [self.palyCtrlView.textCurFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)index + 1]];
     });
 }
@@ -404,6 +406,12 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 
 #pragma mark - PalyCtrlView Action
+- (void)palyCtrlView:(PalyCtrlView*)palyCtrlView progressUpdated:(NSInteger)index {
+    if (index <= self.fileSourceCapture.totalFrames && index > 0) {
+        [self.fileSourceCapture seekToFrameIndex:index - 1];
+    }
+}
+
 - (void)palyCtrlView:(PalyCtrlView*) palyCtrlView formatUpdated:(NSInteger) indexOfSelectedItem {
     
 }

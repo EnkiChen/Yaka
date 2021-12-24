@@ -397,7 +397,10 @@
                                 <subviews>
                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NJa-8h-Deq">
                                         <rect key="frame" x="73" y="14" width="636" height="28"/>
-                                        <sliderCell key="cell" state="on" alignment="left" maxValue="500" tickMarkPosition="above" sliderType="linear" id="0xb-gy-Mr0"/>
+                                        <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="500" tickMarkPosition="above" sliderType="linear" id="0xb-gy-Mr0"/>
+                                        <connections>
+                                            <action selector="onSliderValueChanged:" target="HPT-da-RwN" id="bf4-Lc-0Ly"/>
+                                        </connections>
                                     </slider>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="6qP-om-CWH">
                                         <rect key="frame" x="8" y="23" width="64" height="15"/>
