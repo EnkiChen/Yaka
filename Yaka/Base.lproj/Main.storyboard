@@ -550,7 +550,7 @@
                                     </textField>
                                     <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j9l-OO-5pv">
                                         <rect key="frame" x="91" y="51" width="19" height="28"/>
-                                        <stepperCell key="cell" continuous="YES" alignment="left" increment="-1" maxValue="2" id="l0g-IV-g8e"/>
+                                        <stepperCell key="cell" continuous="YES" alignment="left" minValue="1" maxValue="999999999" doubleValue="24" id="l0g-IV-g8e"/>
                                         <connections>
                                             <action selector="onFpsStepperChanged:" target="HPT-da-RwN" id="C8i-f9-G5l"/>
                                         </connections>

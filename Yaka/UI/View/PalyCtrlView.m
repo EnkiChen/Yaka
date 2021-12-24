@@ -85,10 +85,14 @@
 }
 
 - (IBAction)onFpsStepperChanged:(id)sender {
-
+    [self.textFps setStringValue:[sender stringValue]];
+    if (self.delegate != nil) {
+        [self.delegate palyCtrlView:self fpsUpdated:[sender intValue]];
+    }
 }
 
 - (void)controlTextDidEndEditing:(NSNotification *)obj {
+    [self.fpsStepper setIntValue:self.textFps.intValue];
     if (self.delegate != nil) {
         [self.delegate palyCtrlView:self fpsUpdated:self.textFps.intValue];
     }
