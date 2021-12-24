@@ -331,6 +331,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.fileCapture.delegate = self;
     self.fileCapture.fileSourceDelegate = self;
     self.fileCapture.isLoop = self.isLoop;
+    self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
     [self.fileCapture start];
     
     self.palyCtrlView.progressSlider.minValue = 1;
@@ -339,7 +340,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.palyCtrlView.formatComboBox selectItemAtIndex:formatIndex];
     [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.fileCapture.totalFrames]];
     [self.palyCtrlView.progressSlider setIntValue:1];
-    self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
     self.palyCtrlView.playState = PlayControlState_Stop;
 
     [self.fileConfigWindowCtrl close];
@@ -509,6 +509,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         
         self.naluFileSoucre.delegate = self;
         self.naluFileSoucre.fileSourceDelegate = self;
+        self.naluFileSoucre.fps = self.palyCtrlView.textFps.intValue;
         [self.naluFileSoucre start];
 
         self.palyCtrlView.progressSlider.minValue = 1;
@@ -516,7 +517,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         self.palyCtrlView.formatComboBox.enabled = NO;
         [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.naluFileSoucre.totalFrames]];
         [self.palyCtrlView.progressSlider setIntValue:1];
-        self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
         self.palyCtrlView.playState = PlayControlState_Stop;
 
     } else if ([filePath.path hasSuffix:@"flv"]) {
@@ -527,6 +527,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         
         self.flvFileCaptureImp.delegate = self;
         self.flvFileCaptureImp.fileSourceDelegate = self;
+        self.flvFileCaptureImp.fps = self.palyCtrlView.textFps.intValue;
         [self.flvFileCaptureImp start];
         
         self.palyCtrlView.progressSlider.minValue = 1;
@@ -534,7 +535,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         self.palyCtrlView.formatComboBox.enabled = NO;
         [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.flvFileCaptureImp.totalFrames]];
         [self.palyCtrlView.progressSlider setIntValue:1];
-        self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
         self.palyCtrlView.playState = PlayControlState_Stop;
     }
 }
