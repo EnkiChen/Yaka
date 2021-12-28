@@ -24,7 +24,7 @@ struct DecodeCallbackParams {
 
 @interface VT264Decoder()
 
-@property(nonatomic, assign) CMVideoFormatDescriptionRef videoFormatDescription;
+@property(nonatomic, assign) CMVideoFormatDescriptionRef formatDescription;
 @property(nonatomic, assign) VTDecompressionSessionRef decoderSession;
 
 @property(nonatomic, strong) NSMutableData *sps;
@@ -87,12 +87,21 @@ struct DecodeCallbackParams {
 
     switch ( type ) {
         case H264::kSps:
+            self.sps = nil;
+            self.pps = nil;
             self.sps = [[NSMutableData alloc] initWithBytes:buffer + H264::kNaluLongStartSequenceSize
                                                      length:length - H264::kNaluLongStartSequenceSize];
             break;
         case H264::kPps:
             self.pps = [[NSMutableData alloc] initWithBytes:buffer + H264::kNaluLongStartSequenceSize
                                                      length:length - H264::kNaluLongStartSequenceSize];
+            if (self.decoderSession != nil && self.formatDescription != nil) {
+                CMVideoFormatDescriptionRef format = [self createFormatDescription:self.sps pps:self.pps];
+                if (!CMFormatDescriptionEqual(format, self.formatDescription)) {
+                    [self destroySession];
+                }
+                CFRelease(format);
+            }
             break;
         case H264::kSei:
             break;
@@ -124,7 +133,7 @@ struct DecodeCallbackParams {
     
     CMSampleBufferRef sampleBuffer = nil;
     status = CMSampleBufferCreate(nullptr, blockBuffer, true, nullptr,
-                                  nullptr, self.videoFormatDescription, 1, 0, nullptr, 0,
+                                  nullptr, self.formatDescription, 1, 0, nullptr, 0,
                                   nullptr, &sampleBuffer);
 
     if (status != noErr) {
@@ -162,9 +171,9 @@ struct DecodeCallbackParams {
         CFRelease(_decoderSession);
         _decoderSession = nil;
     }
-    if (_videoFormatDescription != NULL) {
-        CFRelease(_videoFormatDescription);
-        _videoFormatDescription = NULL;
+    if (_formatDescription != NULL) {
+        CFRelease(_formatDescription);
+        _formatDescription = NULL;
     }
 }
 
@@ -173,26 +182,13 @@ struct DecodeCallbackParams {
         return NO;
     }
     
-    CMVideoFormatDescriptionRef videoFormatDescription;
-    
-    const uint8_t* param_set_ptrs[2] = {(const uint8_t*)sps.bytes, (const uint8_t*)pps.bytes};
-    size_t param_set_sizes[2] = {sps.length, pps.length};
-    OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
-                                                                          2,
-                                                                          param_set_ptrs,
-                                                                          param_set_sizes,
-                                                                          4,
-                                                                          &videoFormatDescription);
-    
-    if ( status != noErr ) {
-        NSLog(@"failed to create video format description.");
-        return YES;
+    self.formatDescription = [self createFormatDescription:sps pps:pps];
+    if (self.formatDescription == nil) {
+        return NO;
     }
-    
-    self.videoFormatDescription = videoFormatDescription;
 
     BOOL isFullRange = NO;
-    CFDictionaryRef attrs =  CMFormatDescriptionGetExtensions(videoFormatDescription);
+    CFDictionaryRef attrs =  CMFormatDescriptionGetExtensions(self.formatDescription);
     Boolean isHaveFullRange = CFDictionaryContainsKey(attrs, CFSTR("FullRangeVideo"));
     if (isHaveFullRange == true) {
         NSNumber *fullRange = (NSNumber *)CFDictionaryGetValue(attrs, CFSTR("FullRangeVideo"));
@@ -215,7 +211,7 @@ struct DecodeCallbackParams {
     VTDecompressionOutputCallbackRecord callbackInfo;
     callbackInfo.decompressionOutputCallback = decompressionOutputCallback;
     callbackInfo.decompressionOutputRefCon = (__bridge void *)self;
-    status = VTDecompressionSessionCreate(nil, videoFormatDescription, nil, nil, &callbackInfo, &_decoderSession);
+    OSStatus status = VTDecompressionSessionCreate(nil, self.formatDescription, nil, nil, &callbackInfo, &_decoderSession);
     
     if (attrs) {
         CFRelease(attrs);
@@ -229,6 +225,24 @@ struct DecodeCallbackParams {
     VTSessionSetProperty(_decoderSession, kVTDecompressionPropertyKey_RealTime, kCFBooleanTrue);
     
     return status == noErr;
+}
+
+- (CMVideoFormatDescriptionRef)createFormatDescription:(NSData*)sps pps:(NSData*)pps {
+    CMVideoFormatDescriptionRef videoFormatDescription;
+    const uint8_t* param_set_ptrs[2] = {(const uint8_t*)sps.bytes, (const uint8_t*)pps.bytes};
+    size_t param_set_sizes[2] = {sps.length, pps.length};
+    OSStatus status = CMVideoFormatDescriptionCreateFromH264ParameterSets(kCFAllocatorDefault,
+                                                                          2,
+                                                                          param_set_ptrs,
+                                                                          param_set_sizes,
+                                                                          4,
+                                                                          &videoFormatDescription);
+    
+    if ( status != noErr ) {
+        NSLog(@"failed to create video format description.");
+        return nil;
+    }
+    return videoFormatDescription;
 }
 
 void decompressionOutputCallback(void *decoder,

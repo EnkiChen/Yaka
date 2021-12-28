@@ -109,6 +109,9 @@ struct DecodeCallbackParams {
 
     switch ( nalType ) {
         case NAL_VPS:
+            self.vps = nil;
+            self.sps = nil;
+            self.pps = nil;
             self.vps = [[NSMutableData alloc] initWithBytes:buffer + H264::kNaluLongStartSequenceSize
                                                      length:length - H264::kNaluLongStartSequenceSize];
             break;
@@ -119,6 +122,13 @@ struct DecodeCallbackParams {
         case NAL_PPS:
             self.pps = [[NSMutableData alloc] initWithBytes:buffer + H264::kNaluLongStartSequenceSize
                                                      length:length - H264::kNaluLongStartSequenceSize];
+            if (self.decoderSession != nil && self.formatDescription != nil) {
+                CMFormatDescriptionRef formatDescription = [self createFormatDescription:self.vps sps:self.sps pps:self.pps];
+                if (!CMFormatDescriptionEqual(formatDescription, self.formatDescription)) {
+                    [self destroySession];
+                }
+                CFRelease(formatDescription);
+            }
             break;
         case NAL_SEI_PREFIX:
         case NAL_SEI_SUFFIX:
@@ -186,22 +196,10 @@ struct DecodeCallbackParams {
         return YES;
     }
 
-    const uint8_t * const param_set_ptrs[3] = {(const uint8_t *)vps.bytes, (const uint8_t *)sps.bytes, (const uint8_t *)pps.bytes};
-    const size_t param_set_sizes[3] = {vps.length, sps.length, pps.length };
-    CMFormatDescriptionRef formatDescription = NULL;
-    OSStatus status = CMVideoFormatDescriptionCreateFromHEVCParameterSets(kCFAllocatorDefault,
-                                                                          3,
-                                                                          param_set_ptrs,
-                                                                          param_set_sizes,
-                                                                          4,
-                                                                          NULL,
-                                                                          &formatDescription);
-    if (status != noErr) {
-        NSLog(@"create format description error, status:%d!!", status);
+    self.formatDescription = [self createFormatDescription:vps sps:sps pps:pps];
+    if (self.formatDescription == nil) {
         return NO;
     }
-
-    self.formatDescription = formatDescription;
     
     BOOL isFullRange = NO;
     int bits = 8;
@@ -209,7 +207,7 @@ struct DecodeCallbackParams {
     CFStringRef colorPrimaries = nil;
     CFStringRef yCbCrMatrix = nil;
     
-    CFDictionaryRef attrs =  CMFormatDescriptionGetExtensions(formatDescription);
+    CFDictionaryRef attrs =  CMFormatDescriptionGetExtensions(self.formatDescription);
     Boolean isHaveFullRange = CFDictionaryContainsKey(attrs, CFSTR("FullRangeVideo"));
     if (isHaveFullRange == true) {
         NSNumber *fullRange = (NSNumber *)CFDictionaryGetValue(attrs, CFSTR("FullRangeVideo"));
@@ -267,18 +265,18 @@ struct DecodeCallbackParams {
     callBackRecord.decompressionOutputRefCon = (__bridge void *)self;
     NSDictionary *videoDecoderSpecification = @{AVVideoCodecKey: AVVideoCodecTypeHEVC};
     
-    status = VTDecompressionSessionCreate(kCFAllocatorDefault,
-                                          formatDescription,
-                                          (__bridge CFDictionaryRef)videoDecoderSpecification,
-                                          attrs,
-                                          &callBackRecord,
-                                          &_decoderSession);
+    OSStatus status = VTDecompressionSessionCreate(kCFAllocatorDefault,
+                                                   self.formatDescription,
+                                                   (__bridge CFDictionaryRef)videoDecoderSpecification,
+                                                   attrs,
+                                                   &callBackRecord,
+                                                   &_decoderSession);
     if (attrs != nil) {
         CFRelease(attrs);
     }
 
     if (status != noErr) {
-        NSLog(@"createSession error:%d",status);
+        NSLog(@"createSession error:%d", status);
     }
     
     VTSessionSetProperty(_decoderSession, kVTDecompressionPropertyKey_RealTime, kCFBooleanTrue);
@@ -298,6 +296,26 @@ struct DecodeCallbackParams {
         CFRelease(_formatDescription);
         _formatDescription = NULL;
     }
+}
+
+- (CMFormatDescriptionRef)createFormatDescription:(NSData*)vps
+                                              sps:(NSData*)sps
+                                              pps:(NSData*)pps {
+    const uint8_t * const param_set_ptrs[3] = {(const uint8_t *)vps.bytes, (const uint8_t *)sps.bytes, (const uint8_t *)pps.bytes};
+    const size_t param_set_sizes[3] = {vps.length, sps.length, pps.length };
+    CMFormatDescriptionRef formatDescription = NULL;
+    OSStatus status = CMVideoFormatDescriptionCreateFromHEVCParameterSets(kCFAllocatorDefault,
+                                                                          3,
+                                                                          param_set_ptrs,
+                                                                          param_set_sizes,
+                                                                          4,
+                                                                          NULL,
+                                                                          &formatDescription);
+    if (status != noErr) {
+        NSLog(@"create format description error, status:%d!!", status);
+        return nil;
+    }
+    return formatDescription;
 }
 
 static void decompressionOutputCallback(void *decompressionOutputRefCon,
