@@ -40,7 +40,7 @@
 }
 
 - (void)initDecoder {
-    if ( WelsCreateDecoder(&_decoder) != 0 ) {
+    if (WelsCreateDecoder(&_decoder) != 0 ) {
         NSLog(@"create openh264 decoder fail.");
     }
     
@@ -64,7 +64,7 @@
     }
 }
 
-- (void)decode:(Nal*) nal {
+- (void)decode:(Nal*)nal {
     dispatch_async(self.decoder_queue, ^{
         uint8_t *bytes = nal.buffer.bytes;
         int length = (int)nal.buffer.length;
@@ -75,10 +75,10 @@
             }
             int nextIndex = H264::findNalu(bytes + startIndex + H264::kNaluLongStartSequenceSize, length - startIndex - H264::kNaluLongStartSequenceSize);
             if ( nextIndex == -1 ) {
-                [self decodeFrame:bytes + startIndex length:length - startIndex];
+                [self decodeFrame:bytes + startIndex length:length - startIndex presentationTimeStamp:nal.presentationTimeStamp];
                 break;
             } else {
-                [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize];
+                [self decodeFrame:bytes + startIndex length:nextIndex + H264::kNaluLongStartSequenceSize presentationTimeStamp:nal.presentationTimeStamp];
                 bytes += startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
                 length -= startIndex + H264::kNaluLongStartSequenceSize + nextIndex;
             }
@@ -86,7 +86,7 @@
     });
 }
 
-- (void)decodeFrame:(const unsigned char*) src length:(NSUInteger) length {
+- (void)decodeFrame:(const unsigned char*)src length:(NSUInteger)length presentationTimeStamp:(CMTime)pts {
     if ( _decoder == nil ) {
         NSLog(@"uninitialized openh264 decoder.");
         return;
@@ -104,15 +104,16 @@
 
     if (bufInfo.iBufferStatus == 1) {
         VideoFrame *frame = [self yuvVideoFrame:data bufferInfo:bufInfo];
+        frame.presentationTimeStamp = pts;
         if ( self.delegate != nil ) {
             [self.delegate decoder:self onDecoded:frame];
         }
     } else {
-         [self flushFrame];
+         [self flushFrame:pts];
     }
 }
 
-- (void)flushFrame {
+- (void)flushFrame:(CMTime)pts {
     int32_t num_of_frames_in_buffer = 0;
     uint8_t* data[3] = {nullptr};
     SBufferInfo bufInfo;
@@ -123,12 +124,13 @@
         DECODING_STATE rv = _decoder->FlushFrame(data, &bufInfo);
         if (rv == dsErrorFree && bufInfo.iBufferStatus == 1 && self.delegate != nil) {
             VideoFrame *frame = [self yuvVideoFrame:data bufferInfo:bufInfo];
+            frame.presentationTimeStamp = pts;
             [self.delegate decoder:self onDecoded:frame];
         }
     }
 }
 
-- (VideoFrame*)yuvVideoFrame:(uint8_t**) data bufferInfo:(SBufferInfo &) bufInfo {
+- (VideoFrame*)yuvVideoFrame:(uint8_t**)data bufferInfo:(SBufferInfo &)bufInfo {
     int iWidth = bufInfo.UsrData.sSystemBuffer.iWidth;
     int iHeight = bufInfo.UsrData.sSystemBuffer.iHeight;
     MutableI420Buffer *i420Buffer = [[MutableI420Buffer alloc] initWithWidth:iWidth height:iHeight];
@@ -165,8 +167,5 @@
     
     return [[VideoFrame alloc] initWithBuffer:i420Buffer rotation:VideoRotation_0];
 }
-
-
-
 
 @end
