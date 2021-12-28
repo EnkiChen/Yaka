@@ -173,6 +173,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.palyCtrlView.playState = PlayControlState_RecordStart;
     
     self.renderCount = 0;
+    [self.frameOrderedList removeAllObjects];
     
     [self clearRecordState];
 }
