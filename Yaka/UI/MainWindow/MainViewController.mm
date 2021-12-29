@@ -40,6 +40,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 @property(nonatomic, weak) id<VideoRenderer> videoRenderer;
 @property(nonatomic, assign) NSUInteger renderCount;
 @property(nonatomic, strong) RateStatistics *renderFps;
+@property(nonatomic, strong) NSMutableArray<VideoFrame*> *frameOrderedList;
 
 @property(nonatomic, strong) id<DecoderInterface> decoder;
 @property(nonatomic, strong) Openh264Decoder *openh264Decoder;
@@ -78,8 +79,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 @property(nonatomic, assign) uint64_t lastPrintLog;
 @property(nonatomic, assign) NSUInteger count;
 
-@property(nonatomic, strong) NSMutableArray<VideoFrame*> *frameOrderedList;
-
 @property(nonatomic, strong) FormatConvert *formatConvert;
 
 @end
@@ -100,10 +99,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)viewWillDisappear {
-    if ( self.capture.isRunning ) {
-        [self.capture stop];
-    }
-    [self.yuvFileDumper stop];
+    [self performClose:nil];
 }
 
 
@@ -141,13 +137,17 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (IBAction)performClose:(id)sender {
-    if (self.capture != nil) {
-        [self.capture stop];
-        self.capture = nil;
-    }
+    [self.capture stop];
+    self.capture = nil;
     
     [self.fileSourceCapture stop];
     self.fileSourceCapture = nil;
+    
+    [self.yuvFileDumper stop];
+    self.yuvFileDumper = nil;
+    
+    [self.h264FileDumper stop];
+    self.h264FileDumper = nil;
     
     self.palyCtrlView.progressSlider.minValue = 1;
     self.palyCtrlView.progressSlider.maxValue = 1;
@@ -491,7 +491,8 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     
     if ( [filePath.path hasSuffix:@"yuv"] ) {
         [self showFileConfigPanle:filePath.path];
-    } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"] || [filePath.path hasSuffix:@"h265"] || [filePath.path hasSuffix:@"265"] ) {
+    } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"]
+               || [filePath.path hasSuffix:@"h265"] || [filePath.path hasSuffix:@"265"] ) {
         [self performClose:nil];
         self.videoTrack = [[VideoTrack alloc] initWithNalFile:filePath.path];
 
