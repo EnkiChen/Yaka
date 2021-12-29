@@ -25,11 +25,15 @@
 @protocol FileSourceInterface <NSObject>
 
 @property(nonatomic, weak) id<FileSourceDelegate> fileSourceDelegate;
-@property(nonatomic, assign) BOOL isPause;
+@property(nonatomic, assign, readonly) BOOL isPause;
 @property(nonatomic, assign) BOOL isLoop;
 @property(nonatomic, assign) NSUInteger fps;
 @property(nonatomic, assign, readonly) NSUInteger frameIndex;
 @property(nonatomic, assign, readonly) NSUInteger totalFrames;
+
+- (void)start;
+
+- (void)stop;
 
 - (void)pause;
 

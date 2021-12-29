@@ -19,6 +19,7 @@
 		895A32012227D98400B952A8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31FE2227D98400B952A8 /* main.m */; };
 		895B2509235844920031B819 /* YuvHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 895B2507235844920031B819 /* YuvHelper.cpp */; };
 		895E7B03272D81FE00400B49 /* MultiPlayViewCtrl.m in Sources */ = {isa = PBXBuildFile; fileRef = 895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */; };
+		896DA441277BEDFD003B4909 /* VideoTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 896DA440277BEDFD003B4909 /* VideoTrack.m */; };
 		898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 898825D426B96E9E00B90B26 /* DragOperationView.m */; };
 		8990537D26A995EC00358B8C /* CameraCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537326A995EC00358B8C /* CameraCapture.m */; };
 		8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537726A995EC00358B8C /* DesktopCapture.m */; };
@@ -82,6 +83,8 @@
 		895B2507235844920031B819 /* YuvHelper.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = YuvHelper.cpp; sourceTree = "<group>"; };
 		895E7B01272D81FE00400B49 /* MultiPlayViewCtrl.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultiPlayViewCtrl.h; sourceTree = "<group>"; };
 		895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MultiPlayViewCtrl.m; sourceTree = "<group>"; };
+		896DA43F277BEDFD003B4909 /* VideoTrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoTrack.h; sourceTree = "<group>"; };
+		896DA440277BEDFD003B4909 /* VideoTrack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoTrack.m; sourceTree = "<group>"; };
 		898825D326B96E9E00B90B26 /* DragOperationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragOperationView.h; sourceTree = "<group>"; };
 		898825D426B96E9E00B90B26 /* DragOperationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DragOperationView.m; sourceTree = "<group>"; };
 		89891A1327199FE600C22745 /* picture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = picture.h; sourceTree = "<group>"; };
@@ -302,6 +305,15 @@
 				89B83F36273A68A1009DB332 /* FormatConvert.mm */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		896DA43E277BED98003B4909 /* media */ = {
+			isa = PBXGroup;
+			children = (
+				896DA43F277BEDFD003B4909 /* VideoTrack.h */,
+				896DA440277BEDFD003B4909 /* VideoTrack.m */,
+			);
+			path = media;
 			sourceTree = "<group>";
 		};
 		89891A1127199FE600C22745 /* vmaf */ = {
@@ -686,6 +698,7 @@
 		89FBCC342774193700844DC9 /* MediaEngine */ = {
 			isa = PBXGroup;
 			children = (
+				896DA43E277BED98003B4909 /* media */,
 				89AEF406269E80F200DA9FAD /* api */,
 				89AEF3B7269E80E800DA9FAD /* modules */,
 				89AEF38B269E80DA00DA9FAD /* third_party */,
@@ -775,6 +788,7 @@
 				8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */,
 				8990537D26A995EC00358B8C /* CameraCapture.m in Sources */,
 				8990538026A995EC00358B8C /* NalUnitSourceFileImp.mm in Sources */,
+				896DA441277BEDFD003B4909 /* VideoTrack.m in Sources */,
 				89A74EA626C29D02001DB050 /* VT265Encoder.mm in Sources */,
 				89B83F312738C156009DB332 /* FileUnit.m in Sources */,
 				893B8EDD2727924300CF0A51 /* FormatConvertVCtrl.mm in Sources */,

@@ -31,6 +31,7 @@
 #import "RateStatistics.h"
 #import "FormatConvert.h"
 #import "BulletinView.h"
+#import "VideoTrack.h"
 
 static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", @"flv"];
 
@@ -55,14 +56,12 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 @property(nonatomic, strong) RateStatistics *encodeFps;
 
 @property(nonatomic, strong) id<VideoSourceInterface> capture;
-@property(nonatomic, strong) id<FileSourceInterface> fileSourceCapture;
 @property(nonatomic, strong) CameraCapture *cameraCapture;
 @property(nonatomic, strong) DesktopCapture *desktopCapture;
 
+@property(nonatomic, strong) id<FileSourceInterface> fileSourceCapture;
 @property(nonatomic, copy) NSString *filePath;
-@property(nonatomic, strong) FileCapture *fileCapture;
-@property(nonatomic, strong) NalUnitSourceFileImp *naluFileSoucre;
-@property(nonatomic, strong) FlvFileCaptureImp *flvFileCaptureImp;
+@property(nonatomic, strong) VideoTrack *videoTrack;
 
 @property(nonatomic, strong) YuvFileDumper *yuvFileDumper;
 @property(nonatomic, strong) H264FileDumper *h264FileDumper;
@@ -142,26 +141,12 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (IBAction)performClose:(id)sender {
-    if ( self.capture != nil ) {
+    if (self.capture != nil) {
         [self.capture stop];
         self.capture = nil;
     }
     
-    if (self.flvFileCaptureImp != nil) {
-        [self.flvFileCaptureImp stop];
-        self.flvFileCaptureImp = nil;
-    }
-    
-    if ( self.naluFileSoucre != nil ) {
-        [self.naluFileSoucre stop];
-        self.naluFileSoucre = nil;
-    }
-    
-    if ( self.fileCapture != nil ) {
-        [self.fileCapture stop];
-        self.fileCapture = nil;
-    }
-    
+    [self.fileSourceCapture stop];
     self.fileSourceCapture = nil;
     
     self.palyCtrlView.progressSlider.minValue = 1;
@@ -217,10 +202,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     NSMenuItem *loopMenuItem = sender;
     if (loopMenuItem.state == NSControlStateValueOn) {
         loopMenuItem.state = NSControlStateValueOff;
-        self.fileCapture.isLoop = NO;
+        self.fileSourceCapture.isLoop = NO;
     } else {
         loopMenuItem.state = NSControlStateValueOn;
-        self.fileCapture.isLoop = YES;
+        self.fileSourceCapture.isLoop = YES;
     }
 }
 
@@ -326,20 +311,21 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
             format = kPixelFormatType_420_I420;
             break;
     }
-    self.fileCapture = [[FileCapture alloc] initWithPath:filePath width:widht height:height pixelFormatType:format];
-    self.fileSourceCapture = self.fileCapture;
-    self.capture = self.fileCapture;
-    self.fileCapture.delegate = self;
-    self.fileCapture.fileSourceDelegate = self;
-    self.fileCapture.isLoop = self.isLoop;
-    self.fileCapture.fps = self.palyCtrlView.textFps.intValue;
-    [self.fileCapture start];
+    
+    self.videoTrack = [[VideoTrack alloc] initWithRawFile:filePath width:widht height:height pixelFormat:format];
+    self.fileSourceCapture = self.videoTrack;
+    
+    self.videoTrack.delegate = self;
+    self.videoTrack.fileSourceDelegate = self;
+    self.videoTrack.isLoop = self.isLoop;
+    self.videoTrack.fps = self.palyCtrlView.textFps.intValue;
+    [self.videoTrack start];
     
     self.palyCtrlView.progressSlider.minValue = 1;
-    self.palyCtrlView.progressSlider.maxValue = self.fileCapture.totalFrames;
+    self.palyCtrlView.progressSlider.maxValue = self.videoTrack.totalFrames;
     self.palyCtrlView.formatComboBox.enabled = YES;
     [self.palyCtrlView.formatComboBox selectItemAtIndex:formatIndex];
-    [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.fileCapture.totalFrames]];
+    [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.videoTrack.totalFrames]];
     [self.palyCtrlView.progressSlider setIntValue:1];
     self.palyCtrlView.playState = PlayControlState_Stop;
 
@@ -391,6 +377,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - FileSourceInterface Action
 - (void)fileSource:(id<FileSourceInterface>) fileSource progressUpdated:(NSUInteger) index {
+    if (index + 1 == self.fileSourceCapture.totalFrames) {
+        // todo:剩余的帧，应该要渲染出来，而不是丢弃
+        [self.frameOrderedList removeAllObjects];
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         if (!self.palyCtrlView.isDragging) {
             [self.palyCtrlView.progressSlider setIntValue:(int)index + 1];
@@ -496,7 +486,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - Private Method
 - (void)openFileWithPath:(NSURL*) filePath {
-    
     self.filePath = [filePath.path lowercaseString];
     self.view.window.title = [filePath.path componentsSeparatedByString:@"/"].lastObject;
     
@@ -504,40 +493,27 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         [self showFileConfigPanle:filePath.path];
     } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"] || [filePath.path hasSuffix:@"h265"] || [filePath.path hasSuffix:@"265"] ) {
         [self performClose:nil];
-        
-        self.naluFileSoucre = [[NalUnitSourceFileImp alloc] initWithPath:filePath.path];
-        self.fileSourceCapture = self.naluFileSoucre;
-        
-        self.naluFileSoucre.delegate = self;
-        self.naluFileSoucre.fileSourceDelegate = self;
-        self.naluFileSoucre.fps = self.palyCtrlView.textFps.intValue;
-        [self.naluFileSoucre start];
-
-        self.palyCtrlView.progressSlider.minValue = 1;
-        self.palyCtrlView.progressSlider.maxValue = self.naluFileSoucre.totalFrames;
-        self.palyCtrlView.formatComboBox.enabled = NO;
-        [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.naluFileSoucre.totalFrames]];
-        [self.palyCtrlView.progressSlider setIntValue:1];
-        self.palyCtrlView.playState = PlayControlState_Stop;
+        self.videoTrack = [[VideoTrack alloc] initWithNalFile:filePath.path];
 
     } else if ([filePath.path hasSuffix:@"flv"]) {
         [self performClose:nil];
-        
-        self.flvFileCaptureImp = [[FlvFileCaptureImp alloc] initWithPath:filePath.path];
-        self.fileSourceCapture = self.flvFileCaptureImp;
-        
-        self.flvFileCaptureImp.delegate = self;
-        self.flvFileCaptureImp.fileSourceDelegate = self;
-        self.flvFileCaptureImp.fps = self.palyCtrlView.textFps.intValue;
-        [self.flvFileCaptureImp start];
-        
-        self.palyCtrlView.progressSlider.minValue = 1;
-        self.palyCtrlView.progressSlider.maxValue = self.flvFileCaptureImp.totalFrames;
-        self.palyCtrlView.formatComboBox.enabled = NO;
-        [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.flvFileCaptureImp.totalFrames]];
-        [self.palyCtrlView.progressSlider setIntValue:1];
-        self.palyCtrlView.playState = PlayControlState_Stop;
+        self.videoTrack = [[VideoTrack alloc] initWithFlvFile:filePath.path];
     }
+    
+    self.fileSourceCapture = self.videoTrack;
+    
+    self.videoTrack.delegate = self;
+    self.videoTrack.fileSourceDelegate = self;
+    self.videoTrack.isLoop = self.isLoop;
+    self.videoTrack.fps = self.palyCtrlView.textFps.intValue;
+    [self.videoTrack start];
+    
+    self.palyCtrlView.progressSlider.minValue = 1;
+    self.palyCtrlView.progressSlider.maxValue = self.videoTrack.totalFrames;
+    self.palyCtrlView.formatComboBox.enabled = NO;
+    [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.videoTrack.totalFrames]];
+    [self.palyCtrlView.progressSlider setIntValue:1];
+    self.palyCtrlView.playState = PlayControlState_Stop;
 }
 
 - (void)showFileConfigPanle:(NSString*) filePath {
