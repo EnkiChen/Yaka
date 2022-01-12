@@ -69,6 +69,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 @property(nonatomic, assign) BOOL isDump;
 @property(nonatomic, assign) BOOL dumpType;
 
+@property(nonatomic, strong) NSWindowController *settingWindowCtrl;
 @property(nonatomic, strong) NSWindowController *fileConfigWindowCtrl;
 @property(nonatomic, strong) NSWindowController *formatConvertWindowCtrl;
 
@@ -161,6 +162,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.frameOrderedList removeAllObjects];
     
     [self clearRecordState];
+}
+
+- (IBAction)openPreferencesWindow:(id)sender {
+    NSStoryboard *storyBoard = [NSStoryboard storyboardWithName:@"Main" bundle:nil];
+    self.settingWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"PreferencesWindow"];
+    [self.settingWindowCtrl.window setLevel:NSFloatingWindowLevel];
+    [self.settingWindowCtrl showWindow:nil];
 }
 
 - (IBAction)openCameraRecord:(id)sender {
