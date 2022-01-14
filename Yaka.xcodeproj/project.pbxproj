@@ -20,6 +20,7 @@
 		895B2509235844920031B819 /* YuvHelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 895B2507235844920031B819 /* YuvHelper.cpp */; };
 		895E7B03272D81FE00400B49 /* MultiPlayViewCtrl.m in Sources */ = {isa = PBXBuildFile; fileRef = 895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */; };
 		896DA441277BEDFD003B4909 /* VideoTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 896DA440277BEDFD003B4909 /* VideoTrack.m */; };
+		896DA460278EFCDB003B4909 /* MultiPlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = 896DA45F278EFCDB003B4909 /* MultiPlayView.m */; };
 		898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */ = {isa = PBXBuildFile; fileRef = 898825D426B96E9E00B90B26 /* DragOperationView.m */; };
 		8990537D26A995EC00358B8C /* CameraCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537326A995EC00358B8C /* CameraCapture.m */; };
 		8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537726A995EC00358B8C /* DesktopCapture.m */; };
@@ -85,6 +86,8 @@
 		895E7B02272D81FE00400B49 /* MultiPlayViewCtrl.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MultiPlayViewCtrl.m; sourceTree = "<group>"; };
 		896DA43F277BEDFD003B4909 /* VideoTrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoTrack.h; sourceTree = "<group>"; };
 		896DA440277BEDFD003B4909 /* VideoTrack.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoTrack.m; sourceTree = "<group>"; };
+		896DA45E278EFCDB003B4909 /* MultiPlayView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MultiPlayView.h; sourceTree = "<group>"; };
+		896DA45F278EFCDB003B4909 /* MultiPlayView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MultiPlayView.m; sourceTree = "<group>"; };
 		898825D326B96E9E00B90B26 /* DragOperationView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DragOperationView.h; sourceTree = "<group>"; };
 		898825D426B96E9E00B90B26 /* DragOperationView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DragOperationView.m; sourceTree = "<group>"; };
 		89891A1327199FE600C22745 /* picture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = picture.h; sourceTree = "<group>"; };
@@ -380,14 +383,6 @@
 			path = file;
 			sourceTree = "<group>";
 		};
-		8990538126A997CD00358B8C /* network */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = network;
-			path = Yaka/modules/network;
-			sourceTree = SOURCE_ROOT;
-		};
 		89A03BF426B6C7270071891E /* libyuv */ = {
 			isa = PBXGroup;
 			children = (
@@ -586,7 +581,6 @@
 			isa = PBXGroup;
 			children = (
 				8990537226A995EC00358B8C /* camera */,
-				8990538126A997CD00358B8C /* network */,
 				8990537526A995EC00358B8C /* desktop */,
 				8990537826A995EC00358B8C /* file */,
 			);
@@ -668,6 +662,8 @@
 				898825D426B96E9E00B90B26 /* DragOperationView.m */,
 				89FBCBEB276B419B00844DC9 /* BulletinView.h */,
 				89FBCBEC276B419B00844DC9 /* BulletinView.m */,
+				896DA45E278EFCDB003B4909 /* MultiPlayView.h */,
+				896DA45F278EFCDB003B4909 /* MultiPlayView.m */,
 			);
 			name = View;
 			path = Yaka/UI/View;
@@ -779,6 +775,7 @@
 			files = (
 				89B83F37273A68A2009DB332 /* FormatConvert.mm in Sources */,
 				89A74EA826C29D02001DB050 /* X264Encoder.mm in Sources */,
+				896DA460278EFCDB003B4909 /* MultiPlayView.m in Sources */,
 				89AEF3FF269E80E800DA9FAD /* I420TextureCache.mm in Sources */,
 				89FBCBED276B419B00844DC9 /* BulletinView.m in Sources */,
 				898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */,

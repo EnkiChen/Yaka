@@ -905,7 +905,7 @@
                 </tabViewController>
                 <customObject id="Fxa-Dg-Ol2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2019" y="1855"/>
+            <point key="canvasLocation" x="-1894" y="1855"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="GYi-1k-k9m">
@@ -930,7 +930,7 @@
                 </windowController>
                 <customObject id="FX7-vL-FZs" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2019" y="1297"/>
+            <point key="canvasLocation" x="-2463" y="1849"/>
         </scene>
         <!--通用-->
         <scene sceneID="ZJ4-ZT-tnI">
@@ -943,7 +943,7 @@
                 </viewController>
                 <customObject id="Qwu-5g-O4S" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1363" y="1612"/>
+            <point key="canvasLocation" x="-2505" y="2348"/>
         </scene>
         <!--高级-->
         <scene sceneID="F8a-hc-Kae">
@@ -956,7 +956,7 @@
                 </viewController>
                 <customObject id="zhq-m9-y1P" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1280" y="2059"/>
+            <point key="canvasLocation" x="-1533" y="2348"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="KN8-IW-W0q">
