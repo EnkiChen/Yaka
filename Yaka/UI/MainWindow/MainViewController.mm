@@ -315,6 +315,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         case 2:
             format = kPixelFormatType_420_P010;
             break;
+        case 3:
+            format = kPixelFormatType_420_I010;
+            break;
         default:
             format = kPixelFormatType_420_I420;
             break;

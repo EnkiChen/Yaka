@@ -94,6 +94,10 @@ typedef NS_ENUM(NSInteger, VideoRotation) {
 @interface MutableI420Buffer : I420Buffer <MutableI420Buffer>
 @end
 
+@interface I010Buffer : I420Buffer
+
+@end
+
 @interface VideoFrame : NSObject
 
 @property(nonatomic, readonly) int width;

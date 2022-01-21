@@ -11,7 +11,47 @@
 #include "libyuv.h"
 #import "PixelBufferTools.h"
 
+namespace {
+
 static const int kDefaultFps = 24;
+
+void splitUVPlane16(const uint8_t* src_uv, int src_stride_uv,
+                    uint8_t* dst_u, int dst_stride_u,
+                    uint8_t* dst_v, int dst_stride_v,
+                    int width, int height) {
+    for (int i = 0; i < height / 2; i++) {
+        const uint8_t *uv = src_uv + src_stride_uv * i;
+        uint8_t* u = dst_u + dst_stride_u * i / 2;
+        uint8_t* v = dst_v + dst_stride_v * i / 2;
+        for (int i = 0; i < width / 2; i++) {
+            memcpy(u, uv, 2);
+            memcpy(v, uv + 2, 2);
+            uv += 4;
+            u += 2;
+            v += 2;
+        }
+    }
+}
+
+void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
+                    const uint8_t* src_v, int src_stride_v,
+                    uint8_t* dst_uv, int dst_stride_uv,
+                    int width, int height) {
+    for (int i = 0; i < height / 2; i++) {
+        uint8_t *uv = dst_uv + dst_stride_uv * i;
+        const uint8_t* u = src_u + src_stride_u * i / 2;
+        const uint8_t* v = src_v + src_stride_v * i / 2;
+        for (int i = 0; i < width / 2; i++) {
+            memcpy(uv, u, 2);
+            memcpy(uv + 2, v, 2);
+            uv += 4;
+            u += 2;
+            v += 2;
+        }
+    }
+}
+
+}
 
 @interface FileCapture ()
 
@@ -146,7 +186,8 @@ static const int kDefaultFps = 24;
     if (self.fd == NULL) {
         return NO;
     }
-    if (self.format == kPixelFormatType_420_P010) {
+    if (self.format == kPixelFormatType_420_P010 ||
+        self.format == kPixelFormatType_420_I010) {
         self.frameSize = self.width * self.height * 3;
     } else {
         self.frameSize = self.width * self.height * 3 / 2;
@@ -154,7 +195,8 @@ static const int kDefaultFps = 24;
     fseek(self.fd, 0, SEEK_END);
     self.totalByte = ftell(self.fd);
     fseek(self.fd, 0, SEEK_SET);
-    self.frameBuffer = [[MutableI420Buffer alloc] initWithWidth:(int)self.width height:(int)self.height];
+    self.frameBuffer = [[MutableI420Buffer alloc] initWithWidth:(int)self.width
+                                                         height:(int)self.height];
     return YES;
 }
 
@@ -212,6 +254,8 @@ static const int kDefaultFps = 24;
             videoFrame = [self readNV12Frame];
         } else if (self.format == kPixelFormatType_420_P010) {
             videoFrame = [self readP010Frame];
+        } else if (self.format == kPixelFormatType_420_I010) {
+            videoFrame = [self readI010Frame];
         }
         if (videoFrame == nil && isLoop) {
             fseek(self.fd, 0, SEEK_SET);
@@ -322,6 +366,42 @@ static const int kDefaultFps = 24;
     return videoFrame;
 }
 
+- (VideoFrame*)readI010Frame {
+    I010Buffer *frameBuffer = [[I010Buffer alloc] initWithWidth:self.width
+                                                         height:self.height];
+    for (int i = 0; i < frameBuffer.height; i++) {
+        int read_size = [self fread:(uint8_t *)frameBuffer.dataY + frameBuffer.strideY * i
+                             length:frameBuffer.width * 2
+                                 fd:self.fd];
+        if (read_size != frameBuffer.width * 2) {
+            return nil;
+        }
+    }
+    for (int i = 0; i < frameBuffer.chromaHeight / 2; i++) {
+        int read_size = [self fread:(uint8_t *)frameBuffer.dataU + frameBuffer.strideU * i
+                             length:frameBuffer.width * 2
+                                 fd:self.fd];
+        if (read_size != frameBuffer.width * 2) {
+            return nil;
+        }
+    }
+    for (int i = 0; i < frameBuffer.chromaHeight / 2; i++) {
+        int read_size = [self fread:(uint8_t *)frameBuffer.dataV + frameBuffer.strideV * i
+                             length:frameBuffer.width * 2
+                                 fd:self.fd];
+        if (read_size != frameBuffer.width * 2) {
+            return nil;
+        }
+    }
+    CVPixelBufferRef pixelBuffer = [self convertToP010:frameBuffer];
+    if (pixelBuffer == nil) {
+        return nil;
+    }
+    VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
+    CVPixelBufferRelease(pixelBuffer);
+    return videoFrame;
+}
+
 - (int)fread:(void*)buffer length:(int)length fd:(FILE *)fd {
     size_t read_size = 0;
     size_t total_size = 0;
@@ -330,6 +410,61 @@ static const int kDefaultFps = 24;
         total_size += read_size;
     } while ( read_size != 0 && total_size != length );
     return (int)total_size;
+}
+
+- (CVPixelBufferRef)convertToP010:(I010Buffer *)buffer {
+    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(buffer.width, buffer.height)
+                                                                   pixelFormat:kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange];
+    
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    uint8_t *dst = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int dstStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    int dstWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+    int dstHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    for (int i = 0; i < dstHeight; i++) {
+        memcpy(dst + dstStride * i, buffer.dataY + buffer.strideV * i, dstWidth * 2);
+    }
+    
+    dst = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    dstStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    mergeUVPlane16(buffer.dataU, buffer.strideU, buffer.dataV, buffer.strideV, dst, dstStride, buffer.width, buffer.height);
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    
+    CVBufferSetAttachment(pixelBuffer, kCVImageBufferYCbCrMatrixKey, kCVImageBufferYCbCrMatrix_ITU_R_2020, kCVAttachmentMode_ShouldPropagate);
+    CVBufferSetAttachment(pixelBuffer, kCVImageBufferColorPrimariesKey, kCVImageBufferColorPrimaries_ITU_R_2020, kCVAttachmentMode_ShouldPropagate);
+    CVBufferSetAttachment(pixelBuffer, kCVImageBufferTransferFunctionKey, kCVImageBufferTransferFunction_ITU_R_2100_HLG, kCVAttachmentMode_ShouldPropagate);
+
+    return pixelBuffer;
+}
+
+- (I010Buffer *)convertToI010:(CVPixelBufferRef)pixelBuffer {
+    OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (format != kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+        return nil;
+    }
+    
+    int width = (int)CVPixelBufferGetWidth(pixelBuffer);
+    int height = (int)CVPixelBufferGetHeight(pixelBuffer);
+    
+    I010Buffer *frameBuffer = [[I010Buffer alloc] initWithWidth:width height:height];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    uint8_t *src = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0) * 2;
+    int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    for (int i = 0; i < srcHeight; i++) {
+        memcpy((void *)(frameBuffer.dataY + frameBuffer.strideY * i), src + srcStride * i, srcWidth);
+    }
+    
+    src = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    splitUVPlane16((uint8_t *)src, srcStride,
+                   (uint8_t *)frameBuffer.dataU, frameBuffer.strideU,
+                   (uint8_t *)frameBuffer.dataV, frameBuffer.strideV,
+                   width, height);
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    return frameBuffer;
 }
 
 @end

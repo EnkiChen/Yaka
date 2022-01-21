@@ -135,6 +135,39 @@
 
 @end
 
+@implementation I010Buffer
+
+- (instancetype)initWithWidth:(int)width height:(int)height {
+    self = [super initWithWidth:width
+                         height:height
+                        strideY:width * 2
+                        strideU:width * 2
+                        strideV:width * 2];
+    if (self) {
+        
+    }
+    return self;
+}
+
+- (instancetype)initWithWidth:(int)width
+                       height:(int)height
+                      strideY:(int)strideY
+                      strideU:(int)strideU
+                      strideV:(int)strideV {
+    self = [super initWithWidth:width
+                         height:height
+                        strideY:strideY * 2
+                        strideU:strideU * 2
+                        strideV:strideV * 2];
+    if (self) {
+        
+    }
+    return self;
+}
+
+@end
+
+
 @interface CVPixelBuffer ()
 
 @property(nonatomic, strong) MutableI420Buffer* i420Buffer;

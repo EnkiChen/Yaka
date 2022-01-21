@@ -46,8 +46,12 @@
         [self.formatComboBox selectItemAtIndex:1];
         return;
     }
-    if ([self containsType:filePath types:@[@"p010", @"x420"]]) {
+    if ([self containsType:filePath types:@[@"p010", @"x420", @"p010le"]]) {
         [self.formatComboBox selectItemAtIndex:2];
+        return;
+    }
+    if ([self containsType:filePath types:@[@"i010", @"yuv420p16le", @"yuv420p10le"]]) {
+        [self.formatComboBox selectItemAtIndex:3];
         return;
     }
 }
