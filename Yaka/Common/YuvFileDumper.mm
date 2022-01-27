@@ -8,6 +8,8 @@
 
 #import "YuvFileDumper.h"
 
+namespace {
+
 void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iHeight) {
     int i = 0;
     unsigned char* pPtr = NULL;
@@ -33,6 +35,26 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
     }
     
     fflush(pFp);
+}
+
+void splitUVPlane16(const uint8_t* src_uv, int src_stride_uv,
+                    uint8_t* dst_u, int dst_stride_u,
+                    uint8_t* dst_v, int dst_stride_v,
+                    int width, int height) {
+    for (int i = 0; i < height / 2; i++) {
+        const uint8_t *uv = src_uv + src_stride_uv * i;
+        uint8_t* u = dst_u + dst_stride_u * i / 2;
+        uint8_t* v = dst_v + dst_stride_v * i / 2;
+        for (int i = 0; i < width / 2; i++) {
+            memcpy(u, uv, 2);
+            memcpy(v, uv + 2, 2);
+            uv += 4;
+            u += 2;
+            v += 2;
+        }
+    }
+}
+
 }
 
 @interface YuvFileDumper ()
@@ -127,6 +149,10 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
             [self writeToFile:pixelBuffer.pixelBuffer fd:self.fd_yuv];
             [self.fdLock unlock];
             return;
+        } else if (format == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+            [self writeI010ToFile:pixelBuffer.pixelBuffer fd:self.fd_yuv];
+            [self.fdLock unlock];
+            return;
         }
     }
     id<I420Buffer> buffer = [frame.buffer toI420];
@@ -176,6 +202,55 @@ void Write2File(FILE* pFp, uint8_t* pData[3], int iStride[2], int iWidth, int iH
         }
     }
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
+}
+
+- (void)writeI010ToFile:(CVPixelBufferRef)pixelBuffer fd:(FILE*)fd {
+    const OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange == format) {
+        I010Buffer *i010buffer = [self convertToI010:pixelBuffer];
+        for (int i = 0; i < i010buffer.height; i++) {
+            fwrite(i010buffer.dataY + i010buffer.strideY * i, 1, i010buffer.width * 2, fd);
+            fflush(fd);
+        }
+        for (int i = 0; i < i010buffer.height / 4; i++) {
+            fwrite(i010buffer.dataU + i010buffer.strideU * i, 1, i010buffer.width * 2, fd);
+            fflush(fd);
+        }
+        for (int i = 0; i < i010buffer.height / 4; i++) {
+            fwrite(i010buffer.dataV + i010buffer.strideV * i, 1, i010buffer.width * 2, fd);
+            fflush(fd);
+        }
+    }
+}
+
+- (I010Buffer *)convertToI010:(CVPixelBufferRef)pixelBuffer {
+    OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (format != kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+        return nil;
+    }
+    
+    int width = (int)CVPixelBufferGetWidth(pixelBuffer);
+    int height = (int)CVPixelBufferGetHeight(pixelBuffer);
+    
+    I010Buffer *frameBuffer = [[I010Buffer alloc] initWithWidth:width height:height];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    uint8_t *src = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    int srcWidth = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0) * 2;
+    int srcHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    for (int i = 0; i < srcHeight; i++) {
+        memcpy((void *)(frameBuffer.dataY + frameBuffer.strideY * i), src + srcStride * i, srcWidth);
+    }
+    
+    src = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    srcStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    splitUVPlane16((uint8_t *)src, srcStride,
+                   (uint8_t *)frameBuffer.dataU, frameBuffer.strideU,
+                   (uint8_t *)frameBuffer.dataV, frameBuffer.strideV,
+                   width, height);
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    return frameBuffer;
 }
 
 @end

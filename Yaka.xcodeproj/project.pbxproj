@@ -39,7 +39,7 @@
 		89A74EAD26C29D02001DB050 /* EncoderInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A74EA426C29D02001DB050 /* EncoderInterface.m */; };
 		89A74EB326C51D70001DB050 /* RateStatistics.m in Sources */ = {isa = PBXBuildFile; fileRef = 89A74EB226C51D6F001DB050 /* RateStatistics.m */; };
 		89AEF389269E7F8F00DA9FAD /* H264FileDumper.m in Sources */ = {isa = PBXBuildFile; fileRef = 89AEF385269E7F8F00DA9FAD /* H264FileDumper.m */; };
-		89AEF38A269E7F8F00DA9FAD /* YuvFileDumper.m in Sources */ = {isa = PBXBuildFile; fileRef = 89AEF388269E7F8F00DA9FAD /* YuvFileDumper.m */; };
+		89AEF38A269E7F8F00DA9FAD /* YuvFileDumper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89AEF388269E7F8F00DA9FAD /* YuvFileDumper.mm */; };
 		89AEF3B4269E80DA00DA9FAD /* libx264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89AEF391269E80DA00DA9FAD /* libx264.a */; };
 		89AEF3B6269E80DA00DA9FAD /* libopenh264.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89AEF3B3269E80DA00DA9FAD /* libopenh264.a */; };
 		89AEF3F6269E80E800DA9FAD /* SampleVideoRenderView.m in Sources */ = {isa = PBXBuildFile; fileRef = 89AEF3C8269E80E800DA9FAD /* SampleVideoRenderView.m */; };
@@ -155,7 +155,7 @@
 		89AEF385269E7F8F00DA9FAD /* H264FileDumper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = H264FileDumper.m; sourceTree = "<group>"; };
 		89AEF386269E7F8F00DA9FAD /* H264FileDumper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = H264FileDumper.h; sourceTree = "<group>"; };
 		89AEF387269E7F8F00DA9FAD /* YuvFileDumper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YuvFileDumper.h; sourceTree = "<group>"; };
-		89AEF388269E7F8F00DA9FAD /* YuvFileDumper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YuvFileDumper.m; sourceTree = "<group>"; };
+		89AEF388269E7F8F00DA9FAD /* YuvFileDumper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = YuvFileDumper.mm; sourceTree = "<group>"; };
 		89AEF38E269E80DA00DA9FAD /* x264_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264_config.h; sourceTree = "<group>"; };
 		89AEF38F269E80DA00DA9FAD /* x264.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x264.h; sourceTree = "<group>"; };
 		89AEF391269E80DA00DA9FAD /* libx264.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libx264.a; sourceTree = "<group>"; };
@@ -295,7 +295,7 @@
 				89AEF386269E7F8F00DA9FAD /* H264FileDumper.h */,
 				89AEF385269E7F8F00DA9FAD /* H264FileDumper.m */,
 				89AEF387269E7F8F00DA9FAD /* YuvFileDumper.h */,
-				89AEF388269E7F8F00DA9FAD /* YuvFileDumper.m */,
+				89AEF388269E7F8F00DA9FAD /* YuvFileDumper.mm */,
 				895B25062358445D0031B819 /* YuvHelper.h */,
 				895B2507235844920031B819 /* YuvHelper.cpp */,
 				8990538226AA7B3D00358B8C /* PixelBufferTools.h */,
@@ -813,7 +813,7 @@
 				89A74EA726C29D02001DB050 /* VT265Decoder.mm in Sources */,
 				8936CE19231A4E03009217FE /* FileConfigViewController.m in Sources */,
 				89A74EAA26C29D02001DB050 /* VT264Encoder.mm in Sources */,
-				89AEF38A269E7F8F00DA9FAD /* YuvFileDumper.m in Sources */,
+				89AEF38A269E7F8F00DA9FAD /* YuvFileDumper.mm in Sources */,
 				89AEF3F6269E80E800DA9FAD /* SampleVideoRenderView.m in Sources */,
 				8990538C26AECCA100358B8C /* SystemTools.mm in Sources */,
 				89AEF3FA269E80E800DA9FAD /* MTLVideoView.m in Sources */,
