@@ -144,9 +144,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.fileSourceCapture stop];
     self.fileSourceCapture = nil;
     
-    [self.yuvFileDumper stop];
-    self.yuvFileDumper = nil;
-    
     [self.h264FileDumper stop];
     self.h264FileDumper = nil;
     
