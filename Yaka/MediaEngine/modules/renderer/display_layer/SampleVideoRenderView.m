@@ -38,6 +38,12 @@
     self.displayLayer.backgroundColor = [NSColor blackColor].CGColor;
 }
 
+- (void)setBackgroundColor:(CGColorRef)backgroundColor {
+    self.wantsLayer = YES;
+    self.layer.opaque = YES;
+    self.layer.backgroundColor = backgroundColor;
+}
+
 - (void)renderFrame:(nullable VideoFrame *)frame {
     if ([frame.buffer isKindOfClass:CVPixelBuffer.class]) {
         CVPixelBuffer *pixelBuffer = (CVPixelBuffer*)frame.buffer;

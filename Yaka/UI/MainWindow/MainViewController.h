@@ -7,16 +7,12 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "GLVideoRenderView.h"
-#import "SampleVideoRenderView.h"
-#import "MTLNSVideoView.h"
 #import "PalyCtrlView.h"
+#import "MultiPlayView.h"
 
 @interface MainViewController : NSViewController
 
-@property (weak) IBOutlet GLVideoRenderView *glVideoView;
-@property (weak) IBOutlet SampleVideoRenderView *sampleRenderView;
-@property (weak) IBOutlet MTLNSVideoView *metalRenderView;
+@property (weak) IBOutlet MultiPlayView *multiPlayView;
 @property (weak) IBOutlet PalyCtrlView *palyCtrlView;
 
 @end

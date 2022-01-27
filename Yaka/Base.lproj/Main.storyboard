@@ -371,29 +371,15 @@
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="9os-Vc-Xyu">
                                 <rect key="frame" x="0.0" y="100" width="782" height="440"/>
                                 <subviews>
-                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="2iN-gB-Clt" customClass="SampleVideoRenderView">
-                                        <rect key="frame" x="0.0" y="0.0" width="782" height="440"/>
-                                    </customView>
-                                    <customView hidden="YES" translatesAutoresizingMaskIntoConstraints="NO" id="KW1-5W-yXs" customClass="MTLNSVideoView">
-                                        <rect key="frame" x="0.0" y="0.0" width="782" height="440"/>
-                                    </customView>
-                                    <customView hidden="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zid-F9-oKw" customClass="GLVideoRenderView">
+                                    <customView translatesAutoresizingMaskIntoConstraints="NO" id="22b-gu-jCO" customClass="MultiPlayView">
                                         <rect key="frame" x="0.0" y="0.0" width="782" height="440"/>
                                     </customView>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="KW1-5W-yXs" secondAttribute="trailing" id="1du-ix-9Zb"/>
-                                    <constraint firstAttribute="bottom" secondItem="zid-F9-oKw" secondAttribute="bottom" id="3RJ-w9-zJM"/>
-                                    <constraint firstAttribute="trailing" secondItem="zid-F9-oKw" secondAttribute="trailing" id="APx-4Q-aJo"/>
-                                    <constraint firstItem="zid-F9-oKw" firstAttribute="top" secondItem="9os-Vc-Xyu" secondAttribute="top" id="D4F-qD-3Fa"/>
-                                    <constraint firstAttribute="bottom" secondItem="2iN-gB-Clt" secondAttribute="bottom" id="JlR-xn-pbg"/>
-                                    <constraint firstItem="zid-F9-oKw" firstAttribute="leading" secondItem="9os-Vc-Xyu" secondAttribute="leading" id="RNM-z3-nnz"/>
-                                    <constraint firstItem="KW1-5W-yXs" firstAttribute="top" secondItem="9os-Vc-Xyu" secondAttribute="top" id="jsQ-ph-Wt1"/>
-                                    <constraint firstItem="2iN-gB-Clt" firstAttribute="top" secondItem="9os-Vc-Xyu" secondAttribute="top" id="jtG-ud-ayz"/>
-                                    <constraint firstItem="2iN-gB-Clt" firstAttribute="leading" secondItem="9os-Vc-Xyu" secondAttribute="leading" id="pGC-lU-kDa"/>
-                                    <constraint firstItem="KW1-5W-yXs" firstAttribute="leading" secondItem="9os-Vc-Xyu" secondAttribute="leading" id="sdP-bg-jK3"/>
-                                    <constraint firstAttribute="bottom" secondItem="KW1-5W-yXs" secondAttribute="bottom" id="xis-td-yy1"/>
-                                    <constraint firstAttribute="trailing" secondItem="2iN-gB-Clt" secondAttribute="trailing" id="yFC-Va-Mmc"/>
+                                    <constraint firstAttribute="trailing" secondItem="22b-gu-jCO" secondAttribute="trailing" id="6aI-C0-nf0"/>
+                                    <constraint firstItem="22b-gu-jCO" firstAttribute="top" secondItem="9os-Vc-Xyu" secondAttribute="top" id="W9I-3x-d6d"/>
+                                    <constraint firstItem="22b-gu-jCO" firstAttribute="leading" secondItem="9os-Vc-Xyu" secondAttribute="leading" id="izA-kF-2zd"/>
+                                    <constraint firstAttribute="bottom" secondItem="22b-gu-jCO" secondAttribute="bottom" id="t6r-XL-TI1"/>
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="HPT-da-RwN" customClass="PalyCtrlView">
@@ -625,10 +611,8 @@
                         </connections>
                     </view>
                     <connections>
-                        <outlet property="glVideoView" destination="zid-F9-oKw" id="EKR-13-TX8"/>
-                        <outlet property="metalRenderView" destination="KW1-5W-yXs" id="T9Q-Sc-MNz"/>
+                        <outlet property="multiPlayView" destination="22b-gu-jCO" id="GJO-6P-Uj1"/>
                         <outlet property="palyCtrlView" destination="HPT-da-RwN" id="yRh-LC-lfD"/>
-                        <outlet property="sampleRenderView" destination="2iN-gB-Clt" id="DXz-eZ-aYB"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

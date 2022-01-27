@@ -16,6 +16,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property(nonatomic, assign) NSUInteger maxPlayCount;
 
+- (void)renderFrame:(nullable VideoFrame *)frame;
+
 - (void)renderFrame:(nullable VideoFrame *)frame withIndex:(NSUInteger)index;
 
 - (void)enableMirror:(BOOL)enableMirror withIndex:(NSUInteger)index;

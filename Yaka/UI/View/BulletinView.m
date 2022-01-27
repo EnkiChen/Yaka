@@ -28,6 +28,7 @@
     self.orientation = NSUserInterfaceLayoutOrientationVertical;
     self.spacing = 0;
     self.alignment = NSLayoutAttributeLeft;
+    self.distribution = NSStackViewDistributionFillEqually;
 }
 
 - (void)setRowCount:(NSUInteger)rowCount {

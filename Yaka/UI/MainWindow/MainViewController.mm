@@ -37,7 +37,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 @interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
 
-@property(nonatomic, weak) id<VideoRenderer> videoRenderer;
 @property(nonatomic, assign) NSUInteger renderCount;
 @property(nonatomic, strong) RateStatistics *renderFps;
 @property(nonatomic, strong) NSMutableArray<VideoFrame*> *frameOrderedList;
@@ -247,25 +246,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (IBAction)onRendererComboboxChanged:(id)sender {
-    NSComboBox *combobox = (NSComboBox*)sender;
-    id<VideoRenderer> renderView = self.videoRenderer;
-    switch (combobox.indexOfSelectedItem) {
-        case 0:
-            self.videoRenderer = self.glVideoView;
-            break;
-        case 1:
-            self.videoRenderer = self.metalRenderView;
-            break;
-        case 2:
-            self.videoRenderer = self.sampleRenderView;
-            break;
-        default:
-            break;
-    }
-    if ( renderView != self.videoRenderer ) {
-        ((NSView*)self.videoRenderer).hidden = NO;
-        ((NSView*)renderView).hidden = YES;
-    }
+
 }
 
 - (IBAction)onDecoderComboboxChanged:(id)sender {
@@ -552,7 +533,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
     frame = [self pushFrameToOrderedlist:frame];
     if (frame != nil) {
-        [self.videoRenderer renderFrame:frame];
+        [self.multiPlayView renderFrame:frame];
     }
 }
 
@@ -585,7 +566,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)setupUI {
-    self.videoRenderer = self.sampleRenderView;
     self.decoder = self.openh264Decoder;
     self.encoder = self.openh264Encoder;
     self.palyCtrlView.delegate = self;
@@ -597,7 +577,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     int rowCount = 4;
     self.bulletinView = [[BulletinView alloc] initWithFrame:CGRectMake(10, 10, 300, rowCount * 15)];
     self.bulletinView.rowCount = rowCount;
-    [self.sampleRenderView.superview addSubview:self.bulletinView];
+    [self.multiPlayView.superview addSubview:self.bulletinView];
 }
 
 - (void)updateRecordMenu {
