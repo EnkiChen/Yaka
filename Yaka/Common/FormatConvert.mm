@@ -51,30 +51,39 @@
 }
 
 - (void)scaleFrame {
-    NSArray* numbers = @[@"A", @"B", @"E", @"G"];
-    NSArray* resolutions = @[@"368x640x10"];
-    NSArray* bitrates = @[@"200", @"400"];
+    NSArray* numbers = @[@"A"];
+    NSString* codec = @"x264";
+    NSArray* resolutions = @[@"240x432x15"];
+    NSArray* bitrates = @[@"200", @"300", @"400", @"500", @"600", @"700", @"800"];
+    int outputWidth = 720;
+    int ouputHeight = 1280;
     for (NSString *num in numbers) {
         for (NSString *resl in resolutions) {
+            NSArray<NSString*> *components = [resl componentsSeparatedByString:@"x"];
+            int width = [components[0] intValue];
+            int height = [components[1] intValue];
+            int fps = [components[2] intValue];
             for (NSString *br in bitrates) {
-                NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_%@_I420_vt264_%@k.yuv", num, num, resl, br];
-                NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_720x1280x10_I420_%@_UP_vt264_%@k.yuv", num, num, resl, br];
-                scaleYUV([inputFile cStringUsingEncoding:NSUTF8StringEncoding], 368, 640, [outputFile cStringUsingEncoding:NSUTF8StringEncoding], 720, 1280);
+                NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/视频质量测试/%@/%@_%@_I420_%@_%@k.yuv", num, num, resl, codec, br];
+                NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/视频质量测试/%@/%@_%dx%dx%d_I420_%@_UP_%@_%@k.yuv", num, num, outputWidth, ouputHeight, fps, resl, codec, br];
+                NSLog(@"start convert %@", inputFile);
+                scaleYUV([inputFile cStringUsingEncoding:NSUTF8StringEncoding], width, height, [outputFile cStringUsingEncoding:NSUTF8StringEncoding], outputWidth, ouputHeight);
             }
         }
     }
 }
 
 - (void)flvToYuv {
-    NSArray* numbers = @[@"A", @"B", @"E", @"G"];
-    NSArray* resolutions = @[@"240x432x15"];
-    NSArray* bitrates = @[@"600", @"800"];
+    NSArray* numbers = @[@"A"];
+    NSString* codec = @"vt265";
+    NSArray* resolutions = @[@"720x1280x24"];
+    NSArray* bitrates = @[ @"400", @"500", @"600", @"700", @"800", @"900", @"1000", @"1100", @"1200", @"1300", @"1400", @"1500", @"1600", @"1700", @"1800", @"1900", @"2000", @"2100", @"2200"];
     NSMutableDictionary *filePaths = [[NSMutableDictionary alloc] init];
     for (NSString *num in numbers) {
         for (NSString *resl in resolutions) {
             for (NSString *br in bitrates) {
-                NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_%@_vt264_%@k.flv", num, num, resl, br];
-                NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/盲测视频/%@/%@_%@_I420_vt264_%@k.yuv", num, num, resl, br];
+                NSString *inputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/HDR质量测试/%@/%@_%@_%@_%@k.flv", num, num, resl, codec, br];
+                NSString *outputFile = [NSString stringWithFormat:@"/Users/enki/Desktop/HDR质量测试/%@/%@_%@_I010_%@_%@k.yuv", num, num, resl, codec, br];
                 [filePaths setValue:outputFile forKey:inputFile];
             }
         }
