@@ -112,8 +112,12 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     openPanel.canChooseFiles = YES;
     openPanel.allowedFileTypes = kAllowedFileTypes;
     [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
-        if ( result == NSModalResponseOK ) {
-            [self openFileWithPath:openPanel.URL];
+        if (result == NSModalResponseOK) {
+            if ([openPanel.URL.path hasSuffix:@"yuv"]) {
+                [self showFileConfigPanle:openPanel.URL];
+            } else {
+                [self openFileWithPath:openPanel.URL fileInfo:nil];
+            }
         }
     }];
 }
@@ -265,59 +269,26 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 
 #pragma mark - FileConfigDelegae
-- (void)fileConfigViewController:(FileConfigViewController*) fileConfigCtrl openDocument:(NSString*) path {
+- (void)fileConfigViewController:(FileConfigViewController*)fileConfigCtrl openDocument:(NSURL*)path {
     [self.fileConfigWindowCtrl close];
     [self openDocument:nil];
 }
 
-- (void)fileConfigViewController:(FileConfigViewController*) fileConfigCtrl filePath:(NSString*) filePath width:(int) widht height:(int) height formatIndex:(int) formatIndex {
-    if ( ![filePath hasSuffix:@".yuv"] ) {
+- (void)fileConfigViewController:(FileConfigViewController*)fileConfigCtrl filePath:(NSURL*)fileUrl width:(int)widht height:(int)height formatIndex:(int)formatIndex {
+    if (![fileUrl.path hasSuffix:@".yuv"]) {
         [self showMessage:@"提示" message:@"请选择正确的文件格式！" window:self.fileConfigWindowCtrl.window];
         return;
     }
-    if ( filePath.length == 0 || widht == 0 || height == 0 ) {
+    if (fileUrl.path.length == 0 || widht == 0 || height == 0) {
         [self showMessage:@"提示" message:@"参数信息错误！" window:self.fileConfigWindowCtrl.window];
         return;
     }
-
-    [self performClose:nil];
-
-    PixelFormatType format = kPixelFormatType_420_I420;
-    switch (formatIndex) {
-        case 0:
-            format = kPixelFormatType_420_I420;
-            break;
-        case 1:
-            format = kPixelFormatType_420_NV12;
-            break;
-        case 2:
-            format = kPixelFormatType_420_P010;
-            break;
-        case 3:
-            format = kPixelFormatType_420_I010;
-            break;
-        default:
-            format = kPixelFormatType_420_I420;
-            break;
-    }
-    
-    self.videoTrack = [[VideoTrack alloc] initWithRawFile:filePath width:widht height:height pixelFormat:format];
-    self.fileSourceCapture = self.videoTrack;
-    
-    self.videoTrack.delegate = self;
-    self.videoTrack.fileSourceDelegate = self;
-    self.videoTrack.isLoop = self.isLoop;
-    self.videoTrack.fps = self.palyCtrlView.textFps.intValue;
-    [self.videoTrack start];
-    
-    self.palyCtrlView.progressSlider.minValue = 1;
-    self.palyCtrlView.progressSlider.maxValue = self.videoTrack.totalFrames;
-    self.palyCtrlView.formatComboBox.enabled = YES;
-    [self.palyCtrlView.formatComboBox selectItemAtIndex:formatIndex];
-    [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.videoTrack.totalFrames]];
-    [self.palyCtrlView.progressSlider setIntValue:1];
-    self.palyCtrlView.playState = PlayControlState_Stop;
-
+    NSDictionary *fileInfo = @{
+        @"width" : @(widht),
+        @"height" : @(height),
+        @"formatIndex" : @(formatIndex)
+    };
+    [self openFileWithPath:fileUrl fileInfo:fileInfo];
     [self.fileConfigWindowCtrl close];
 }
 
@@ -468,30 +439,39 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 - (void)dragOperationView:(DragOperationView*) view prepareForDragOperation:(NSArray<NSURL *>*) fileUrls {
     if (fileUrls.count == 1) {
-        [self openFileWithPath:fileUrls.lastObject];
+        if ([fileUrls.lastObject.path hasSuffix:@"yuv"]) {
+            [self showFileConfigPanle:fileUrls.lastObject];
+        } else {
+            [self openFileWithPath:fileUrls.lastObject fileInfo:nil];
+        }
     }
 }
 
 
 #pragma mark - Private Method
-- (void)openFileWithPath:(NSURL*) filePath {
+- (void)openFileWithPath:(NSURL*)filePath fileInfo:(NSDictionary *)fileInfo {
     self.filePath = [filePath.path lowercaseString];
     self.view.window.title = [filePath.path componentsSeparatedByString:@"/"].lastObject;
-    
+    [self performClose:nil];
     if ( [filePath.path hasSuffix:@"yuv"] ) {
-        [self showFileConfigPanle:filePath.path];
+        int width = [fileInfo[@"width"] intValue];
+        int height = [fileInfo[@"height"] intValue];
+        int formatIndex = [fileInfo[@"formatIndex"] intValue];
+        PixelFormatType formats[] = {kPixelFormatType_420_I420, kPixelFormatType_420_NV12, kPixelFormatType_420_P010, kPixelFormatType_420_I010};
+        PixelFormatType format = formats[formatIndex];
+        self.videoTrack = [[VideoTrack alloc] initWithRawFile:filePath.path width:width height:height pixelFormat:format];
+        self.palyCtrlView.formatComboBox.enabled = YES;
+        [self.palyCtrlView.formatComboBox selectItemAtIndex:formatIndex];
     } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"]
                || [filePath.path hasSuffix:@"h265"] || [filePath.path hasSuffix:@"265"] ) {
-        [self performClose:nil];
         self.videoTrack = [[VideoTrack alloc] initWithNalFile:filePath.path];
-
+        self.palyCtrlView.formatComboBox.enabled = NO;
     } else if ([filePath.path hasSuffix:@"flv"]) {
-        [self performClose:nil];
         self.videoTrack = [[VideoTrack alloc] initWithFlvFile:filePath.path];
+        self.palyCtrlView.formatComboBox.enabled = NO;
     }
     
     self.fileSourceCapture = self.videoTrack;
-    
     self.videoTrack.delegate = self;
     self.videoTrack.fileSourceDelegate = self;
     self.videoTrack.isLoop = self.isLoop;
@@ -500,19 +480,18 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     
     self.palyCtrlView.progressSlider.minValue = 1;
     self.palyCtrlView.progressSlider.maxValue = self.videoTrack.totalFrames;
-    self.palyCtrlView.formatComboBox.enabled = NO;
     [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.videoTrack.totalFrames]];
     [self.palyCtrlView.progressSlider setIntValue:1];
     self.palyCtrlView.playState = PlayControlState_Stop;
 }
 
-- (void)showFileConfigPanle:(NSString*) filePath {
+- (void)showFileConfigPanle:(NSURL*)fileUrl {
     NSStoryboard *storyBoard = [NSStoryboard storyboardWithName:@"Main" bundle:nil];
     self.fileConfigWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"FileConfigPanel"];
     [self.fileConfigWindowCtrl.window setLevel:NSFloatingWindowLevel];
     FileConfigViewController *fileConfigVC = (FileConfigViewController*)[self.fileConfigWindowCtrl contentViewController];
     fileConfigVC.delegate = self;
-    fileConfigVC.filePath = filePath;
+    fileConfigVC.fileUrl = fileUrl;
     [self.fileConfigWindowCtrl showWindow:nil];
 }
 

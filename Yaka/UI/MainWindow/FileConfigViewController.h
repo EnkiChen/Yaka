@@ -24,9 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol FileConfigDelegate <NSObject>
 
-- (void)fileConfigViewController:(FileConfigViewController*) fileConfigCtrl openDocument:(NSString*) path;
+- (void)fileConfigViewController:(FileConfigViewController*)fileConfigCtrl openDocument:(NSURL*)url;
 
-- (void)fileConfigViewController:(FileConfigViewController*) fileConfigCtrl filePath:(NSString*) filePath width:(int) widht height:(int) height formatIndex:(int) formatIndex;
+- (void)fileConfigViewController:(FileConfigViewController*)fileConfigCtrl filePath:(NSURL*)fileUrl width:(int)widht height:(int)height formatIndex:(int)formatIndex;
 
 @end
 
@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak) IBOutlet NSComboBox *formatComboBox;
 @property (weak) IBOutlet NSComboBox *sizeComboBox;
 
-@property(nonatomic, copy) NSString *filePath;
+@property(nonatomic, copy) NSURL *fileUrl;
 
 @property(nonatomic, weak) id<FileConfigDelegate> delegate;
 

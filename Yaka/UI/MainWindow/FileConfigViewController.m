@@ -23,8 +23,8 @@
 
 - (void)viewWillAppear {
     [super viewWillAppear];
-    [self.textFilePath setStringValue:self.filePath];
-    NSString *filePath = [self.filePath lowercaseString];
+    [self.textFilePath setStringValue:self.fileUrl.path];
+    NSString *filePath = [self.fileUrl.path lowercaseString];
     NSRange range = [filePath rangeOfString:@"[1-9][0-9]*[x,X,_][0-9]*" options:NSRegularExpressionSearch];
     if (range.location != NSNotFound) {
         NSString *result = [filePath substringWithRange:range];
@@ -70,14 +70,14 @@
 
 - (IBAction)openDocument:(id)sender {
     if (self.delegate != nil) {
-        [self.delegate fileConfigViewController:self openDocument:self.filePath];
+        [self.delegate fileConfigViewController:self openDocument:self.fileUrl];
     }
 }
 
 - (IBAction)closeAction:(id)sender {
     if ( self.delegate != nil ) {
         [self.delegate fileConfigViewController:self
-                                       filePath:self.textFilePath.stringValue
+                                       filePath:self.fileUrl
                                           width:self.textWidth.intValue
                                          height:self.textHeight.intValue
                                     formatIndex:(int)self.formatComboBox.indexOfSelectedItem];
