@@ -89,6 +89,7 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
         self.format = format;
         self.isLoop = YES;
         self.fps = kDefaultFps;
+        [self openFileAndAnalysis];
     }
     return self;
 }
@@ -105,7 +106,6 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
     if ( !self.cancel ) {
         return;
     }
-    [self openFileAndAnalysis];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         self.cancel = NO;
         [self process];

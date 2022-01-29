@@ -220,10 +220,10 @@ static const int kDefaultFps = 24;
     self = [super init];
     if (self) {
         self.filePath = filePath;
-        
         self.cancel = YES;
         self.isLoop = NO;
         self.fps = kDefaultFps;
+        [self openFileAndAnalysis];
     }
     return self;
 }
@@ -232,7 +232,9 @@ static const int kDefaultFps = 24;
 #pragma mark - VideoSourceInterface
 
 - (void)start {
-    [self openFileAndAnalysis];
+    if (!self.cancel) {
+        return;
+    }
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         self.cancel = NO;
         [self process];

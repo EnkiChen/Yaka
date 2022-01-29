@@ -115,6 +115,7 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
         self.cancel = YES;
         self.isLoop = NO;
         self.fps = kDefaultFps;
+        [self openFileAndAnalysis];
     }
     return self;
 }
@@ -131,7 +132,6 @@ int readData(unsigned char* buffer, int length, FILE *fd) {
     if ( !self.cancel ) {
         return;
     }
-    [self openFileAndAnalysis];
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         self.cancel = NO;
         [self process];

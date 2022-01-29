@@ -215,6 +215,12 @@
                                                 <action selector="loopStatUpdated:" target="Ady-hI-5gd" id="rLM-Io-RK7"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="多文件模式" keyEquivalent="m" id="x9v-JQ-k4m">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="multiPlayModeAction:" target="Ady-hI-5gd" id="nPT-s9-yI4"/>
+                                            </connections>
+                                        </menuItem>
                                     </items>
                                 </menu>
                             </menuItem>

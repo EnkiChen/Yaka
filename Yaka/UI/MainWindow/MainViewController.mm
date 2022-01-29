@@ -39,7 +39,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 @property(nonatomic, assign) NSUInteger renderCount;
 @property(nonatomic, strong) RateStatistics *renderFps;
-@property(nonatomic, strong) NSMutableArray<VideoFrame*> *frameOrderedList;
+@property(nonatomic, strong) NSMutableDictionary *frameBuffers;
 
 @property(nonatomic, strong) id<DecoderInterface> decoder;
 @property(nonatomic, strong) Openh264Decoder *openh264Decoder;
@@ -59,9 +59,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 @property(nonatomic, strong) CameraCapture *cameraCapture;
 @property(nonatomic, strong) DesktopCapture *desktopCapture;
 
+@property(nonatomic, assign, getter=isMultiPlayMode) BOOL multiPlayMode;
+@property(nonatomic, assign) NSUInteger maxTotalFrames;
+
 @property(nonatomic, strong) id<FileSourceInterface> fileSourceCapture;
 @property(nonatomic, copy) NSString *filePath;
 @property(nonatomic, strong) VideoTrack *videoTrack;
+@property(nonatomic, strong) NSMutableArray<VideoTrack *>* videoTracks;
 
 @property(nonatomic, strong) YuvFileDumper *yuvFileDumper;
 @property(nonatomic, strong) H264FileDumper *h264FileDumper;
@@ -147,6 +151,12 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self.fileSourceCapture stop];
     self.fileSourceCapture = nil;
     
+    self.maxTotalFrames = 0;
+    for (VideoTrack *videoTrack in self.videoTracks) {
+        [videoTrack stop];
+    }
+    [self.videoTracks removeAllObjects];
+    
     [self.h264FileDumper stop];
     self.h264FileDumper = nil;
     
@@ -159,7 +169,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.palyCtrlView.playState = PlayControlState_RecordStart;
     
     self.renderCount = 0;
-    [self.frameOrderedList removeAllObjects];
+    [self.frameBuffers removeAllObjects];
     
     [self clearRecordState];
 }
@@ -210,10 +220,24 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     NSMenuItem *loopMenuItem = sender;
     if (loopMenuItem.state == NSControlStateValueOn) {
         loopMenuItem.state = NSControlStateValueOff;
-        self.fileSourceCapture.isLoop = NO;
+        self.fileSourceCapture.isLoop = YES;
     } else {
         loopMenuItem.state = NSControlStateValueOn;
         self.fileSourceCapture.isLoop = YES;
+    }
+    for (VideoTrack *videoTrack in self.videoTracks) {
+        videoTrack.isLoop = (loopMenuItem.state == NSControlStateValueOn);
+    }
+}
+
+- (IBAction)multiPlayModeAction:(id)sender {
+    NSMenuItem *multiPlayMenuItem = sender;
+    if (multiPlayMenuItem.state == NSControlStateValueOn) {
+        multiPlayMenuItem.state = NSControlStateValueOff;
+        self.multiPlayMode = NO;
+    } else {
+        multiPlayMenuItem.state = NSControlStateValueOn;
+        self.multiPlayMode = YES;
     }
 }
 
@@ -305,8 +329,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-    [self renderFrame:frame];
-    
+    if ([self.videoTracks containsObject:(VideoTrack *)source]) {
+        NSUInteger index = [self.videoTracks indexOfObject:(VideoTrack *)source];
+        [self renderFrame:frame withIndex:index];
+    } else {
+        [self renderFrame:frame];
+    }
+
 //    dispatch_async(self.encodeQueue, ^{
 //        [self.vt264Encoder encode:frame];
 //        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
@@ -337,9 +366,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - FileSourceInterface Action
 - (void)fileSource:(id<FileSourceInterface>) fileSource progressUpdated:(NSUInteger) index {
-    if (index + 1 == self.fileSourceCapture.totalFrames) {
-        // todo:剩余的帧，应该要渲染出来，而不是丢弃
-        [self.frameOrderedList removeAllObjects];
+    if ([self.videoTracks containsObject:(VideoTrack *)fileSource]) {
+        NSUInteger trackIndex = [self.videoTracks indexOfObject:(VideoTrack *)fileSource];
+        NSMutableArray *frames = [self.frameBuffers objectForKey:@(trackIndex)];
+        // todo:播放到最后一帧时，缓存的帧，应该要渲染出来，而不是丢弃
+        if (index + 1 == fileSource.totalFrames) {
+            [frames removeAllObjects];
+        }
     }
     dispatch_async(dispatch_get_main_queue(), ^{
         if (!self.palyCtrlView.isDragging) {
@@ -361,6 +394,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     if (index <= self.fileSourceCapture.totalFrames && index > 0) {
         [self.fileSourceCapture seekToFrameIndex:index - 1];
     }
+    for (VideoTrack *videoTrack in self.videoTracks) {
+        if (index <= videoTrack.totalFrames && index > 0) {
+            [videoTrack seekToFrameIndex:index - 1];
+        }
+    }
 }
 
 - (void)palyCtrlView:(PalyCtrlView*) palyCtrlView formatUpdated:(NSInteger) indexOfSelectedItem {
@@ -369,6 +407,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 - (void)palyCtrlView:(PalyCtrlView*) palyCtrlView fpsUpdated:(int) fps {
     self.fileSourceCapture.fps = fps;
+    for (VideoTrack *videoTrack in self.videoTracks) {
+        videoTrack.fps = fps;
+    }
 }
 
 - (void)palyCtrlView:(PalyCtrlView*) palyCtrlView playStatusUpdated:(CtrlType) ctrlType {
@@ -388,37 +429,51 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         return;
     }
     
-    if (self.fileSourceCapture != nil) {
+    if (self.videoTracks.count != 0) {
         if (ctrlType == CtrlType_Play) {
-            if (self.fileSourceCapture.isPause) {
-                self.palyCtrlView.playState = PlayControlState_Stop;
-                [self.fileSourceCapture resume];
+            self.palyCtrlView.playState = PlayControlState_Stop;
+            for (VideoTrack *videoTrack in self.videoTracks) {
+                if (videoTrack.isPause) {
+                    [videoTrack resume];
+                } else {
+                    [videoTrack start];
+                }
             }
         } else if (ctrlType == CtrlType_Pause) {
-            if (!self.fileSourceCapture.isPause) {
-                self.palyCtrlView.playState = PlayControlState_Play;
-                [self.fileSourceCapture pause];
+            self.palyCtrlView.playState = PlayControlState_Play;
+            for (VideoTrack *videoTrack in self.videoTracks) {
+                if (!videoTrack.isPause) {
+                    [videoTrack pause];
+                }
             }
-        } else if (ctrlType == CtrlType_Rewind ) {
-            NSUInteger frameIndex = self.fileSourceCapture.frameIndex;
-            if (frameIndex != 0) {
-                [self.fileSourceCapture seekToFrameIndex:frameIndex - 1];
+        } else if (ctrlType == CtrlType_Rewind) {
+            for (VideoTrack *videoTrack in self.videoTracks) {
+                NSUInteger frameIndex = videoTrack.frameIndex;
+                if (frameIndex != 0) {
+                    [videoTrack seekToFrameIndex:frameIndex - 1];
+                }
             }
-        } else if (ctrlType == CtrlType_FastForward ) {
-            NSUInteger totalFrames = self.fileSourceCapture.totalFrames;
-            NSUInteger frameIndex = self.fileSourceCapture.frameIndex;
-            if (totalFrames > 0 && frameIndex < totalFrames - 1) {
-                [self.fileSourceCapture seekToFrameIndex:frameIndex + 1];
+        } else if (ctrlType == CtrlType_FastForward) {
+            for (VideoTrack *videoTrack in self.videoTracks) {
+                NSUInteger totalFrames = videoTrack.totalFrames;
+                NSUInteger frameIndex = videoTrack.frameIndex;
+                if (totalFrames > 0 && frameIndex < totalFrames - 1) {
+                    [videoTrack seekToFrameIndex:frameIndex + 1];
+                }
             }
         } else if (ctrlType == CtrlType_SkipToStart) {
-            NSUInteger frameIndex = self.fileSourceCapture.frameIndex;
-            if (frameIndex != 0) {
-                [self.fileSourceCapture seekToFrameIndex:0];
+            for (VideoTrack *videoTrack in self.videoTracks) {
+                NSUInteger frameIndex = videoTrack.frameIndex;
+                if (frameIndex != 0) {
+                    [videoTrack seekToFrameIndex:0];
+                }
             }
         } else if (ctrlType == CtrlType_SkipToEnd) {
-            NSUInteger totalFrames = self.fileSourceCapture.totalFrames;
-            if (totalFrames > 0) {
-                [self.fileSourceCapture seekToFrameIndex:totalFrames - 1];
+            for (VideoTrack *videoTrack in self.videoTracks) {
+                NSUInteger totalFrames = videoTrack.totalFrames;
+                if (totalFrames > 0) {
+                    [videoTrack seekToFrameIndex:totalFrames - 1];
+                }
             }
         }
     }
@@ -452,7 +507,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 - (void)openFileWithPath:(NSURL*)filePath fileInfo:(NSDictionary *)fileInfo {
     self.filePath = [filePath.path lowercaseString];
     self.view.window.title = [filePath.path componentsSeparatedByString:@"/"].lastObject;
-    [self performClose:nil];
+
+    if (!self.multiPlayMode) {
+        [self performClose:nil];
+    }
+    
     if ( [filePath.path hasSuffix:@"yuv"] ) {
         int width = [fileInfo[@"width"] intValue];
         int height = [fileInfo[@"height"] intValue];
@@ -471,18 +530,30 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         self.palyCtrlView.formatComboBox.enabled = NO;
     }
     
+    [self.videoTracks addObject:self.videoTrack];
+    self.multiPlayView.maxPlayCount = self.videoTracks.count;
+    
     self.fileSourceCapture = self.videoTrack;
     self.videoTrack.delegate = self;
     self.videoTrack.fileSourceDelegate = self;
     self.videoTrack.isLoop = self.isLoop;
     self.videoTrack.fps = self.palyCtrlView.textFps.intValue;
-    [self.videoTrack start];
+    
+    if (self.videoTrack.totalFrames > self.maxTotalFrames) {
+        self.maxTotalFrames = self.videoTrack.totalFrames;
+    }
     
     self.palyCtrlView.progressSlider.minValue = 1;
-    self.palyCtrlView.progressSlider.maxValue = self.videoTrack.totalFrames;
-    [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.videoTrack.totalFrames]];
+    self.palyCtrlView.progressSlider.maxValue = self.maxTotalFrames;
+    [self.palyCtrlView.textMaxFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)self.maxTotalFrames]];
     [self.palyCtrlView.progressSlider setIntValue:1];
-    self.palyCtrlView.playState = PlayControlState_Stop;
+    self.palyCtrlView.playState = PlayControlState_Play;
+    
+    for (VideoTrack *videoTrack in self.videoTracks) {
+        [videoTrack pause];
+        [videoTrack seekToFrameIndex:0];
+    }
+    [self.frameBuffers removeAllObjects];
 }
 
 - (void)showFileConfigPanle:(NSURL*)fileUrl {
@@ -496,6 +567,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)renderFrame:(VideoFrame *)frame {
+    [self renderFrame:frame withIndex:0];
+}
+
+- (void)renderFrame:(VideoFrame *)frame withIndex:(NSUInteger)index {
     uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
     [self.renderFps update:1 now:now_ms];
     self.renderCount++;
@@ -510,27 +585,37 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         [self.yuvFileDumper dumpToFile:frame];
     }
 
-    frame = [self pushFrameToOrderedlist:frame];
+    frame = [self pushFrameToOrderedlist:frame withIndex:index];
     if (frame != nil) {
-        [self.multiPlayView renderFrame:frame];
+        [self.multiPlayView renderFrame:frame withIndex:index];
     }
 }
 
-- (VideoFrame*)pushFrameToOrderedlist:(VideoFrame*)frame {
-    NSUInteger index = 0;
-    for (; index < self.frameOrderedList.count; index++) {
-        if (CMTimeCompare(frame.presentationTimeStamp, self.frameOrderedList[index].presentationTimeStamp) == -1) {
+- (VideoFrame*)pushFrameToOrderedlist:(VideoFrame*)frame withIndex:(NSUInteger)index {
+    if (CMTIME_IS_INVALID(frame.presentationTimeStamp)) {
+        return frame;
+    }
+    
+    NSMutableArray<VideoFrame*> *frames = [self.frameBuffers objectForKey:@(index)];
+    if (frames == nil) {
+        frames = [[NSMutableArray alloc] init];
+        [self.frameBuffers setObject:frames forKey:@(index)];
+    }
+    
+    index = 0;
+    for (; index < frames.count; index++) {
+        if (CMTimeCompare(frame.presentationTimeStamp, frames[index].presentationTimeStamp) == -1) {
             break;
         }
     }
     
-    [self.frameOrderedList insertObject:frame atIndex:index];
+    [frames insertObject:frame atIndex:index];
     
-    if (self.frameOrderedList.count < 4) {
+    if (frames.count < 4) {
         return nil;
     } else {
-        frame = self.frameOrderedList.firstObject;
-        [self.frameOrderedList removeObjectAtIndex:0];
+        frame = frames.firstObject;
+        [frames removeObjectAtIndex:0];
         return frame;
     }
 }
@@ -545,6 +630,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)setupUI {
+    self.videoTracks = [[NSMutableArray alloc] initWithCapacity:5];
     self.decoder = self.openh264Decoder;
     self.encoder = self.openh264Encoder;
     self.palyCtrlView.delegate = self;
@@ -719,11 +805,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     return _renderFps;
 }
 
-- (NSMutableArray*)frameOrderedList {
-    if (_frameOrderedList == nil) {
-        _frameOrderedList = [[NSMutableArray alloc] init];
+- (NSMutableDictionary*)frameBuffers {
+    if (_frameBuffers == nil) {
+        _frameBuffers = [[NSMutableDictionary alloc] init];
     }
-    return _frameOrderedList;
+    return _frameBuffers;
 }
 
 - (FormatConvert*)formatConvert {

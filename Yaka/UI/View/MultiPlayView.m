@@ -55,6 +55,7 @@
             SampleVideoRenderView *renderView = [self.arrangedSubviews lastObject];
             [self removeArrangedSubview:renderView];
             [self.renderViews removeObject:renderView];
+            [renderView removeFromSuperview];
         }
     }
 }
