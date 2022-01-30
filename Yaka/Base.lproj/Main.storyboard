@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19162" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" initialViewController="B8D-0N-5wS">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19162"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19529"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -175,7 +175,7 @@
                             </menuItem>
                             <menuItem title="显示" id="H8h-7b-M4v">
                                 <modifierMask key="keyEquivalentModifierMask"/>
-                                <menu key="submenu" title="显示" id="HyV-fh-RgO">
+                                <menu key="submenu" title="显示" autoenablesItems="NO" id="HyV-fh-RgO">
                                     <items>
                                         <menuItem title="进入全屏" keyEquivalent="f" id="4J7-dP-txa">
                                             <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
@@ -184,6 +184,47 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="hB3-LF-h0Y"/>
+                                        <menuItem title="色彩空间" id="hql-p1-51t">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <menu key="submenu" id="jCs-OL-QqU">
+                                                <items>
+                                                    <menuItem title="Y" state="on" keyEquivalent="y" identifier="Y" id="kmK-z7-5Hf">
+                                                        <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                                        <connections>
+                                                            <action selector="colorspaceMenuAction:" target="Ady-hI-5gd" id="srw-FT-ejs"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="U" state="on" tag="1" keyEquivalent="u" identifier="U" id="91O-QK-vS3">
+                                                        <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                                        <connections>
+                                                            <action selector="colorspaceMenuAction:" target="Ady-hI-5gd" id="Vid-NE-G6Z"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="V" state="on" tag="2" keyEquivalent="v" identifier="V" id="VFF-6d-SUu">
+                                                        <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                                        <connections>
+                                                            <action selector="colorspaceMenuAction:" target="Ady-hI-5gd" id="cnb-VC-jjN"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                        </menuItem>
+                                        <menuItem title="缩略图面板" keyEquivalent="t" id="hTP-ce-Avm">
+                                            <connections>
+                                                <action selector="thumbnailMenuAction:" target="Ady-hI-5gd" id="9mz-ya-TBb"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="信息面板" state="on" keyEquivalent="i" id="8Gh-hK-e2Y">
+                                            <connections>
+                                                <action selector="bulletinMenuAction:" target="Ady-hI-5gd" id="qfH-KZ-ebv"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="状态栏" state="on" keyEquivalent="/" id="aAG-q2-gg6">
+                                            <connections>
+                                                <action selector="statusbarAction:" target="Ady-hI-5gd" id="gOd-hu-cHS"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="cOd-5q-HLz"/>
                                         <menuItem title="向左旋转" keyEquivalent="L" identifier="rotateLeft" id="snW-S8-Cw5">
                                             <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                             <connections>
@@ -219,6 +260,28 @@
                                             <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>
                                                 <action selector="multiPlayModeAction:" target="Ady-hI-5gd" id="nPT-s9-yI4"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="多文件窗口模式" enabled="NO" id="LyO-Dk-Euv">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <menu key="submenu" id="1Tv-7s-hYN">
+                                                <items>
+                                                    <menuItem title="单窗口" state="on" enabled="NO" id="efn-Si-e9V">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="multiFileWindowModeAction:" target="Ady-hI-5gd" id="8dh-yz-Inb"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="多窗口" tag="1" enabled="NO" id="lJ7-Uq-T4e">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="multiFileWindowModeAction:" target="Ady-hI-5gd" id="nkN-Sn-AVU"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                </items>
+                                            </menu>
+                                            <connections>
+                                                <action selector="multiPlayModeAction:" target="Ady-hI-5gd" id="PM3-fl-CTl"/>
                                             </connections>
                                         </menuItem>
                                     </items>
@@ -290,6 +353,7 @@
                                 <menu key="submenu" title="工具" id="kHE-fo-QLU">
                                     <items>
                                         <menuItem title="格式转换" keyEquivalent="t" id="r3G-4g-lHj">
+                                            <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                             <connections>
                                                 <action selector="openConvertTool:" target="Ady-hI-5gd" id="8CN-IP-ghU"/>
                                             </connections>
@@ -344,7 +408,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1415" y="-1694"/>
+            <point key="canvasLocation" x="-2375" y="-1365"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -371,28 +435,75 @@
             <objects>
                 <viewController id="XfG-lQ-9wD" customClass="MainViewController" sceneMemberID="viewController">
                     <view key="view" wantsLayer="YES" id="m2S-Jp-Qdl" customClass="DragOperationView">
-                        <rect key="frame" x="0.0" y="0.0" width="782" height="540"/>
+                        <rect key="frame" x="0.0" y="0.0" width="808" height="653"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="XIf-Ag-0jF">
+                                <rect key="frame" x="0.0" y="523" width="808" height="130"/>
+                                <subviews>
+                                    <scrollView wantsLayer="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="byu-8C-MvL">
+                                        <rect key="frame" x="0.0" y="1" width="808" height="129"/>
+                                        <clipView key="contentView" id="ffX-5O-xVh">
+                                            <rect key="frame" x="0.0" y="0.0" width="808" height="129"/>
+                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <subviews>
+                                                <collectionView id="lfg-qx-YC9">
+                                                    <rect key="frame" x="0.0" y="0.0" width="808" height="158"/>
+                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
+                                                    <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="10" minimumLineSpacing="10" id="iHy-ci-zuV">
+                                                        <size key="itemSize" width="50" height="50"/>
+                                                    </collectionViewFlowLayout>
+                                                    <color key="primaryBackgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                </collectionView>
+                                            </subviews>
+                                        </clipView>
+                                        <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="TxO-hY-Tv3">
+                                            <rect key="frame" x="1" y="113" width="780" height="16"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </scroller>
+                                        <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="c5m-qA-eqh">
+                                            <rect key="frame" x="792" y="0.0" width="16" height="129"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </scroller>
+                                    </scrollView>
+                                    <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="f5Q-Yg-G29">
+                                        <rect key="frame" x="0.0" y="-2" width="808" height="5"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="1" id="TbT-A1-kXd"/>
+                                        </constraints>
+                                    </box>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="f5Q-Yg-G29" firstAttribute="leading" secondItem="XIf-Ag-0jF" secondAttribute="leading" id="9ii-dF-lKH"/>
+                                    <constraint firstAttribute="bottom" secondItem="f5Q-Yg-G29" secondAttribute="bottom" id="Ct9-g8-Frb"/>
+                                    <constraint firstAttribute="trailing" secondItem="f5Q-Yg-G29" secondAttribute="trailing" id="Iqc-hY-yQG"/>
+                                    <constraint firstItem="byu-8C-MvL" firstAttribute="leading" secondItem="XIf-Ag-0jF" secondAttribute="leading" id="MiS-Jj-fm0"/>
+                                    <constraint firstAttribute="height" constant="130" id="NuH-jW-hTH"/>
+                                    <constraint firstItem="f5Q-Yg-G29" firstAttribute="top" secondItem="byu-8C-MvL" secondAttribute="bottom" id="U0P-Ey-foY"/>
+                                    <constraint firstAttribute="trailing" secondItem="byu-8C-MvL" secondAttribute="trailing" id="XRy-uG-lg1"/>
+                                    <constraint firstItem="byu-8C-MvL" firstAttribute="top" secondItem="XIf-Ag-0jF" secondAttribute="top" id="lTT-BE-emb"/>
+                                </constraints>
+                            </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="9os-Vc-Xyu">
-                                <rect key="frame" x="0.0" y="100" width="782" height="440"/>
+                                <rect key="frame" x="0.0" y="122" width="808" height="401"/>
                                 <subviews>
                                     <customView translatesAutoresizingMaskIntoConstraints="NO" id="22b-gu-jCO" customClass="MultiPlayView">
-                                        <rect key="frame" x="0.0" y="0.0" width="782" height="440"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="808" height="401"/>
                                     </customView>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="22b-gu-jCO" secondAttribute="trailing" id="6aI-C0-nf0"/>
+                                    <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="120" id="PTn-TX-vUJ"/>
                                     <constraint firstItem="22b-gu-jCO" firstAttribute="top" secondItem="9os-Vc-Xyu" secondAttribute="top" id="W9I-3x-d6d"/>
                                     <constraint firstItem="22b-gu-jCO" firstAttribute="leading" secondItem="9os-Vc-Xyu" secondAttribute="leading" id="izA-kF-2zd"/>
                                     <constraint firstAttribute="bottom" secondItem="22b-gu-jCO" secondAttribute="bottom" id="t6r-XL-TI1"/>
                                 </constraints>
                             </customView>
                             <customView translatesAutoresizingMaskIntoConstraints="NO" id="HPT-da-RwN" customClass="PalyCtrlView">
-                                <rect key="frame" x="0.0" y="0.0" width="782" height="100"/>
+                                <rect key="frame" x="0.0" y="22" width="808" height="100"/>
                                 <subviews>
                                     <slider verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="NJa-8h-Deq">
-                                        <rect key="frame" x="73" y="14" width="636" height="28"/>
+                                        <rect key="frame" x="73" y="14" width="662" height="28"/>
                                         <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="500" tickMarkPosition="above" sliderType="linear" id="0xb-gy-Mr0"/>
                                         <connections>
                                             <action selector="onSliderValueChanged:" target="HPT-da-RwN" id="bf4-Lc-0Ly"/>
@@ -410,7 +521,7 @@
                                         </textFieldCell>
                                     </textField>
                                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="tDf-A9-mo5">
-                                        <rect key="frame" x="710" y="23" width="64" height="15"/>
+                                        <rect key="frame" x="736" y="23" width="64" height="15"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="60" id="f1T-mR-3qs"/>
                                         </constraints>
@@ -421,7 +532,7 @@
                                         </textFieldCell>
                                     </textField>
                                     <button verticalHuggingPriority="750" tag="6" translatesAutoresizingMaskIntoConstraints="NO" id="8s1-F8-yR0">
-                                        <rect key="frame" x="376" y="52" width="30" height="26"/>
+                                        <rect key="frame" x="389" y="52" width="30" height="26"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="TI1-mG-1q0"/>
                                             <constraint firstAttribute="width" constant="30" id="fGF-lQ-V8X"/>
@@ -435,7 +546,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="plY-CQ-Bwb">
-                                        <rect key="frame" x="341" y="53.5" width="30" height="23"/>
+                                        <rect key="frame" x="354" y="53.5" width="30" height="23"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="30" id="BNQ-1r-4oa"/>
                                             <constraint firstAttribute="height" constant="20" id="haf-lG-VRb"/>
@@ -449,7 +560,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="ZrC-81-Wl3">
-                                        <rect key="frame" x="306" y="53.5" width="30" height="24"/>
+                                        <rect key="frame" x="319" y="53.5" width="30" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="MOa-A5-5Rs"/>
                                             <constraint firstAttribute="width" constant="30" id="fFG-xv-wEN"/>
@@ -463,7 +574,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="Lhi-bG-zTS">
-                                        <rect key="frame" x="411" y="53.5" width="30" height="23"/>
+                                        <rect key="frame" x="424" y="53.5" width="30" height="23"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="20" id="8vo-eu-L1n"/>
                                             <constraint firstAttribute="width" constant="30" id="lbm-Fd-6U5"/>
@@ -477,7 +588,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="eq7-te-BiC">
-                                        <rect key="frame" x="446" y="53.5" width="30" height="24"/>
+                                        <rect key="frame" x="459" y="53.5" width="30" height="24"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="30" id="CyC-rE-UgT"/>
                                             <constraint firstAttribute="height" constant="20" id="chD-6G-Eds"/>
@@ -517,34 +628,6 @@
                                             <outlet property="delegate" destination="HPT-da-RwN" id="byV-oX-Bv5"/>
                                         </connections>
                                     </textField>
-                                    <comboBox verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="pXf-LU-5NZ">
-                                        <rect key="frame" x="682" y="52" width="93" height="25"/>
-                                        <constraints>
-                                            <constraint firstAttribute="width" constant="90" id="Kpb-ZX-f9U"/>
-                                        </constraints>
-                                        <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" completes="NO" numberOfVisibleItems="5" id="eYv-IB-QpN">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                            <objectValues>
-                                                <string>420_I420</string>
-                                                <string>420_NV12</string>
-                                                <string>420_P010</string>
-                                                <string>420_I010</string>
-                                            </objectValues>
-                                        </comboBoxCell>
-                                        <connections>
-                                            <action selector="onFormatComboboxChanged:" target="HPT-da-RwN" id="G6C-nh-1SW"/>
-                                        </connections>
-                                    </comboBox>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="eGL-hs-vKm">
-                                        <rect key="frame" x="648" y="57" width="31" height="16"/>
-                                        <textFieldCell key="cell" lineBreakMode="clipping" title="格式" id="Et9-bs-vXv">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
                                     <stepper horizontalHuggingPriority="750" verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="j9l-OO-5pv">
                                         <rect key="frame" x="91" y="51" width="19" height="28"/>
                                         <stepperCell key="cell" continuous="YES" alignment="left" minValue="1" maxValue="999999999" doubleValue="24" id="l0g-IV-g8e"/>
@@ -559,7 +642,6 @@
                                     <constraint firstItem="j9l-OO-5pv" firstAttribute="leading" secondItem="xf4-dy-VHE" secondAttribute="trailing" id="4gc-ru-fX4"/>
                                     <constraint firstItem="eq7-te-BiC" firstAttribute="leading" secondItem="Lhi-bG-zTS" secondAttribute="trailing" constant="5" id="71D-mZ-t93"/>
                                     <constraint firstItem="6qP-om-CWH" firstAttribute="centerX" secondItem="DKU-87-B8O" secondAttribute="centerX" id="7Qh-aN-lgR"/>
-                                    <constraint firstItem="tDf-A9-mo5" firstAttribute="top" secondItem="pXf-LU-5NZ" secondAttribute="bottom" constant="18" id="8te-xv-1fq"/>
                                     <constraint firstAttribute="height" constant="100" id="C1Q-Tu-rvq"/>
                                     <constraint firstItem="plY-CQ-Bwb" firstAttribute="centerY" secondItem="ZrC-81-Wl3" secondAttribute="centerY" id="GGy-hS-We1"/>
                                     <constraint firstItem="8s1-F8-yR0" firstAttribute="centerY" secondItem="DKU-87-B8O" secondAttribute="centerY" id="HIT-mG-u1J"/>
@@ -571,29 +653,23 @@
                                     <constraint firstItem="xf4-dy-VHE" firstAttribute="centerY" secondItem="DKU-87-B8O" secondAttribute="centerY" id="Tgd-aV-Pav"/>
                                     <constraint firstItem="8s1-F8-yR0" firstAttribute="centerX" secondItem="HPT-da-RwN" secondAttribute="centerX" id="Tky-Fj-MLA"/>
                                     <constraint firstItem="tDf-A9-mo5" firstAttribute="leading" secondItem="NJa-8h-Deq" secondAttribute="trailing" constant="5" id="Uvv-2w-vFC"/>
-                                    <constraint firstItem="eGL-hs-vKm" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="eq7-te-BiC" secondAttribute="trailing" constant="20" id="Zen-Yl-kHE"/>
                                     <constraint firstItem="NJa-8h-Deq" firstAttribute="leading" secondItem="6qP-om-CWH" secondAttribute="trailing" constant="5" id="aJC-Wi-1mg"/>
                                     <constraint firstItem="eq7-te-BiC" firstAttribute="centerY" secondItem="ZrC-81-Wl3" secondAttribute="centerY" id="b9b-sv-MSh"/>
                                     <constraint firstItem="plY-CQ-Bwb" firstAttribute="centerY" secondItem="ZrC-81-Wl3" secondAttribute="centerY" id="bNF-4q-DzA"/>
                                     <constraint firstItem="6qP-om-CWH" firstAttribute="baseline" secondItem="tDf-A9-mo5" secondAttribute="baseline" id="cbr-rN-t9B"/>
                                     <constraint firstItem="plY-CQ-Bwb" firstAttribute="leading" secondItem="ZrC-81-Wl3" secondAttribute="trailing" constant="5" id="dUn-wF-7lk"/>
-                                    <constraint firstItem="tDf-A9-mo5" firstAttribute="trailing" secondItem="pXf-LU-5NZ" secondAttribute="trailing" id="eZZ-RL-ShP"/>
                                     <constraint firstItem="Lhi-bG-zTS" firstAttribute="centerY" secondItem="ZrC-81-Wl3" secondAttribute="centerY" id="fRe-Ys-PcN"/>
                                     <constraint firstItem="NJa-8h-Deq" firstAttribute="centerY" secondItem="HPT-da-RwN" secondAttribute="centerY" constant="20" id="gmn-Yp-uGd"/>
                                     <constraint firstItem="8s1-F8-yR0" firstAttribute="leading" secondItem="plY-CQ-Bwb" secondAttribute="trailing" constant="5" id="gst-Iy-lRO"/>
                                     <constraint firstItem="tDf-A9-mo5" firstAttribute="centerY" secondItem="6qP-om-CWH" secondAttribute="centerY" id="hln-e7-kmg"/>
-                                    <constraint firstItem="pXf-LU-5NZ" firstAttribute="centerY" secondItem="8s1-F8-yR0" secondAttribute="centerY" id="jAc-pD-XOP"/>
                                     <constraint firstItem="8s1-F8-yR0" firstAttribute="centerY" secondItem="ZrC-81-Wl3" secondAttribute="centerY" id="jGU-fP-QoN"/>
                                     <constraint firstItem="Lhi-bG-zTS" firstAttribute="leading" secondItem="8s1-F8-yR0" secondAttribute="trailing" constant="5" id="l1G-TC-Iza"/>
                                     <constraint firstItem="tDf-A9-mo5" firstAttribute="leading" secondItem="NJa-8h-Deq" secondAttribute="trailing" constant="5" id="nD9-WZ-ktE"/>
                                     <constraint firstItem="6qP-om-CWH" firstAttribute="top" secondItem="xf4-dy-VHE" secondAttribute="bottom" constant="17" id="oWm-NL-9uP"/>
                                     <constraint firstItem="xf4-dy-VHE" firstAttribute="leading" secondItem="DKU-87-B8O" secondAttribute="trailing" constant="5" id="qgb-o6-7xW"/>
-                                    <constraint firstItem="pXf-LU-5NZ" firstAttribute="centerY" secondItem="eGL-hs-vKm" secondAttribute="centerY" id="wNH-nx-XMn"/>
-                                    <constraint firstItem="pXf-LU-5NZ" firstAttribute="leading" secondItem="eGL-hs-vKm" secondAttribute="trailing" constant="5" id="yaE-Sn-7uT"/>
                                     <constraint firstItem="j9l-OO-5pv" firstAttribute="centerY" secondItem="xf4-dy-VHE" secondAttribute="centerY" id="zRU-fm-FE0"/>
                                 </constraints>
                                 <connections>
-                                    <outlet property="formatComboBox" destination="pXf-LU-5NZ" id="MCb-gn-ZkZ"/>
                                     <outlet property="fpsStepper" destination="j9l-OO-5pv" id="alK-Tx-13d"/>
                                     <outlet property="playButton" destination="8s1-F8-yR0" id="MEx-1m-JCl"/>
                                     <outlet property="progressSlider" destination="NJa-8h-Deq" id="2om-Ve-uMs"/>
@@ -602,15 +678,38 @@
                                     <outlet property="textMaxFrameIndex" destination="tDf-A9-mo5" id="046-RI-g74"/>
                                 </connections>
                             </customView>
+                            <customView translatesAutoresizingMaskIntoConstraints="NO" id="oNh-tp-rGE">
+                                <rect key="frame" x="0.0" y="0.0" width="808" height="22"/>
+                                <subviews>
+                                    <box verticalHuggingPriority="750" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="9Sz-K1-eJF">
+                                        <rect key="frame" x="0.0" y="19" width="808" height="5"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" relation="lessThanOrEqual" constant="1" id="Qu1-4k-BPj"/>
+                                        </constraints>
+                                    </box>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="9Sz-K1-eJF" secondAttribute="trailing" id="0nm-Bq-hhs"/>
+                                    <constraint firstAttribute="height" constant="22" id="Bg5-PI-GYg"/>
+                                    <constraint firstItem="9Sz-K1-eJF" firstAttribute="leading" secondItem="oNh-tp-rGE" secondAttribute="leading" id="oKh-W8-0lb"/>
+                                    <constraint firstItem="9Sz-K1-eJF" firstAttribute="top" secondItem="oNh-tp-rGE" secondAttribute="top" id="ucg-6R-M7w"/>
+                                </constraints>
+                            </customView>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="XIf-Ag-0jF" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="6jo-yB-KCL"/>
                             <constraint firstItem="HPT-da-RwN" firstAttribute="top" secondItem="9os-Vc-Xyu" secondAttribute="bottom" id="6xA-Nx-iPb"/>
                             <constraint firstItem="9os-Vc-Xyu" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="AyA-of-6C0"/>
+                            <constraint firstItem="XIf-Ag-0jF" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="F8M-L0-P0R"/>
                             <constraint firstAttribute="trailing" secondItem="HPT-da-RwN" secondAttribute="trailing" id="Hr5-N8-2PV"/>
-                            <constraint firstItem="9os-Vc-Xyu" firstAttribute="top" secondItem="m2S-Jp-Qdl" secondAttribute="top" id="c21-Kv-WqQ"/>
+                            <constraint firstAttribute="trailing" secondItem="oNh-tp-rGE" secondAttribute="trailing" id="OWG-57-Sjt"/>
+                            <constraint firstAttribute="bottom" secondItem="oNh-tp-rGE" secondAttribute="bottom" id="cgE-wd-Mu2"/>
                             <constraint firstItem="HPT-da-RwN" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="dNg-kW-ZPO"/>
-                            <constraint firstAttribute="bottom" secondItem="HPT-da-RwN" secondAttribute="bottom" id="dRJ-v5-gb6"/>
                             <constraint firstAttribute="trailing" secondItem="9os-Vc-Xyu" secondAttribute="trailing" id="e62-7z-Eet"/>
+                            <constraint firstItem="oNh-tp-rGE" firstAttribute="leading" secondItem="m2S-Jp-Qdl" secondAttribute="leading" id="fDw-yM-QPx"/>
+                            <constraint firstAttribute="trailing" secondItem="XIf-Ag-0jF" secondAttribute="trailing" id="qfq-hQ-yMq"/>
+                            <constraint firstItem="oNh-tp-rGE" firstAttribute="top" secondItem="HPT-da-RwN" secondAttribute="bottom" id="rmv-Yg-3hv"/>
+                            <constraint firstItem="9os-Vc-Xyu" firstAttribute="top" secondItem="XIf-Ag-0jF" secondAttribute="bottom" id="yYf-US-Sc9"/>
                         </constraints>
                         <connections>
                             <outlet property="delegate" destination="XfG-lQ-9wD" id="7ud-H7-LXE"/>
@@ -619,11 +718,13 @@
                     <connections>
                         <outlet property="multiPlayView" destination="22b-gu-jCO" id="GJO-6P-Uj1"/>
                         <outlet property="palyCtrlView" destination="HPT-da-RwN" id="yRh-LC-lfD"/>
+                        <outlet property="statusbarConstraint" destination="Bg5-PI-GYg" id="2ly-NB-65P"/>
+                        <outlet property="thumbnailHeightConstraint" destination="NuH-jW-hTH" id="4em-As-9PG"/>
                     </connections>
                 </viewController>
                 <customObject id="rPt-NT-nkU" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1483" y="-662"/>
+            <point key="canvasLocation" x="-1483" y="-586.5"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="ccc-MT-FGW">
@@ -643,7 +744,7 @@
                 </windowController>
                 <customObject id="5Zn-uZ-cUj" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1183" y="-55"/>
+            <point key="canvasLocation" x="-1183" y="257"/>
         </scene>
         <!--文件信息-->
         <scene sceneID="iYo-1e-MhD">
@@ -869,7 +970,7 @@
                 </viewController>
                 <customObject id="LyI-ji-T80" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1183" y="358"/>
+            <point key="canvasLocation" x="-1183" y="670"/>
         </scene>
         <!--Tab View Controller-->
         <scene sceneID="2bb-yS-b9A">
@@ -897,7 +998,7 @@
                 </tabViewController>
                 <customObject id="Fxa-Dg-Ol2" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1894" y="1855"/>
+            <point key="canvasLocation" x="-1029" y="997"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="GYi-1k-k9m">
@@ -922,7 +1023,7 @@
                 </windowController>
                 <customObject id="FX7-vL-FZs" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2463" y="1849"/>
+            <point key="canvasLocation" x="-1598" y="991"/>
         </scene>
         <!--通用-->
         <scene sceneID="ZJ4-ZT-tnI">
@@ -935,7 +1036,7 @@
                 </viewController>
                 <customObject id="Qwu-5g-O4S" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2505" y="2348"/>
+            <point key="canvasLocation" x="-1785" y="1493"/>
         </scene>
         <!--高级-->
         <scene sceneID="F8a-hc-Kae">
@@ -948,7 +1049,7 @@
                 </viewController>
                 <customObject id="zhq-m9-y1P" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1533" y="2348"/>
+            <point key="canvasLocation" x="-813" y="1493"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="KN8-IW-W0q">
@@ -1023,7 +1124,7 @@
                 </windowController>
                 <customObject id="u4q-gH-YIQ" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1738" y="-55"/>
+            <point key="canvasLocation" x="-1738" y="257"/>
         </scene>
         <!--Format ConvertV Ctrl-->
         <scene sceneID="L5S-WS-VhV">
@@ -1389,7 +1490,7 @@
                 </viewController>
                 <customObject id="RXF-Bn-Idm" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1738" y="359"/>
+            <point key="canvasLocation" x="-1738" y="671"/>
         </scene>
         <!--视频-->
         <scene sceneID="qoa-xO-kp0">
@@ -1402,7 +1503,7 @@
                 </viewController>
                 <customObject id="8YH-nd-hko" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2019" y="2348"/>
+            <point key="canvasLocation" x="-1299" y="1493"/>
         </scene>
     </scenes>
     <resources>

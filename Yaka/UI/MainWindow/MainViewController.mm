@@ -78,6 +78,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 @property(nonatomic, strong) BulletinView *bulletinView;
 
+@property (weak) IBOutlet NSLayoutConstraint *thumbnailHeightConstraint;
+@property (weak) IBOutlet NSLayoutConstraint *statusbarConstraint;
+
 @property(nonatomic, assign) BOOL isLoop;
 
 @property(nonatomic, assign) uint64_t lastPrintLog;
@@ -162,7 +165,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     
     self.palyCtrlView.progressSlider.minValue = 1;
     self.palyCtrlView.progressSlider.maxValue = 1;
-    self.palyCtrlView.formatComboBox.enabled = NO;
     [self.palyCtrlView.textMaxFrameIndex setStringValue:@"-"];
     [self.palyCtrlView.textCurFrameIndex setStringValue:@"-"];
     [self.palyCtrlView.progressSlider setIntValue:1];
@@ -216,6 +218,47 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.view.window.title = menuItem.title;
 }
 
+- (IBAction)colorspaceMenuAction:(id)sender {
+    NSMenuItem *menuItem = sender;
+    if (menuItem.state == NSControlStateValueOn) {
+        menuItem.state = NSControlStateValueOff;
+    } else {
+        menuItem.state = NSControlStateValueOn;
+    }
+}
+
+- (IBAction)thumbnailMenuAction:(id)sender {
+    NSMenuItem *menuItem = sender;
+    if (menuItem.state == NSControlStateValueOn) {
+        menuItem.state = NSControlStateValueOff;
+        self.thumbnailHeightConstraint.constant = 0;
+    } else {
+        menuItem.state = NSControlStateValueOn;
+        self.thumbnailHeightConstraint.constant = 130;
+    }
+}
+
+- (IBAction)statusbarAction:(id)sender {
+    NSMenuItem *menuItem = sender;
+    if (menuItem.state == NSControlStateValueOn) {
+        menuItem.state = NSControlStateValueOff;
+        self.statusbarConstraint.constant = 0;
+    } else {
+        menuItem.state = NSControlStateValueOn;
+        self.statusbarConstraint.constant = 22;
+    }
+}
+
+- (IBAction)bulletinMenuAction:(id)sender {
+    NSMenuItem *menuItem = sender;
+    if (menuItem.state == NSControlStateValueOn) {
+        menuItem.state = NSControlStateValueOff;
+    } else {
+        menuItem.state = NSControlStateValueOn;
+    }
+    self.bulletinView.hidden = (menuItem.state == NSControlStateValueOff);
+}
+
 - (IBAction)loopStatUpdated:(id) sender {
     NSMenuItem *loopMenuItem = sender;
     if (loopMenuItem.state == NSControlStateValueOn) {
@@ -231,13 +274,28 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (IBAction)multiPlayModeAction:(id)sender {
-    NSMenuItem *multiPlayMenuItem = sender;
-    if (multiPlayMenuItem.state == NSControlStateValueOn) {
-        multiPlayMenuItem.state = NSControlStateValueOff;
+    NSMenuItem *menuItem = sender;
+    NSUInteger index = [menuItem.menu.itemArray indexOfObject:menuItem];
+    NSMenuItem *subItem = [menuItem.menu itemAtIndex:index+1];
+    if (menuItem.state == NSControlStateValueOn) {
+        menuItem.state = NSControlStateValueOff;
         self.multiPlayMode = NO;
+        subItem.enabled = NO;
     } else {
-        multiPlayMenuItem.state = NSControlStateValueOn;
+        menuItem.state = NSControlStateValueOn;
         self.multiPlayMode = YES;
+        subItem.enabled = YES;
+    }
+}
+
+- (IBAction)multiFileWindowModeAction:(id)sender {
+    NSMenuItem *menuItem = sender;
+    if (menuItem.tag == 0) {
+        menuItem.state = NSControlStateValueOn;
+        [menuItem.menu itemAtIndex:1].state = NSControlStateValueOff;
+    } else if (menuItem.tag == 1) {
+        menuItem.state = NSControlStateValueOn;
+        [menuItem.menu itemAtIndex:0].state = NSControlStateValueOff;
     }
 }
 
@@ -401,10 +459,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     }
 }
 
-- (void)palyCtrlView:(PalyCtrlView*) palyCtrlView formatUpdated:(NSInteger) indexOfSelectedItem {
-    
-}
-
 - (void)palyCtrlView:(PalyCtrlView*) palyCtrlView fpsUpdated:(int) fps {
     self.fileSourceCapture.fps = fps;
     for (VideoTrack *videoTrack in self.videoTracks) {
@@ -519,15 +573,11 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         PixelFormatType formats[] = {kPixelFormatType_420_I420, kPixelFormatType_420_NV12, kPixelFormatType_420_P010, kPixelFormatType_420_I010};
         PixelFormatType format = formats[formatIndex];
         self.videoTrack = [[VideoTrack alloc] initWithRawFile:filePath.path width:width height:height pixelFormat:format];
-        self.palyCtrlView.formatComboBox.enabled = YES;
-        [self.palyCtrlView.formatComboBox selectItemAtIndex:formatIndex];
     } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"]
                || [filePath.path hasSuffix:@"h265"] || [filePath.path hasSuffix:@"265"] ) {
         self.videoTrack = [[VideoTrack alloc] initWithNalFile:filePath.path];
-        self.palyCtrlView.formatComboBox.enabled = NO;
     } else if ([filePath.path hasSuffix:@"flv"]) {
         self.videoTrack = [[VideoTrack alloc] initWithFlvFile:filePath.path];
-        self.palyCtrlView.formatComboBox.enabled = NO;
     }
     
     [self.videoTracks addObject:self.videoTrack];
@@ -636,6 +686,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.palyCtrlView.delegate = self;
     [self updateRecordMenu];
     [self setupBulletinView];
+    self.thumbnailHeightConstraint.constant = 0;
 }
 
 - (void)setupBulletinView {

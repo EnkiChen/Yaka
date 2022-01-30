@@ -77,13 +77,6 @@
     }
 }
 
-- (IBAction)onFormatComboboxChanged:(id)sender {
-    NSComboBox *formatCombobox = sender;
-    if (self.delegate != nil) {
-        [self.delegate palyCtrlView:self formatUpdated:formatCombobox.indexOfSelectedItem];
-    }
-}
-
 - (IBAction)onFpsStepperChanged:(id)sender {
     [self.textFps setStringValue:[sender stringValue]];
     if (self.delegate != nil) {

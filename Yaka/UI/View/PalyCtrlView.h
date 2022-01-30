@@ -34,8 +34,6 @@ typedef NS_ENUM(NSInteger, PlayControlState) {
 
 - (void)palyCtrlView:(PalyCtrlView*)palyCtrlView progressUpdated:(NSInteger)index;
 
-- (void)palyCtrlView:(PalyCtrlView*)palyCtrlView formatUpdated:(NSInteger)indexOfSelectedItem;
-
 - (void)palyCtrlView:(PalyCtrlView*)palyCtrlView fpsUpdated:(int)fps;
 
 - (void)palyCtrlView:(PalyCtrlView*)palyCtrlView playStatusUpdated:(CtrlType)ctrlType;
@@ -57,8 +55,6 @@ typedef NS_ENUM(NSInteger, PlayControlState) {
 
 @property (weak) IBOutlet NSTextField *textFps;
 @property (weak) IBOutlet NSStepper *fpsStepper;
-
-@property (weak) IBOutlet NSComboBox *formatComboBox;
 
 @end
 
