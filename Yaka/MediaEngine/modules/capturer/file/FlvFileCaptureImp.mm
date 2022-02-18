@@ -22,10 +22,10 @@ namespace {
 
 #pragma pack(1)
 typedef struct __flv_header {
-    uint8_t         signature[3]; /* always "FLV" */
-    uint8_t         version; /* should be 1 */
-    uint8_t         flags;
-    uint32_t        offset; /* always 9 */
+    uint8_t signature[3]; /* always "FLV" */
+    uint8_t version; /* should be 1 */
+    uint8_t flags;
+    uint32_t offset; /* always 9 */
 } flv_header;
 #pragma pack()
 
@@ -46,12 +46,12 @@ typedef struct __uint24 {
 
 #pragma pack(1)
 typedef struct __flv_tag {
-    uint32_t    previous_tag_length;
-    uint8_t     type;
-    uint24      body_length; /* in bytes, total tag size minus 11 */
-    uint24      timestamp; /* milli-seconds */
-    uint8       timestamp_extended; /* timestamp extension */
-    uint24      stream_id; /* reserved, must be "\0\0\0" */
+    uint32_t previous_tag_length;
+    uint8_t type;
+    uint24 body_length; /* in bytes, total tag size minus 11 */
+    uint24 timestamp; /* milli-seconds */
+    uint8 timestamp_extended; /* timestamp extension */
+    uint24 stream_id; /* reserved, must be "\0\0\0" */
     /* body comes next */
 } flv_tag;
 #pragma pack(0)
@@ -59,29 +59,79 @@ typedef struct __flv_tag {
 #pragma pack(1)
 typedef struct __flv_tag_video_header {
     struct {
-        uint8_t    codec_id : 4;
-        uint8_t    frame_type : 4;
+        uint8_t codec_id : 4;
+        uint8_t frame_type : 4;
     };
-    uint8_t     avc_packet_type;
-    uint24      composition_time;
+    uint8_t avc_packet_type;
+    uint24 composition_time;
 } flv_video_tag_header;
 #pragma pack(0)
 
 #pragma pack(1)
 typedef struct __avc_decoder_config_header {
-    uint8_t     version;
-    uint8_t     profile;
-    uint8_t     compatibility;
-    uint8_t     level;
+    uint8_t version;
+    uint8_t profile;
+    uint8_t compatibility;
+    uint8_t level;
     struct {
-        uint8_t    length_size_minus_one : 2;
-        uint8_t    reserved_a : 6;
+        uint8_t length_size_minus_one : 2;
+        uint8_t reserved_a : 6;
     };
     struct {
-        uint8_t    num_of_sps_count : 5;
-        uint8_t    reserved_b : 3;
+        uint8_t num_of_sps_count : 5;
+        uint8_t reserved_b : 3;
     };
 } avc_decoder_config_header;
+#pragma pack(0)
+
+#pragma pack(1)
+typedef struct __hvcc_nal_unit {
+    uint8_t nalu_type;
+    uint16_t num_nalus;
+    uint16_t nalu_length;
+} hvcc_nal_unit;
+#pragma pack(0)
+
+#pragma pack(1)
+typedef struct __hevc_decoder_config_header {
+    uint8_t configurationVersion;
+    struct {
+        uint8_t general_profile_idc : 5;
+        uint8_t general_tier_flag : 1;
+        uint8_t general_profile_space : 2;
+    };
+    uint32_t general_profile_compatibility_flags;
+    uint8_t general_constraint_indicator_flags[6];
+    uint8_t general_level_idc;
+    struct {
+        uint16_t min_spatial_segmentation_idc : 12;
+        uint16_t reserved_1 : 4;
+    };
+    struct {
+        uint8_t parallelism_type : 2;
+        uint8_t reserved_2 : 6;
+    };
+    struct {
+        uint8_t chroma_format : 2;
+        uint8_t reserved_3 : 6;
+    };
+    struct {
+        uint8_t bit_depth_luma_minus : 3;
+        uint8_t reserved_4 : 5;
+    };
+    struct {
+        uint8_t bit_depth_chroma_minus : 3;
+        uint8_t reserved_5 : 5;
+    };
+    uint16_t avg_framerate;
+    struct {
+        uint8_t length_size_minus_one : 2;
+        uint8_t num_temporal_layers : 3;
+        uint8_t temporal_id_nested : 1;
+        uint8_t constant_framerate : 2;
+    };
+    uint8_t num_of_nalus;
+} hevc_decoder_config_header;
 #pragma pack(0)
 
 #define FLV_TAG_SIZE 11u
@@ -432,18 +482,55 @@ static const int kDefaultFps = 24;
                 fseek(self.fd, length, SEEK_CUR);
                 
             } else if (video_tag_header.codec_id == FLV_VIDEO_TAG_CODEC_HEVC) {
-                FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:length];
-                videoTagUnit.tagType = flvTag.type;
-                videoTagUnit.timestamp = flv_tag_get_timestamp(flvTag);
-                videoTagUnit.streamId = flv_tag_get_stream_id(flvTag);
-                videoTagUnit.codecId = video_tag_header.codec_id;
-                videoTagUnit.frameType = video_tag_header.frame_type;
-                videoTagUnit.avcPacketType = video_tag_header.avc_packet_type;
-                videoTagUnit.compositionTime = uint24_be_to_uint32(video_tag_header.composition_time);
-                [self.videoTags addObject:videoTagUnit];
+                if (video_tag_header.avc_packet_type == FLV_AVC_PACKET_TYPE_SEQUENCE_HEADER) {
+                    hevc_decoder_config_header hevc_config;
+                    memset(&hevc_config, 0, sizeof(hevc_decoder_config_header));
+                    if ([self fread:&hevc_config length:sizeof(hevc_decoder_config_header) fd:self.fd] != sizeof(hevc_decoder_config_header)) {
+                        break;
+                    }
+                    length -= sizeof(hevc_decoder_config_header);
+                    
+                    for (int i = 0; i < hevc_config.num_of_nalus; i++) {
+                        hvcc_nal_unit nalUnit;
+                        if ([self fread:&nalUnit length:sizeof(hvcc_nal_unit) fd:self.fd] != sizeof(hvcc_nal_unit)) {
+                            break;
+                        }
+                        length -= sizeof(hvcc_nal_unit);
+                        
+                        nalUnit.nalu_type = nalUnit.nalu_type & 0x3F;
+                        nalUnit.num_nalus = CFSwapInt16BigToHost(nalUnit.num_nalus);
+                        nalUnit.nalu_length = CFSwapInt16BigToHost(nalUnit.nalu_length);
+                        
+                        FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:nalUnit.nalu_length];
+                        videoTagUnit.tagType = flvTag.type;
+                        videoTagUnit.timestamp = flv_tag_get_timestamp(flvTag);
+                        videoTagUnit.streamId = flv_tag_get_stream_id(flvTag);
+                        videoTagUnit.codecId = video_tag_header.codec_id;
+                        videoTagUnit.frameType = video_tag_header.frame_type;
+                        videoTagUnit.avcPacketType = video_tag_header.avc_packet_type;
+                        videoTagUnit.compositionTime = uint24_be_to_uint32(video_tag_header.composition_time);
+                        [self.videoTags addObject:videoTagUnit];
+                        
+                        fseek(self.fd, nalUnit.nalu_length, SEEK_CUR);
+                        length -= nalUnit.nalu_length;
+                    }
+                    
+                } else if (video_tag_header.avc_packet_type == FLV_AVC_PACKET_TYPE_NALU) {
+                    FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:length];
+                    videoTagUnit.tagType = flvTag.type;
+                    videoTagUnit.timestamp = flv_tag_get_timestamp(flvTag);
+                    videoTagUnit.streamId = flv_tag_get_stream_id(flvTag);
+                    videoTagUnit.codecId = video_tag_header.codec_id;
+                    videoTagUnit.frameType = video_tag_header.frame_type;
+                    videoTagUnit.avcPacketType = video_tag_header.avc_packet_type;
+                    videoTagUnit.compositionTime = uint24_be_to_uint32(video_tag_header.composition_time);
+                    [self.videoTags addObject:videoTagUnit];
+                    
+                    fseek(self.fd, length, SEEK_CUR);
+                    length -= length;
+                }
                 
                 fseek(self.fd, length, SEEK_CUR);
-                length -= length;
 
             } else {
                 fseek(self.fd, length, SEEK_CUR);
@@ -519,6 +606,33 @@ static const int kDefaultFps = 24;
         nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length];
         readSize = [self fread:nalBuffer.bytes length:(int)videoTagUnint.length fd:self.fd];
         type = NalType_HEVC;
+        
+        BOOL isAnnexB = [self isAnnexBStyle:nalBuffer.bytes length:(int)nalBuffer.length];
+        BOOL isAvcc = [self isAVCCStyle:nalBuffer.bytes length:(int)nalBuffer.length];
+        
+        if (!isAnnexB && isAvcc) {
+            uint32_t length = (uint32_t)videoTagUnint.length;
+            uint8_t *data = (uint8_t *)nalBuffer.bytes;
+            while (length > 0) {
+                uint32_t nalu_length = CFSwapInt32BigToHost(*((uint32_t*)data));
+                data[0] = 0x00;
+                data[1] = 0x00;
+                data[2] = 0x00;
+                data[3] = 0x01;
+                length -= nalu_length + 4;
+                data += nalu_length + 4;
+            }
+        }
+        
+        if (!isAnnexB && !isAvcc) {
+            NalBuffer *buffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length + 4];
+            nalBuffer.bytes[0] = 0x00;
+            nalBuffer.bytes[1] = 0x00;
+            nalBuffer.bytes[2] = 0x00;
+            nalBuffer.bytes[3] = 0x01;
+            memcpy(nalBuffer.bytes + 4, nalBuffer.bytes, videoTagUnint.length);
+            nalBuffer = buffer;
+        }
     }
     if (readSize == videoTagUnint.length) {
         Nal *nal = [[Nal alloc] initWithNalBuffer:nalBuffer];
@@ -540,6 +654,41 @@ static const int kDefaultFps = 24;
         total_size += read_size;
     } while ( read_size != 0 && total_size != length );
     return (int)total_size;
+}
+
+- (BOOL)isAVCCStyle:(void*)buffer length:(int)length {
+    if (length < 6) {
+        return NO;
+    }
+    uint32_t nalu_length = CFSwapInt32BigToHost(*((uint32_t*)buffer));
+    if (nalu_length == length - 4) {
+        return YES;
+    } else if (nalu_length > length - 4) {
+        return NO;
+    } else {
+        uint8_t *data = (uint8_t *)buffer;
+        while (length > 0) {
+            uint32_t data_length = CFSwapInt32BigToHost(*((uint32_t*)data));
+            if (data_length == 0) {
+                return NO;
+            }
+            length -= data_length + 4;
+            data += data_length + 4;
+        }
+        return length == 0;
+    }
+    return NO;
+}
+
+- (BOOL)isAnnexBStyle:(void*)buffer length:(int)length {
+    if (length < 6) {
+        return NO;
+    }
+    uint8_t *data = (uint8_t *)buffer;
+    if (data[0] == 0x00 && data[1] == 0x00 && data[2] == 0x00 && data[3] == 0x01) {
+        return YES;
+    }
+    return NO;
 }
 
 @end
