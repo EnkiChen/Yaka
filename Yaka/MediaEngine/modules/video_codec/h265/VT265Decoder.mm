@@ -165,7 +165,7 @@ struct DecodeCallbackParams {
 
     if (status != noErr) {
         CFRelease(blockBuffer);
-        NSLog(@"create sample Bbuffer fail with error code : %d", status);
+        NSLog(@"create sample buffer fail with error code : %d", status);
         return;
     }
 
@@ -181,10 +181,12 @@ struct DecodeCallbackParams {
             [self.delegate decoder:self onDecoded:videoFrame];
             CVPixelBufferRelease(callbackInfo.pixelBuffer);
         } else {
-            NSLog(@"decode frame status : %d", callbackInfo.status);
+            int nalType = (buffer[H264::kNaluLongStartSequenceSize] & 0x7E) >> 1;
+            NSLog(@"decode frame status : %d, nalu type : %d, length: %lu", callbackInfo.status, nalType, (unsigned long)length);
         }
     } else {
-        NSLog(@"decode frame fail with error code : %d", status);
+        int nalType = (buffer[H264::kNaluLongStartSequenceSize] & 0x7E) >> 1;
+        NSLog(@"decode frame fail with error code : %d, nalu type : %d, length: %lu", status, nalType, (unsigned long)length);
     }
 
     CFRelease(blockBuffer);
