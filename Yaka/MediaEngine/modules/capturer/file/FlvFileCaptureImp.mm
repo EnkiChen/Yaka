@@ -465,7 +465,7 @@ static const int kDefaultFps = 24;
                     }
                 } else if (video_tag_header.avc_packet_type == FLV_AVC_PACKET_TYPE_NALU) {
                     
-                    FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) + 4 length:length - 4];
+                    FlvVideoTagUnit *videoTagUnit = [[FlvVideoTagUnit alloc] initWithOffset:ftell(self.fd) length:length];
                     videoTagUnit.tagType = flvTag.type;
                     videoTagUnit.timestamp = flv_tag_get_timestamp(flvTag);
                     videoTagUnit.streamId = flv_tag_get_stream_id(flvTag);
@@ -591,49 +591,38 @@ static const int kDefaultFps = 24;
     }
     
     fseek(self.fd, videoTagUnint.offset, SEEK_SET);
-    NalBuffer *nalBuffer = nil;
-    int readSize = 0;
+
     NalType type = NalType_H264;
     if (videoTagUnint.codecId == FLV_VIDEO_TAG_CODEC_AVC) {
-        nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length + 4];
-        nalBuffer.bytes[0] = 0x00;
-        nalBuffer.bytes[1] = 0x00;
-        nalBuffer.bytes[2] = 0x00;
-        nalBuffer.bytes[3] = 0x01;
-        readSize = [self fread:nalBuffer.bytes + 4 length:(int)videoTagUnint.length fd:self.fd];
         type = NalType_H264;
     } else if (videoTagUnint.codecId == FLV_VIDEO_TAG_CODEC_HEVC) {
-        nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length];
-        readSize = [self fread:nalBuffer.bytes length:(int)videoTagUnint.length fd:self.fd];
         type = NalType_HEVC;
-        
-        BOOL isAnnexB = [self isAnnexBStyle:nalBuffer.bytes length:(int)nalBuffer.length];
-        BOOL isAvcc = [self isAVCCStyle:nalBuffer.bytes length:(int)nalBuffer.length];
-        
-        if (!isAnnexB && isAvcc) {
-            uint32_t length = (uint32_t)videoTagUnint.length;
-            uint8_t *data = (uint8_t *)nalBuffer.bytes;
-            while (length > 0) {
-                uint32_t nalu_length = CFSwapInt32BigToHost(*((uint32_t*)data));
-                data[0] = 0x00;
-                data[1] = 0x00;
-                data[2] = 0x00;
-                data[3] = 0x01;
-                length -= nalu_length + 4;
-                data += nalu_length + 4;
-            }
-        }
-        
-        if (!isAnnexB && !isAvcc) {
-            NalBuffer *buffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length + 4];
-            nalBuffer.bytes[0] = 0x00;
-            nalBuffer.bytes[1] = 0x00;
-            nalBuffer.bytes[2] = 0x00;
-            nalBuffer.bytes[3] = 0x01;
-            memcpy(nalBuffer.bytes + 4, nalBuffer.bytes, videoTagUnint.length);
-            nalBuffer = buffer;
+    }
+    
+    NalBuffer *nalBuffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length];
+    int readSize = [self fread:nalBuffer.bytes length:(int)videoTagUnint.length fd:self.fd];
+    
+    BOOL isAnnexB = [self isAnnexBStyle:nalBuffer.bytes length:(int)nalBuffer.length];
+    BOOL isAvcc = [self isAVCCStyle:nalBuffer.bytes length:(int)nalBuffer.length];
+    
+    if (!isAnnexB && isAvcc) {
+        uint32_t length = (uint32_t)videoTagUnint.length;
+        uint8_t *data = (uint8_t *)nalBuffer.bytes;
+        while (length > 0) {
+            uint32_t nalu_length = CFSwapInt32BigToHost(*((uint32_t*)data));
+            [self setAnnexBStartCode:data length:length];
+            length -= nalu_length + 4;
+            data += nalu_length + 4;
         }
     }
+    
+    if (!isAnnexB && !isAvcc) {
+        NalBuffer *buffer = [[NalBuffer alloc] initWithLength:(int)videoTagUnint.length + 4];
+        [self setAnnexBStartCode:buffer.bytes length:int(buffer.length)];
+        memcpy(buffer.bytes + 4, nalBuffer.bytes, nalBuffer.length);
+        nalBuffer = buffer;
+    }
+
     if (readSize == videoTagUnint.length) {
         Nal *nal = [[Nal alloc] initWithNalBuffer:nalBuffer];
         nal.nalType = type;
@@ -689,6 +678,16 @@ static const int kDefaultFps = 24;
         return YES;
     }
     return NO;
+}
+
+- (void)setAnnexBStartCode:(void*)buffer length:(int)length {
+    if (length >= 4) {
+        uint8_t *data = (uint8_t *)buffer;
+        data[0] = 0x00;
+        data[1] = 0x00;
+        data[2] = 0x00;
+        data[3] = 0x01;
+    }
 }
 
 @end
