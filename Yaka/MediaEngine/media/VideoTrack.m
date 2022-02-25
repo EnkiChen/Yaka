@@ -110,7 +110,7 @@
 }
 
 - (id<NSObject>)frameWithIndex:(NSUInteger)frameIndex {
-    return [self.fileSource frameWithIndex:fraction];
+    return [self.fileSource frameWithIndex:frameIndex];
 }
 
 #pragma mark - video source action
