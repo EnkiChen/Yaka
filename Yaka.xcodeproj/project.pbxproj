@@ -28,6 +28,7 @@
 		8990538026A995EC00358B8C /* NalUnitSourceFileImp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990537C26A995EC00358B8C /* NalUnitSourceFileImp.mm */; };
 		8990538426AA7B3D00358B8C /* PixelBufferTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990538326AA7B3D00358B8C /* PixelBufferTools.m */; };
 		8990538C26AECCA100358B8C /* SystemTools.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990538A26AECCA100358B8C /* SystemTools.mm */; };
+		899D8DBF27BA7828002AB9EA /* ThumbnailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 899D8DBE27BA7828002AB9EA /* ThumbnailView.m */; };
 		89A03C0F26B6C7270071891E /* libyuv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89A03C0E26B6C7270071891E /* libyuv.a */; };
 		89A74EA626C29D02001DB050 /* VT265Encoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89A74E9326C29D02001DB050 /* VT265Encoder.mm */; };
 		89A74EA726C29D02001DB050 /* VT265Decoder.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89A74E9526C29D02001DB050 /* VT265Decoder.mm */; };
@@ -109,6 +110,8 @@
 		8990538326AA7B3D00358B8C /* PixelBufferTools.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PixelBufferTools.m; sourceTree = "<group>"; };
 		8990538A26AECCA100358B8C /* SystemTools.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemTools.mm; sourceTree = "<group>"; };
 		8990538B26AECCA100358B8C /* SystemTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SystemTools.h; sourceTree = "<group>"; };
+		899D8DBD27BA7828002AB9EA /* ThumbnailView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThumbnailView.h; sourceTree = "<group>"; };
+		899D8DBE27BA7828002AB9EA /* ThumbnailView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ThumbnailView.m; sourceTree = "<group>"; };
 		89A03BF626B6C7270071891E /* libyuv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = libyuv.h; sourceTree = "<group>"; };
 		89A03BF826B6C7270071891E /* scale_row.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scale_row.h; sourceTree = "<group>"; };
 		89A03BF926B6C7270071891E /* scale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = scale.h; sourceTree = "<group>"; };
@@ -664,6 +667,8 @@
 				89FBCBEC276B419B00844DC9 /* BulletinView.m */,
 				896DA45E278EFCDB003B4909 /* MultiPlayView.h */,
 				896DA45F278EFCDB003B4909 /* MultiPlayView.m */,
+				899D8DBD27BA7828002AB9EA /* ThumbnailView.h */,
+				899D8DBE27BA7828002AB9EA /* ThumbnailView.m */,
 			);
 			name = View;
 			path = Yaka/UI/View;
@@ -778,6 +783,7 @@
 				896DA460278EFCDB003B4909 /* MultiPlayView.m in Sources */,
 				89AEF3FF269E80E800DA9FAD /* I420TextureCache.mm in Sources */,
 				89FBCBED276B419B00844DC9 /* BulletinView.m in Sources */,
+				899D8DBF27BA7828002AB9EA /* ThumbnailView.m in Sources */,
 				898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */,
 				89AEF3FB269E80E800DA9FAD /* MTLI420Renderer.mm in Sources */,
 				89A74EAB26C29D02001DB050 /* Openh264Decoder.mm in Sources */,

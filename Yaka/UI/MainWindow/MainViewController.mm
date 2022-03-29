@@ -232,9 +232,15 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     if (menuItem.state == NSControlStateValueOn) {
         menuItem.state = NSControlStateValueOff;
         self.thumbnailHeightConstraint.constant = 0;
+        CGSize contentSize = self.view.window.frame.size;
+        contentSize.height -= 130;
+        [self.view.window setContentSize:contentSize];
     } else {
         menuItem.state = NSControlStateValueOn;
         self.thumbnailHeightConstraint.constant = 130;
+        CGSize contentSize = self.view.window.frame.size;
+        contentSize.height += 130;
+        [self.view.window setContentSize:contentSize];
     }
 }
 

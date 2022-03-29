@@ -9,11 +9,13 @@
 #import <Cocoa/Cocoa.h>
 #import "PalyCtrlView.h"
 #import "MultiPlayView.h"
+#import "ThumbnailView.h"
 
 @interface MainViewController : NSViewController
 
 @property (weak) IBOutlet MultiPlayView *multiPlayView;
 @property (weak) IBOutlet PalyCtrlView *palyCtrlView;
+@property (weak) IBOutlet ThumbnailView *thumbnailView;
 
 @end
 
