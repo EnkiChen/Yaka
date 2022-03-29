@@ -35,7 +35,7 @@
 
 static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", @"flv"];
 
-@interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae>
+@interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae, ThumbnailViewDelegate>
 
 @property(nonatomic, assign) NSUInteger renderCount;
 @property(nonatomic, strong) RateStatistics *renderFps;
@@ -80,6 +80,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 @property (weak) IBOutlet NSLayoutConstraint *thumbnailHeightConstraint;
 @property (weak) IBOutlet NSLayoutConstraint *statusbarConstraint;
+@property (nonatomic, assign) BOOL isDidSelectItems;
 
 @property(nonatomic, assign) BOOL isLoop;
 
@@ -232,15 +233,9 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     if (menuItem.state == NSControlStateValueOn) {
         menuItem.state = NSControlStateValueOff;
         self.thumbnailHeightConstraint.constant = 0;
-        CGSize contentSize = self.view.window.frame.size;
-        contentSize.height -= 130;
-        [self.view.window setContentSize:contentSize];
     } else {
         menuItem.state = NSControlStateValueOn;
         self.thumbnailHeightConstraint.constant = 130;
-        CGSize contentSize = self.view.window.frame.size;
-        contentSize.height += 130;
-        [self.view.window setContentSize:contentSize];
     }
 }
 
@@ -427,6 +422,16 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self renderFrame:frame];
 }
 
+#pragma mark - ThumbnailViewDelegate
+- (void)thumbnailView:(ThumbnailView *)thumbnailView didSelectItemsAtIndexPaths:(NSIndexPath *)indexPath {
+    for (VideoTrack *videoTrack in self.videoTracks) {
+        if (indexPath.item <= videoTrack.totalFrames && indexPath.item > 0) {
+            self.isDidSelectItems = YES;
+            [videoTrack seekToFrameIndex:indexPath.item];
+        }
+    }
+}
+
 
 #pragma mark - FileSourceInterface Action
 - (void)fileSource:(id<FileSourceInterface>) fileSource progressUpdated:(NSUInteger) index {
@@ -443,6 +448,13 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
             [self.palyCtrlView.progressSlider setIntValue:(int)index + 1];
         }
         [self.palyCtrlView.textCurFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)index + 1]];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+        NSCollectionViewScrollPosition position = NSCollectionViewScrollPositionCenteredHorizontally;
+        if (self.isDidSelectItems) {
+            position = NSCollectionViewScrollPositionNone;
+        }
+        [self.thumbnailView selectItemsAtIndexPaths:[NSSet setWithObject:indexPath] scrollPosition:position];
+        self.isDidSelectItems = NO;
     });
 }
 
@@ -455,9 +467,6 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 
 #pragma mark - PalyCtrlView Action
 - (void)palyCtrlView:(PalyCtrlView*)palyCtrlView progressUpdated:(NSInteger)index {
-    if (index <= self.fileSourceCapture.totalFrames && index > 0) {
-        [self.fileSourceCapture seekToFrameIndex:index - 1];
-    }
     for (VideoTrack *videoTrack in self.videoTracks) {
         if (index <= videoTrack.totalFrames && index > 0) {
             [videoTrack seekToFrameIndex:index - 1];
@@ -693,6 +702,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     [self updateRecordMenu];
     [self setupBulletinView];
     self.thumbnailHeightConstraint.constant = 0;
+    self.thumbnailView.eventDelegate = self;
 }
 
 - (void)setupBulletinView {

@@ -46,9 +46,21 @@
     self.view = stackView;
 }
 
+- (void)setHighlightState:(NSCollectionViewItemHighlightState)highlightState {
+    if (highlightState == NSCollectionViewItemHighlightForSelection) {
+        self.renderView.layer.masksToBounds = YES;
+        self.renderView.layer.borderWidth = 2.f;
+        self.renderView.layer.borderColor = [NSColor blueColor].CGColor;
+    } else if (highlightState == NSCollectionViewItemHighlightForDeselection) {
+        self.renderView.layer.masksToBounds = YES;
+        self.renderView.layer.borderWidth = 0.f;
+        self.renderView.layer.borderColor = [NSColor clearColor].CGColor;
+    }
+}
+
 @end
 
-@interface ThumbnailView () <NSCollectionViewDataSource>
+@interface ThumbnailView () <NSCollectionViewDataSource, NSCollectionViewDelegate>
 
 @end
 
@@ -59,12 +71,23 @@
     self.dataSource = self;
     self.wantsLayer = YES;
     self.layer.backgroundColor = [NSColor clearColor].CGColor;
+    self.allowsEmptySelection = NO;
     [self registerClass:ThumbnailViewItem.self forItemWithIdentifier:@"ThumbnailViewItem"];
 }
 
 - (void)setThumbnails:(NSMutableArray *)thumbnails {
     _thumbnails = thumbnails;
     [self reloadData];
+}
+
+- (void)selectItemsAtIndexPaths:(NSSet<NSIndexPath *> *)indexPaths scrollPosition:(NSCollectionViewScrollPosition)scrollPosition {
+    for (NSIndexPath *indexPath in self.selectionIndexPaths.allObjects) {
+        NSCollectionViewItem *item = [self itemAtIndexPath:indexPath];
+        item.highlightState = NSCollectionViewItemHighlightForDeselection;
+    }
+    [super selectItemsAtIndexPaths:indexPaths scrollPosition:scrollPosition];
+    NSCollectionViewItem *item = [self itemAtIndexPath:indexPaths.allObjects.firstObject];
+    item.highlightState = NSCollectionViewItemHighlightForSelection;
 }
 
 - (NSInteger)collectionView:(NSCollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
@@ -76,10 +99,27 @@
     if (!item) {
         item = [[ThumbnailViewItem alloc] init];
     }
+    
+    if ([self.selectionIndexPaths containsObject:indexPath]) {
+        item.highlightState = NSCollectionViewItemHighlightForSelection;
+    } else {
+        item.highlightState = NSCollectionViewItemHighlightForDeselection;
+    }
+    
     [item.textField setStringValue:[NSString stringWithFormat:@"%ld", (long)indexPath.item + 1]];
     VideoFrame *frame = [self.thumbnails objectAtIndex:indexPath.item];
     [item.renderView renderFrame:frame];
     return item;
+}
+
+- (void)collectionView:(NSCollectionView *)collectionView didSelectItemsAtIndexPaths:(NSSet<NSIndexPath *> *)indexPaths {
+    if (self.eventDelegate) {
+        [self.eventDelegate thumbnailView:self didSelectItemsAtIndexPaths:indexPaths.allObjects.firstObject];
+    }
+}
+
+- (void)collectionView:(NSCollectionView *)collectionView didDeselectItemsAtIndexPaths:(NSSet<NSIndexPath *> *)indexPaths {
+    
 }
 
 @end
