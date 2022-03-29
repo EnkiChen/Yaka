@@ -165,7 +165,8 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
 - (id<NSObject>)frameWithIndex:(NSUInteger) frameIndex {
     if ( frameIndex < self.totalFrames ) {
         long location = ftell(self.fd);
-        [self seekToFrameIndex:frameIndex];
+        long offset = self.frameSize * frameIndex;
+        fseek(self.fd, offset, SEEK_SET);
         VideoFrame *videoFrame = [self readFrame:NO];
         fseek(self.fd, location, SEEK_SET);
         return videoFrame;
