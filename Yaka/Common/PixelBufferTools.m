@@ -543,4 +543,62 @@
 //    CVPixelBufferUnlockBaseAddress(dst, kNilOptions);
 //}
 
++ (CVPixelBufferRef)mirrorPixelBuffer:(CVPixelBufferRef)pixelBuffer {
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    int planeCount = (int)CVPixelBufferGetPlaneCount(pixelBuffer);
+    if (planeCount == 2) {
+        int factor = 1;
+        if (pixelFormat == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+            factor = 2;
+        }
+        uint8_t* src_y = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+        uint8_t* src_uv = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+        const int src_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0));
+        const int src_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1));
+        
+        int width = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+        int height = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+        uint32_t value = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width / 2; j++) {
+                memcpy(&value, src_y + j * factor, factor);
+                memcpy(src_y + j * factor, src_y + (width - j - 1) * factor, factor);
+                memcpy(src_y + (width - j - 1) * factor, &value, factor);
+            }
+            src_y += src_stride_y;
+        }
+
+        width = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1);
+        height = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+        factor *= 2;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width / 2; j++) {
+                memcpy(&value, src_uv + j * factor, factor);
+                memcpy(src_uv + j * factor, src_uv + (width - j - 1) * factor, factor);
+                memcpy(src_uv + (width - j - 1) * factor, &value, factor);
+            }
+            src_uv += src_stride_uv;
+        }
+    } else if (planeCount == 3) {
+        for (int i = 0; i < planeCount; i++) {
+            int height = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, i);
+            int width = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, i);
+            uint8_t* src = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, i));
+            const int stride = (int)(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, i));
+            uint8_t value = 0;
+            for (int j = 0; j < height; j++) {
+                for (int k = 0; k < width / 2; k++) {
+                    value = src[k];
+                    src[k] = src[width - k - 1];
+                    src[width - k - 1] = value;
+                }
+                src += stride;
+            }
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    return pixelBuffer;
+}
+
 @end

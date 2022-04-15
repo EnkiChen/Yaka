@@ -35,6 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (CVPixelBufferRef)convertTo32BGRA:(CVPixelBufferRef)pixelBuffer;
 
++ (CVPixelBufferRef)mirrorPixelBuffer:(CVPixelBufferRef)pixelBuffer;
+
 @end
 
 NS_ASSUME_NONNULL_END
