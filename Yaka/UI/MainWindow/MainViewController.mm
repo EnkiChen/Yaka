@@ -448,13 +448,16 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
             [self.palyCtrlView.progressSlider setIntValue:(int)index + 1];
         }
         [self.palyCtrlView.textCurFrameIndex setStringValue:[NSString stringWithFormat:@"%lu", (unsigned long)index + 1]];
-        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-        NSCollectionViewScrollPosition position = NSCollectionViewScrollPositionCenteredHorizontally;
-        if (self.isDidSelectItems) {
-            position = NSCollectionViewScrollPositionNone;
+
+        if (self.thumbnailView.thumbnails.count > 0) {
+            NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
+            NSCollectionViewScrollPosition position = NSCollectionViewScrollPositionCenteredHorizontally;
+            if (self.isDidSelectItems) {
+                position = NSCollectionViewScrollPositionNone;
+            }
+            [self.thumbnailView selectItemsAtIndexPaths:[NSSet setWithObject:indexPath] scrollPosition:position];
+            self.isDidSelectItems = NO;
         }
-        [self.thumbnailView selectItemsAtIndexPaths:[NSSet setWithObject:indexPath] scrollPosition:position];
-        self.isDidSelectItems = NO;
     });
 }
 
