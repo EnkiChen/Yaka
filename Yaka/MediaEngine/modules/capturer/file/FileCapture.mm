@@ -82,7 +82,7 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
 - (instancetype)initWithPath:(NSString*) filePath width:(NSUInteger) width height:(NSUInteger) height pixelFormatType:(PixelFormatType) format {
     self = [super init];
     if ( self ) {
-        self.filePath = filePath;
+        self.filePath = [filePath lowercaseString];
         self.cancel = YES;
         self.width = (int)width;
         self.height = (int)height;
@@ -398,6 +398,11 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
     if (pixelBuffer == nil) {
         return nil;
     }
+    
+    if ([self.filePath containsString:@"420p10le"]) {
+        [self p10leTop16le:pixelBuffer];
+    }
+    
     VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
     CVPixelBufferRelease(pixelBuffer);
     return videoFrame;
@@ -466,6 +471,35 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
     
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
     return frameBuffer;
+}
+
+- (void)p10leTop16le:(CVPixelBufferRef)pixelBuffer {
+    OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (format != kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+        return;
+    }
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    uint8_t *dst = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int dstStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    int dstHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    uint16_t *pixel;
+    for (int i = 0; i < dstHeight; i++) {
+        for (int j = 0; j < dstStride; j += 2) {
+            pixel = (uint16_t *)(dst + dstStride * i + j);
+            pixel[0] <<= 6;
+        }
+    }
+    
+    dst = (uint8_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    dstStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    dstHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+    for (int i = 0; i < dstHeight; i++) {
+        for (int j = 0; j < dstStride; j += 2) {
+            pixel = (uint16_t *)(dst + dstStride * i + j);
+            pixel[0] <<= 6;
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
 }
 
 @end
