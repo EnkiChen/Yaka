@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		892834EA2851E02D00EE107B /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 891A61FB2818E6EC00A47C59 /* Accelerate.framework */; };
 		8936CE19231A4E03009217FE /* FileConfigViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8936CE18231A4E03009217FE /* FileConfigViewController.m */; };
 		8936CE1F231D04DE009217FE /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8936CE1E231D04DE009217FE /* VideoToolbox.framework */; };
 		893B8EDD2727924300CF0A51 /* FormatConvertVCtrl.mm in Sources */ = {isa = PBXBuildFile; fileRef = 893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */; };
 		893B8EE1272830BC00CF0A51 /* vmaf_v0.6.1.json in Resources */ = {isa = PBXBuildFile; fileRef = 893B8EDF272830BB00CF0A51 /* vmaf_v0.6.1.json */; };
 		893B8EE2272830BC00CF0A51 /* vmaf_4k_v0.6.1.json in Resources */ = {isa = PBXBuildFile; fileRef = 893B8EE0272830BB00CF0A51 /* vmaf_4k_v0.6.1.json */; };
+		89400662283F69500000926F /* ColorToolbox.cc in Sources */ = {isa = PBXBuildFile; fileRef = 89400661283F69500000926F /* ColorToolbox.cc */; };
 		895A31E72227D8AC00B952A8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E62227D8AC00B952A8 /* AppDelegate.m */; };
 		895A31EA2227D8AC00B952A8 /* MainViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 895A31E92227D8AC00B952A8 /* MainViewController.mm */; };
 		895A31EF2227D8AE00B952A8 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 895A31ED2227D8AE00B952A8 /* Main.storyboard */; };
@@ -26,7 +28,7 @@
 		8990537E26A995EC00358B8C /* DesktopCapture.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990537726A995EC00358B8C /* DesktopCapture.m */; };
 		8990537F26A995EC00358B8C /* FileCapture.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990537926A995EC00358B8C /* FileCapture.mm */; };
 		8990538026A995EC00358B8C /* NalUnitSourceFileImp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990537C26A995EC00358B8C /* NalUnitSourceFileImp.mm */; };
-		8990538426AA7B3D00358B8C /* PixelBufferTools.m in Sources */ = {isa = PBXBuildFile; fileRef = 8990538326AA7B3D00358B8C /* PixelBufferTools.m */; };
+		8990538426AA7B3D00358B8C /* PixelBufferTools.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990538326AA7B3D00358B8C /* PixelBufferTools.mm */; };
 		8990538C26AECCA100358B8C /* SystemTools.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8990538A26AECCA100358B8C /* SystemTools.mm */; };
 		899D8DBF27BA7828002AB9EA /* ThumbnailView.m in Sources */ = {isa = PBXBuildFile; fileRef = 899D8DBE27BA7828002AB9EA /* ThumbnailView.m */; };
 		89A03C0F26B6C7270071891E /* libyuv.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89A03C0E26B6C7270071891E /* libyuv.a */; };
@@ -64,6 +66,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		891A61FB2818E6EC00A47C59 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		8936CE17231A4E03009217FE /* FileConfigViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileConfigViewController.h; sourceTree = "<group>"; };
 		8936CE18231A4E03009217FE /* FileConfigViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileConfigViewController.m; sourceTree = "<group>"; };
 		8936CE1E231D04DE009217FE /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
@@ -71,6 +74,8 @@
 		893B8EDC2727924300CF0A51 /* FormatConvertVCtrl.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FormatConvertVCtrl.mm; sourceTree = "<group>"; };
 		893B8EDF272830BB00CF0A51 /* vmaf_v0.6.1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = vmaf_v0.6.1.json; sourceTree = "<group>"; };
 		893B8EE0272830BB00CF0A51 /* vmaf_4k_v0.6.1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = vmaf_4k_v0.6.1.json; sourceTree = "<group>"; };
+		89400660283F69500000926F /* ColorToolbox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ColorToolbox.h; sourceTree = "<group>"; };
+		89400661283F69500000926F /* ColorToolbox.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ColorToolbox.cc; sourceTree = "<group>"; };
 		895A31E22227D8AC00B952A8 /* Yaka.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Yaka.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		895A31E52227D8AC00B952A8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		895A31E62227D8AC00B952A8 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -107,7 +112,7 @@
 		8990537B26A995EC00358B8C /* NalUnitSourceFileImp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NalUnitSourceFileImp.h; sourceTree = "<group>"; };
 		8990537C26A995EC00358B8C /* NalUnitSourceFileImp.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = NalUnitSourceFileImp.mm; sourceTree = "<group>"; };
 		8990538226AA7B3D00358B8C /* PixelBufferTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PixelBufferTools.h; sourceTree = "<group>"; };
-		8990538326AA7B3D00358B8C /* PixelBufferTools.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PixelBufferTools.m; sourceTree = "<group>"; };
+		8990538326AA7B3D00358B8C /* PixelBufferTools.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = PixelBufferTools.mm; sourceTree = "<group>"; };
 		8990538A26AECCA100358B8C /* SystemTools.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = SystemTools.mm; sourceTree = "<group>"; };
 		8990538B26AECCA100358B8C /* SystemTools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SystemTools.h; sourceTree = "<group>"; };
 		899D8DBD27BA7828002AB9EA /* ThumbnailView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ThumbnailView.h; sourceTree = "<group>"; };
@@ -213,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8936CE1F231D04DE009217FE /* VideoToolbox.framework in Frameworks */,
+				892834EA2851E02D00EE107B /* Accelerate.framework in Frameworks */,
 				89FBCC3627749C8B00844DC9 /* libvmaf.a in Frameworks */,
 				89AEF3B6269E80DA00DA9FAD /* libopenh264.a in Frameworks */,
 				89A03C0F26B6C7270071891E /* libyuv.a in Frameworks */,
@@ -226,6 +232,7 @@
 		8936CE1D231D04DE009217FE /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				891A61FB2818E6EC00A47C59 /* Accelerate.framework */,
 				8936CE1E231D04DE009217FE /* VideoToolbox.framework */,
 			);
 			name = Frameworks;
@@ -302,13 +309,15 @@
 				895B25062358445D0031B819 /* YuvHelper.h */,
 				895B2507235844920031B819 /* YuvHelper.cpp */,
 				8990538226AA7B3D00358B8C /* PixelBufferTools.h */,
-				8990538326AA7B3D00358B8C /* PixelBufferTools.m */,
+				8990538326AA7B3D00358B8C /* PixelBufferTools.mm */,
 				89A74EB126C51D6F001DB050 /* RateStatistics.h */,
 				89A74EB226C51D6F001DB050 /* RateStatistics.m */,
 				8990538B26AECCA100358B8C /* SystemTools.h */,
 				8990538A26AECCA100358B8C /* SystemTools.mm */,
 				89B83F35273A68A1009DB332 /* FormatConvert.h */,
 				89B83F36273A68A1009DB332 /* FormatConvert.mm */,
+				89400660283F69500000926F /* ColorToolbox.h */,
+				89400661283F69500000926F /* ColorToolbox.cc */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -796,9 +805,10 @@
 				89B83F312738C156009DB332 /* FileUnit.m in Sources */,
 				893B8EDD2727924300CF0A51 /* FormatConvertVCtrl.mm in Sources */,
 				89A74EAD26C29D02001DB050 /* EncoderInterface.m in Sources */,
-				8990538426AA7B3D00358B8C /* PixelBufferTools.m in Sources */,
+				8990538426AA7B3D00358B8C /* PixelBufferTools.mm in Sources */,
 				89AEF3FE269E80E800DA9FAD /* Shader.mm in Sources */,
 				895E7B03272D81FE00400B49 /* MultiPlayViewCtrl.m in Sources */,
+				89400662283F69500000926F /* ColorToolbox.cc in Sources */,
 				8990537F26A995EC00358B8C /* FileCapture.mm in Sources */,
 				89AEF389269E7F8F00DA9FAD /* H264FileDumper.m in Sources */,
 				89AEF3F9269E80E800DA9FAD /* MTLNV12Renderer.mm in Sources */,

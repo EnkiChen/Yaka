@@ -9,6 +9,8 @@
 #import "PixelBufferTools.h"
 #import <AVFoundation/AVFoundation.h>
 #import <Accelerate/Accelerate.h>
+#include "libyuv.h"
+#include "ColorToolbox.h"
 
 @implementation PixelBufferTools
 
@@ -181,10 +183,10 @@
             }
         }
     } else if (format == kCVPixelFormatType_32ARGB || format == kCVPixelFormatType_32BGRA) {
-        const uint8_t* src = CVPixelBufferGetBaseAddress(pixelBuffer);
+        const uint8_t* src = (const uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
         const size_t srcHeight = CVPixelBufferGetHeight(pixelBuffer);
         const size_t srcStride = CVPixelBufferGetBytesPerRow(pixelBuffer);
-        uint8_t* dst = CVPixelBufferGetBaseAddress(outputPixelBuffer);
+        uint8_t* dst = (uint8_t*)CVPixelBufferGetBaseAddress(outputPixelBuffer);
         for (int i = 0; i < srcHeight; i++) {
             memcpy(dst + srcStride * i, src + srcStride * i, srcStride);
         }
@@ -254,7 +256,7 @@
         dstImageBuffer.width = (int)CVPixelBufferGetWidth(outputPixelBuffer);
         dstImageBuffer.height = (int)CVPixelBufferGetHeight(outputPixelBuffer);
         dstImageBuffer.rowBytes = (int)CVPixelBufferGetBytesPerRow(outputPixelBuffer);
-        
+
         Pixel_8888 backgroundColor = {0,0,0,0};
         vImageRotate90_ARGB8888(&srcImageBuffer, &dstImageBuffer, rotationConstant, backgroundColor, kvImageBackgroundColorFill);
     }
@@ -262,6 +264,7 @@
     CVPixelBufferUnlockBaseAddress(outputPixelBuffer, kNilOptions);
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
     return outputPixelBuffer;
+    return nil;
 }
 
 + (CGImagePropertyOrientation)getOrientation:(CMSampleBufferRef)sampleBuffer
@@ -599,6 +602,188 @@
     }
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
     return pixelBuffer;
+}
+
++ (CVPixelBufferRef)mirrorPixelBufferByte:(CVPixelBufferRef)pixelBuffer
+{
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    OSType pixelFormat = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (pixelFormat == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+        uint16_t* src_y = (uint16_t*)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+        uint32_t* src_uv = (uint32_t*)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+        const int src_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0));
+        const int src_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1));
+        
+        int width = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 0);
+        int height = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+        uint16_t y_value = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width / 2; j++) {
+                y_value = src_y[j];
+                src_y[j] = src_y[width - j - 1];
+                src_y[width - j - 1] = y_value;
+            }
+            src_y = (uint16_t*)(((uint8_t*)src_y) + src_stride_y);
+        }
+
+        width = (int)CVPixelBufferGetWidthOfPlane(pixelBuffer, 1);
+        height = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+
+        uint32_t uv_value = 0;
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width / 2; j++) {
+                uv_value = src_uv[j];
+                src_uv[j] = src_uv[width - j - 1];
+                src_uv[width - j - 1] = uv_value;
+            }
+            src_uv = (uint32_t*)(((uint8_t*)src_uv) + src_stride_uv);
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    return pixelBuffer;
+}
+
++ (CVPixelBufferRef)mirror:(CVPixelBufferRef)srcpbr dst:(CVPixelBufferRef)dstpbr
+{
+    CVPixelBufferLockBaseAddress(srcpbr, kNilOptions);
+    CVPixelBufferLockBaseAddress(dstpbr, kNilOptions);
+    OSType pixelFormat = CVPixelBufferGetPixelFormatType(srcpbr);
+    if (pixelFormat == kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+        uint8_t* src_y = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(srcpbr, 0));
+        uint8_t* src_uv = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(srcpbr, 1));
+        const int src_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(srcpbr, 0));
+        const int src_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(srcpbr, 1));
+        uint8_t* dst_y = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dstpbr, 0));
+        uint8_t* dst_uv = (uint8_t*)(CVPixelBufferGetBaseAddressOfPlane(dstpbr, 1));
+        const int dst_stride_y = (int)(CVPixelBufferGetBytesPerRowOfPlane(dstpbr, 0));
+        const int dst_stride_uv = (int)(CVPixelBufferGetBytesPerRowOfPlane(dstpbr, 1));
+        
+        int width = (int)CVPixelBufferGetWidthOfPlane(srcpbr, 0);
+        int height = (int)CVPixelBufferGetHeightOfPlane(srcpbr, 0);
+        libyuv::MirrorUVPlane(src_y, src_stride_y, dst_y, dst_stride_y, width, height);
+
+        width = (int)CVPixelBufferGetWidthOfPlane(srcpbr, 1);
+        height = (int)CVPixelBufferGetHeightOfPlane(srcpbr, 1);
+        libyuv::ARGBMirror(src_uv, src_stride_uv, dst_uv, dst_stride_uv, width, height);
+    }
+    CVPixelBufferUnlockBaseAddress(srcpbr, kNilOptions);
+    CVPixelBufferUnlockBaseAddress(dstpbr, kNilOptions);
+    return dstpbr;
+}
+
++ (CVPixelBufferRef)fillPixelBuffer:(CVPixelBufferRef)pixelBuffer {
+    OSType format = CVPixelBufferGetPixelFormatType(pixelBuffer);
+    if (format != kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange) {
+        return pixelBuffer;
+    }
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    uint16_t *pixel = (uint16_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    int dstStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0) / 2;
+    int dstHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 0);
+    
+    uint16_t y = 0;
+    uint16_t u = 0;
+    uint16_t v = 0;
+    rgbToYuvBT2020(1023, 0, 0, &y, &u, &v);
+    
+    for (int i = 0; i < dstHeight; i++) {
+        for (int j = 0; j < dstStride; j++) {
+            pixel[dstStride * i + j] = y << 6;
+        }
+    }
+    
+    pixel = (uint16_t *)(CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    dstStride = (int)CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1) / 2;
+    dstHeight = (int)CVPixelBufferGetHeightOfPlane(pixelBuffer, 1);
+    for (int i = 0; i < dstHeight; i++) {
+        for (int j = 0; j < dstStride; j += 2) {
+            pixel[dstStride * i + j] = u << 6;
+            pixel[dstStride * i + j + 1] = v << 6;
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    return pixelBuffer;
+}
+
+- (void)fillHDRRectangle {
+    int width = 720;
+    int height = 1280;
+    int bitdepth = 10;
+    
+    uint16_t y = 0;
+    uint16_t u = 0;
+    uint16_t v = 0;
+    
+    int frameSize = height * width * 2 + (height / 2 * width) * 2;
+    uint8_t *dataY = (uint8_t *)malloc(frameSize);
+    
+    rgbToYuvBT2020(1023, 1023, 1023, &y, &u, &v);
+    [self fillRect:dataY
+          original:CGSizeMake(width, height)
+              fill:CGRectMake(0, 0, width, height)
+                 y:(y << (bitdepth - 10))
+                 u:(u << (bitdepth - 10))
+                 v:(v << (bitdepth - 10))];
+    
+    rgbToYuvBT2020(1023, 0, 0, &y, &u, &v);
+    [self fillRect:dataY
+          original:CGSizeMake(width, height)
+              fill:CGRectMake(0, 0, 360, 640)
+                 y:(y << (bitdepth - 10))
+                 u:(u << (bitdepth - 10))
+                 v:(v << (bitdepth - 10))];
+
+    rgbToYuvBT2020(0, 1023, 0, &y, &u, &v);
+    [self fillRect:dataY
+          original:CGSizeMake(width, height)
+              fill:CGRectMake(360, 0, 360, 640)
+                 y:(y << (bitdepth - 10))
+                 u:(u << (bitdepth - 10))
+                 v:(v << (bitdepth - 10))];
+
+
+    rgbToYuvBT2020(0, 0, 1023, &y, &u, &v);
+    [self fillRect:dataY
+          original:CGSizeMake(width, height)
+              fill:CGRectMake(0, 640, 360, 640)
+                 y:(y << (bitdepth - 10))
+                 u:(u << (bitdepth - 10))
+                 v:(v << (bitdepth - 10))];
+
+    FILE *fd = fopen("/Users/enki/Desktop/rgbw_720x1280x24_yuv420p10le.yuv", "wb");
+    for (int i = 0; i < 50; i++) {
+        fwrite(dataY, 1, frameSize, fd);
+    }
+    free(dataY);
+    fflush(fd);
+    fclose(fd);
+}
+
+- (void)fillRect:(uint8_t *)data original:(CGSize)size fill:(CGRect)fillRect y:(uint16_t)y u:(uint16_t)u v:(uint16_t)v {
+    int strideY = size.width;
+    int strideU = size.width / 2;
+    int strideV = size.width / 2;
+    uint16_t *dataY = (uint16_t*)data;
+    uint16_t *dataU = dataY + (int)(size.height * strideY);
+    uint16_t *dataV = dataU + (int)(size.height / 2 * strideU);
+    
+    for (int h = fillRect.origin.y; h < fillRect.origin.y + fillRect.size.height; h++) {
+        for (int w = fillRect.origin.x; w < fillRect.origin.x + fillRect.size.width; w++) {
+            dataY[h * strideY + w] = y;
+        }
+    }
+    
+    for (int h = fillRect.origin.y / 2; h < (fillRect.origin.y + fillRect.size.height) / 2; h++) {
+        for (int w = fillRect.origin.x / 2; w < (fillRect.origin.x + fillRect.size.width) / 2; w++) {
+            dataU[h * strideU + w] = u;
+        }
+    }
+    
+    for (int h = fillRect.origin.y / 2; h < (fillRect.origin.y + fillRect.size.height) / 2; h++) {
+        for (int w = fillRect.origin.x / 2; w < (fillRect.origin.x + fillRect.size.width) / 2; w++) {
+            dataV[h * strideV + w] = v;
+        }
+    }
 }
 
 @end

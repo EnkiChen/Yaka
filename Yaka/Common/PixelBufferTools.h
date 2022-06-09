@@ -37,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (CVPixelBufferRef)mirrorPixelBuffer:(CVPixelBufferRef)pixelBuffer;
 
++ (CVPixelBufferRef)mirror:(CVPixelBufferRef)srcpbr dst:(CVPixelBufferRef)dstpbr;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -32,6 +32,7 @@
 #import "FormatConvert.h"
 #import "BulletinView.h"
 #import "VideoTrack.h"
+#import "ColorToolbox.h"
 
 static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", @"flv"];
 
@@ -326,10 +327,10 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     self.formatConvertWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"FormatConvert"];
     [self.formatConvertWindowCtrl.window setLevel:NSFloatingWindowLevel];
     [self.formatConvertWindowCtrl showWindow:nil];
+}
 
-    // NSWindowController *playWindowCtrl = [storyBoard instantiateControllerWithIdentifier:@"MultiPlayViewCtrl"];
-    // [playWindowCtrl.window setLevel:NSFloatingWindowLevel];
-    // [playWindowCtrl showWindow:nil];
+- (IBAction)openBatchConvertTool:(id)sender {
+    [self.formatConvert startTask];
 }
 
 - (IBAction)onRendererComboboxChanged:(id)sender {
@@ -610,6 +611,15 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     if (self.videoTrack.totalFrames > self.maxTotalFrames) {
         self.maxTotalFrames = self.videoTrack.totalFrames;
     }
+    
+//    NSMutableArray *frames = [[NSMutableArray alloc] initWithCapacity:self.videoTrack.totalFrames];
+//    for (int i = 0; i < self.videoTrack.totalFrames; i++) {
+//        VideoFrame *frame = [self.videoTrack frameWithIndex:i];
+//        if (frame != nil) {
+//            [frames addObject:frame];
+//        }
+//    }
+//    self.thumbnailView.thumbnails = frames;
     
     self.palyCtrlView.progressSlider.minValue = 1;
     self.palyCtrlView.progressSlider.maxValue = self.maxTotalFrames;
