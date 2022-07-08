@@ -34,7 +34,7 @@
 #import "VideoTrack.h"
 #import "ColorToolbox.h"
 
-static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", @"flv"];
+static NSArray *kAllowedFileTypes = @[@"yuv", @"rgb", @"h264", @"264", @"h265", @"265", @"flv"];
 
 @interface MainViewController() <VideoSourceSink, H264SourceSink, DecoderDelegate, EncoderDelegate, FileConfigDelegate, FileSourceDelegate, PalyCtrlViewDelegae, ThumbnailViewDelegate>
 
@@ -122,7 +122,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
     openPanel.allowedFileTypes = kAllowedFileTypes;
     [openPanel beginSheetModalForWindow:self.view.window completionHandler:^(NSModalResponse result) {
         if (result == NSModalResponseOK) {
-            if ([openPanel.URL.path hasSuffix:@"yuv"]) {
+            if ([openPanel.URL.path hasSuffix:@"yuv"] || [openPanel.URL.path hasSuffix:@"rgb"]) {
                 [self showFileConfigPanle:openPanel.URL];
             } else {
                 [self openFileWithPath:openPanel.URL fileInfo:nil];
@@ -359,7 +359,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
 }
 
 - (void)fileConfigViewController:(FileConfigViewController*)fileConfigCtrl filePath:(NSURL*)fileUrl width:(int)widht height:(int)height formatIndex:(int)formatIndex {
-    if (![fileUrl.path hasSuffix:@".yuv"]) {
+    if (![fileUrl.path hasSuffix:@".yuv"] && [fileUrl.path hasSuffix:@".rgb"]) {
         [self showMessage:@"提示" message:@"请选择正确的文件格式！" window:self.fileConfigWindowCtrl.window];
         return;
     }
@@ -585,11 +585,17 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"h264", @"264", @"h265", @"265", 
         [self performClose:nil];
     }
     
-    if ( [filePath.path hasSuffix:@"yuv"] ) {
+    if ([filePath.path hasSuffix:@"yuv"] || [filePath.path hasSuffix:@"rgb"]) {
         int width = [fileInfo[@"width"] intValue];
         int height = [fileInfo[@"height"] intValue];
         int formatIndex = [fileInfo[@"formatIndex"] intValue];
-        PixelFormatType formats[] = {kPixelFormatType_420_I420, kPixelFormatType_420_NV12, kPixelFormatType_420_P010, kPixelFormatType_420_I010};
+        PixelFormatType formats[] = {
+            kPixelFormatType_420_I420,
+            kPixelFormatType_420_NV12,
+            kPixelFormatType_420_P010,
+            kPixelFormatType_420_I010,
+            kPixelFormatType_32BGRA
+        };
         PixelFormatType format = formats[formatIndex];
         self.videoTrack = [[VideoTrack alloc] initWithRawFile:filePath.path width:width height:height pixelFormat:format];
     } else if ([filePath.path hasSuffix:@"h264"] || [filePath.path hasSuffix:@"264"]

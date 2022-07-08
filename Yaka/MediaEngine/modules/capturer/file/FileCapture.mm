@@ -190,6 +190,8 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
     if (self.format == kPixelFormatType_420_P010 ||
         self.format == kPixelFormatType_420_I010) {
         self.frameSize = self.width * self.height * 3;
+    } else if (self.format == kPixelFormatType_32BGRA) {
+        self.frameSize = self.width * self.height * 4;
     } else {
         self.frameSize = self.width * self.height * 3 / 2;
     }
@@ -257,6 +259,8 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
             videoFrame = [self readP010Frame];
         } else if (self.format == kPixelFormatType_420_I010) {
             videoFrame = [self readI010Frame];
+        } else if (self.format == kPixelFormatType_32BGRA) {
+            videoFrame = [self read32BGRAFrame];
         }
         if (videoFrame == nil && isLoop) {
             fseek(self.fd, 0, SEEK_SET);
@@ -267,6 +271,30 @@ void mergeUVPlane16(const uint8_t* src_u, int src_stride_u,
     } while (true);
     return videoFrame;
 }
+
+- (VideoFrame*)read32BGRAFrame {
+    CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)
+                                                                   pixelFormat:kCVPixelFormatType_32BGRA];
+    CVPixelBufferLockBaseAddress(pixelBuffer, kNilOptions);
+    uint8_t *src = (uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
+    int bytesPerRow = (int)CVPixelBufferGetBytesPerRow(pixelBuffer);
+    int width = (int)CVPixelBufferGetWidth(pixelBuffer);
+    int height = (int)CVPixelBufferGetHeight(pixelBuffer);
+    for ( int j = 0; j < height; j++ ) {
+        int read_size = [self fread:src + bytesPerRow * j length:width * 4 fd:self.fd];
+        if (read_size != width * 4) {
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+            CVPixelBufferRelease(pixelBuffer);
+            return nil;
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, kNilOptions);
+    
+    VideoFrame *videoFrame = [[VideoFrame alloc] initWithPixelBuffer:pixelBuffer rotation:VideoRotation_0];
+    CVPixelBufferRelease(pixelBuffer);
+    return videoFrame;
+}
+
 
 - (VideoFrame*)readI420Frame {
     CVPixelBufferRef pixelBuffer = [PixelBufferTools createPixelBufferWithSize:CGSizeMake(self.width, self.height)

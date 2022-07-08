@@ -61,6 +61,7 @@
 		89B83F2E2734175C009DB332 /* FlvFileCaptureImp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F2D2734175C009DB332 /* FlvFileCaptureImp.mm */; };
 		89B83F312738C156009DB332 /* FileUnit.m in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F302738C155009DB332 /* FileUnit.m */; };
 		89B83F37273A68A2009DB332 /* FormatConvert.mm in Sources */ = {isa = PBXBuildFile; fileRef = 89B83F36273A68A1009DB332 /* FormatConvert.mm */; };
+		89CDE21F2875CB8A00AB8F63 /* ChartView.m in Sources */ = {isa = PBXBuildFile; fileRef = 89CDE21D2875CB8A00AB8F63 /* ChartView.m */; };
 		89FBCBED276B419B00844DC9 /* BulletinView.m in Sources */ = {isa = PBXBuildFile; fileRef = 89FBCBEC276B419B00844DC9 /* BulletinView.m */; };
 		89FBCC3627749C8B00844DC9 /* libvmaf.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 89891A1A27199FE600C22745 /* libvmaf.a */; };
 /* End PBXBuildFile section */
@@ -208,6 +209,8 @@
 		89B83F302738C155009DB332 /* FileUnit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = FileUnit.m; sourceTree = "<group>"; };
 		89B83F35273A68A1009DB332 /* FormatConvert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FormatConvert.h; sourceTree = "<group>"; };
 		89B83F36273A68A1009DB332 /* FormatConvert.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = FormatConvert.mm; sourceTree = "<group>"; };
+		89CDE21D2875CB8A00AB8F63 /* ChartView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChartView.m; sourceTree = "<group>"; };
+		89CDE21E2875CB8A00AB8F63 /* ChartView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChartView.h; sourceTree = "<group>"; };
 		89FBCBEB276B419B00844DC9 /* BulletinView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BulletinView.h; sourceTree = "<group>"; };
 		89FBCBEC276B419B00844DC9 /* BulletinView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BulletinView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -678,6 +681,8 @@
 				896DA45F278EFCDB003B4909 /* MultiPlayView.m */,
 				899D8DBD27BA7828002AB9EA /* ThumbnailView.h */,
 				899D8DBE27BA7828002AB9EA /* ThumbnailView.m */,
+				89CDE21E2875CB8A00AB8F63 /* ChartView.h */,
+				89CDE21D2875CB8A00AB8F63 /* ChartView.m */,
 			);
 			name = View;
 			path = Yaka/UI/View;
@@ -794,6 +799,7 @@
 				89FBCBED276B419B00844DC9 /* BulletinView.m in Sources */,
 				899D8DBF27BA7828002AB9EA /* ThumbnailView.m in Sources */,
 				898825D526B96E9E00B90B26 /* DragOperationView.m in Sources */,
+				89CDE21F2875CB8A00AB8F63 /* ChartView.m in Sources */,
 				89AEF3FB269E80E800DA9FAD /* MTLI420Renderer.mm in Sources */,
 				89A74EAB26C29D02001DB050 /* Openh264Decoder.mm in Sources */,
 				89B2C13726A3D3E600D340CC /* PalyCtrlView.m in Sources */,

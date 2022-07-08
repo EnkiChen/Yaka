@@ -30,6 +30,7 @@ typedef NS_ENUM(NSInteger, PixelFormatType) {
     kPixelFormatType_444_NV24,      // 8bit  YYYY UVUVUVUVUV
     kPixelFormatType_444_NV42,      // 8bit  YYYY VUVUVUVUVU
     kPixelFormatType_444_YUV,       // 8bit  YUV YUV YUV YUV
+    kPixelFormatType_32BGRA,        // 8bit  RGBA RGBA
 };
 
 @interface FileCapture : NSObject <ImageFileSourceInterface>

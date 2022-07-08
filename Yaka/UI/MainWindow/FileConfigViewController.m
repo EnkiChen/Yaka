@@ -54,6 +54,10 @@
         [self.formatComboBox selectItemAtIndex:3];
         return;
     }
+    if ([self containsType:filePath types:@[@"32bgra", @"bgra"]]) {
+        [self.formatComboBox selectItemAtIndex:4];
+        return;
+    }
 }
 
 - (IBAction)onSizeComboboxChanged:(id)sender {

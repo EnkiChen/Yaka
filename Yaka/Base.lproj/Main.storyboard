@@ -893,6 +893,7 @@
                                         <string>420_NV12</string>
                                         <string>420_P010</string>
                                         <string>420_I010</string>
+                                        <string>32RGBA</string>
                                     </objectValues>
                                 </comboBoxCell>
                             </comboBox>
