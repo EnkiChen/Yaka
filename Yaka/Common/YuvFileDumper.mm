@@ -200,6 +200,15 @@ void splitUVPlane16(const uint8_t* src_uv, int src_stride_uv,
                 fflush(fd);
             }
         }
+    } else {
+        uint8_t *src = (uint8_t*)CVPixelBufferGetBaseAddress(pixelBuffer);
+        int bytesPerRow = (int)CVPixelBufferGetBytesPerRow(pixelBuffer);
+        int width = (int)CVPixelBufferGetWidth(pixelBuffer);
+        int height = (int)CVPixelBufferGetHeight(pixelBuffer);
+        for ( int j = 0; j < height; j++ ) {
+            fwrite(src + bytesPerRow * j, 1, width * 4, fd);
+            fflush(fd);
+        }
     }
     CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 }
