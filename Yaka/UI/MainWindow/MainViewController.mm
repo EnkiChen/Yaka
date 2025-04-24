@@ -389,18 +389,18 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"rgb", @"h264", @"264", @"h265", 
 
 #pragma mark - VideoSourceInterface Action
 - (void)captureSource:(id<VideoSourceInterface>) source onFrame:(VideoFrame *)frame {
-    if ([self.videoTracks containsObject:(VideoTrack *)source]) {
-        NSUInteger index = [self.videoTracks indexOfObject:(VideoTrack *)source];
-        [self renderFrame:frame withIndex:index];
-    } else {
-        [self renderFrame:frame];
-    }
+   if ([self.videoTracks containsObject:(VideoTrack *)source]) {
+       NSUInteger index = [self.videoTracks indexOfObject:(VideoTrack *)source];
+       [self renderFrame:frame withIndex:index];
+   } else {
+       [self renderFrame:frame];
+   }
 
-//    dispatch_async(self.encodeQueue, ^{
-//        [self.vt264Encoder encode:frame];
-//        uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
-//        [self.encodeFps update:1 now:now_ms];
-//    });
+    // dispatch_async(self.encodeQueue, ^{
+    //     [self.openh264Encoder encode:frame];
+    //     uint64_t now_ms = [[NSDate date] timeIntervalSince1970] * 1000;
+    //     [self.encodeFps update:1 now:now_ms];
+    // });
 }
 
 #pragma mark - h264 Encode Action
@@ -492,6 +492,7 @@ static NSArray *kAllowedFileTypes = @[@"yuv", @"rgb", @"h264", @"264", @"h265", 
             NSMenuItem *menuItem = [cameraMenu itemAtIndex:i];
             if (menuItem.enabled) {
                 [self openCameraRecord:menuItem];
+                return;
             }
         }
         return;
